@@ -1,0 +1,9 @@
+# Python bytecode cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# OS cruft
+.DS_Store
+Thumbs.db
