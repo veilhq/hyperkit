@@ -1,2 +1,118 @@
-# hyperkit
-Shared styles and components for the Hyper® Ecosystem
+<h1 align="center">Hyperkit</h1>
+
+<p align="center">
+  The shared design system package for the hyper ecosystem — CSS tokens, primitives, and JS modules that Hypervisor, Hyperagent, and future apps all build from.
+</p>
+
+---
+
+## What It Does
+
+Hyperkit is not an app — it has no entry point, no window, nothing to launch. It's a folder of plain CSS, vanilla JS, and stdlib Python that Hypervisor's and Hyperagent's own build scripts read from directly:
+
+- **Universal design tokens** — the `:root` custom properties (colors, type scale, space scale, motion, z-index, shadows) that every hyper app renders from
+- **Shared component primitives** — `hv-chip`, `hv-row`, `hv-button`, `hv-overlay`, `hv-progress-*`, and friends — the CSS class vocabulary that gives every app the same visual language
+- **Ecosystem JS modules** — `HvNoiseField`, `HvGreeting`, `HvCursorTrail`, `HvToast` — self-contained IIFEs that ship byte-identical to every consumer
+- **Shared structured logging** — `setup_logger()` for consistent, rotated logs across every app
+
+Before Hyperkit, these lived as byte-mirrored copies inside each app's own `assets/` folder — the same file, pasted twice, drifting apart the moment anyone edited one copy without the other. Hyperkit replaces the copy-paste with a single canonical source both apps import from at build time.
+
+## Design Philosophy
+
+- **Mechanical, not architectural.** Hyperkit is Phase 1 of a two-phase plan — a straight relocation of what was already identical across apps, not a redesign. No new visual patterns get invented here.
+- **Zero frameworks.** Same rule as every other hyper app: no Node, no npm, no bundler. Plain CSS, vanilla JS IIFEs, stdlib Python.
+- **Fail loud, never silent.** If a consuming app's build can't find a Hyperkit file it needs, the build stops with a clear error — it never quietly falls back to a stale local copy.
+- **Extend, don't fork.** When an app needs different behavior than a shared primitive provides, it overrides the specific property in its own local CSS. The shared file itself never gets copied and modified.
+
+## Quick Start
+
+There's nothing to run here — Hyperkit has no build step of its own. Consuming apps read its files directly:
+
+```bash
+# Hypervisor's build.py and Hyperagent's build.py both do this automatically —
+# nothing to configure, just make sure .hyperkit/ exists as a sibling of
+# .hypervisor/ and .hyperagent/
+cd .hypervisor  # or .hyperagent
+python build.py
+```
+
+If `.hyperkit/css/tokens.css`, `primitives.css`, or any of the four JS modules are missing, the build raises `FileNotFoundError` immediately rather than shipping a broken or stale site.
+
+## How It Works
+
+Hyperkit expects to live as a sibling of every app that consumes it:
+
+```
+.hyperspace/                 ← content root
+├── .hyperkit/               ← this package
+│   ├── css/
+│   │   ├── tokens.css       ← universal :root custom properties
+│   │   └── primitives.css   ← shared component classes (hv-chip, hv-row, hv-button, ...)
+│   ├── js/
+│   │   ├── noise-field.js   ← window.HvNoiseField
+│   │   ├── greeting.js      ← window.HvGreeting
+│   │   ├── cursor-trail.js  ← window.HvCursorTrail
+│   │   └── toast.js         ← window.HvToast + window.__hypervisorToast
+│   ├── python/
+│   │   └── hyper_logging.py ← setup_logger() for all ecosystem apps
+│   └── README.md            ← this file
+├── .hypervisor/             ← consumes Hyperkit at build time
+├── .hyperagent/             ← consumes Hyperkit at build time
+└── (your markdown content)
+```
+
+Each consuming app's `build.py` reads Hyperkit's CSS and JS **before** its own local files — app-local content loads after, so it can override a shared primitive via normal CSS cascade order when it needs to look or behave differently.
+
+## Features
+
+### CSS Tokens & Primitives
+
+`tokens.css` holds every color, spacing, typography, motion, and z-index custom property the ecosystem shares. `primitives.css` holds the composable class vocabulary — chips, rows, buttons, overlays, progress bars — built entirely from those tokens. Consuming apps prepend both files ahead of their own numbered CSS modules.
+
+### The Override Pattern
+
+The one deliberate divergence in the whole primitive set is `.hv-tab`: Hypervisor renders it as a bordered box, Hyperagent renders it with a clipped corner. Hyperkit ships only the shared base (position, background, hover transition); each app layers its own shape on top in a small local override file. This is the template for any future divergence — extend the shared base, never fork it.
+
+### Ecosystem JS Modules
+
+Four self-contained modules, each exporting one object to `window`:
+
+| Module | Exports | What it does |
+|--------|---------|---------------|
+| `noise-field.js` | `window.HvNoiseField` | WebGL2 Bayer-dither background texture |
+| `greeting.js` | `window.HvGreeting` | Rotating kaomoji/text welcome-screen greeting |
+| `cursor-trail.js` | `window.HvCursorTrail` | WebGL2 ping-pong cursor smear effect |
+| `toast.js` | `window.HvToast` (+ legacy `window.__hypervisorToast` alias) | Variant-aware toast notifications |
+
+Every module is idempotent (`if (window.HvX) return;` guard) and self-wrapped in strict-mode IIFEs — safe to load exactly once, ahead of every other script.
+
+### Shared Logging
+
+`setup_logger(app_name)` gives every consumer a rotating file handler (2 MB × 3 backups) writing structured, timestamped lines to `.hyperspace/.logs/`. A back-compat shim remains at the old `.hyperspace/hyper_logging.py` location for any consumer that hasn't updated its import path yet.
+
+## Development
+
+Edit source files here, never in a local copy inside an app's `assets/`:
+
+- **CSS** → `css/tokens.css`, `css/primitives.css`
+- **JS** → `js/*.js` (four modules, each its own file)
+- **Python** → `python/hyper_logging.py`
+
+After editing, rebuild each consuming app (`python build.py` inside `.hypervisor/` and `.hyperagent/`) to pick up the change — Hyperkit itself has nothing to build.
+
+**Before adding something new here:** it needs to already be identical (or near-identical) across 2+ real consumers. Don't pre-build a shared module speculatively — extract when actual duplication exists. See Editing Rules below for the complete checklist.
+
+## Editing Rules
+
+1. **Edit here, then rebuild each consumer.** Never copy Hyperkit content back into an app's local `assets/`.
+2. **Don't duplicate primitive properties in an app-local override.** Extend, don't copy — only declare the properties that differ.
+3. **New shared modules must be identical (or near-identical) across consumers before moving here.** If only one app uses something, it stays local.
+4. **Keep the fail-loud behavior in each app's `build.py`.** If you add a new Hyperkit file that a build depends on, add the same `FileNotFoundError` guard — no silent fallbacks.
+
+## What's Not Here Yet
+
+Hyperkit is Phase 1 of a two-phase plan (WI-142) — mechanical separation of what was already shared. A Phase 2 may eventually add purpose-built component modules (CSS class + JS mount-function pairs, extending the pattern the four JS modules already use) for a more deliberate component-library experience. That's a deliberate future decision, not started — it needs a third real consumer (Hyperline) and actual evidence of what apps need in common before it's worth designing.
+
+## License
+
+Personal project. Not currently licensed for distribution.
