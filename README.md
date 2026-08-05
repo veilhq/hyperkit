@@ -54,7 +54,8 @@ Hyperkit expects to live as a sibling of every app that consumes it:
 │   │   ├── cursor-trail.js  ← window.HvCursorTrail
 │   │   └── toast.js         ← window.HvToast + window.__hypervisorToast
 │   ├── python/
-│   │   └── hyper_logging.py ← setup_logger() for all ecosystem apps
+│   │   ├── hyper_logging.py ← setup_logger() for all ecosystem apps
+│   │   └── chips.py         ← render_chip() for semantic chip HTML
 │   └── README.md            ← this file
 ├── .hypervisor/             ← consumes Hyperkit at build time
 ├── .hyperagent/             ← consumes Hyperkit at build time
@@ -90,13 +91,17 @@ Every module is idempotent (`if (window.HvX) return;` guard) and self-wrapped in
 
 `setup_logger(app_name)` gives every consumer a rotating file handler (2 MB × 3 backups) writing structured, timestamped lines to `.hyperspace/.logs/`. A back-compat shim remains at the old `.hyperspace/hyper_logging.py` location for any consumer that hasn't updated its import path yet.
 
+### Shared Chip Rendering
+
+`render_chip(variant, text, extra_class, data_attrs)` returns a semantic chip `<span>` composing the `.hv-chip` primitive class with a variant (`filled`, `outlined-accent`, `outlined-muted`) and optional specific classes for JS hooks. Consuming apps add `.hyperkit/python/` to `sys.path` and call `from chips import render_chip`.
+
 ## Development
 
 Edit source files here, never in a local copy inside an app's `assets/`:
 
 - **CSS** → `css/tokens.css`, `css/primitives.css`
 - **JS** → `js/*.js` (four modules, each its own file)
-- **Python** → `python/hyper_logging.py`
+- **Python** → `python/hyper_logging.py`, `python/chips.py`
 
 After editing, rebuild each consuming app (`python build.py` inside `.hypervisor/` and `.hyperagent/`) to pick up the change — Hyperkit itself has nothing to build.
 
@@ -111,7 +116,9 @@ After editing, rebuild each consuming app (`python build.py` inside `.hypervisor
 
 ## What's Not Here Yet
 
-Hyperkit is Phase 1 of a two-phase plan (WI-142) — mechanical separation of what was already shared. A Phase 2 may eventually add purpose-built component modules (CSS class + JS mount-function pairs, extending the pattern the four JS modules already use) for a more deliberate component-library experience. That's a deliberate future decision, not started — it needs a third real consumer (Hyperline) and actual evidence of what apps need in common before it's worth designing.
+Phase 2 (WI-146) investigated whether Hyperkit should grow a component layer above the current primitives. The conclusion: **not yet.** The audit found that most cross-app duplication was non-composition of existing primitives (sites hand-reimplementing `hv-panel-header`, `hv-hover-lift`, etc. instead of composing them), not missing components. A compliance sweep addressed the `hv-panel-header` sites; the remaining shapes (hover-lift, overlay/drawer) have intentional visual differences that need a design call.
+
+A component layer (`.hyperkit/components/` with render-helper modules like the existing `chips.py`) remains a valid future step, but only when genuine 2-consumer components emerge from real app development — not from speculative extraction. The render-helper pattern (pure function → HTML string, same idiom as `render_chip()`) is the established approach when that time comes.
 
 ## License
 
