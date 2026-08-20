@@ -30,6 +30,10 @@
   var _t = 0;
   var _host = null;
   var _cellDivisor = 200;  // Default; caller may override via start(host, {cellDivisor: N}).
+  var _fpsCap = 30;        // Ambient texture — 30fps is visually indistinguishable from 60
+                           // for this slow-moving gradient and halves GPU/CPU cost.
+  var _lastMs = 0;
+  var _visHandler = null;
 
   var VERT = '#version 300 es\nvoid main(){float x=float(gl_VertexID%2)*4.0-1.0;float y=float(gl_VertexID/2)*4.0-1.0;gl_Position=vec4(x,y,0,1);}';
 
@@ -145,8 +149,27 @@
     return true;
   }
 
-  function frame() {
+  function frame(nowMs) {
     if (!_gl || !_canvas || !_host) { _raf = null; return; }
+
+    // Fully suspend while the document is hidden (minimized / occluded / other
+    // tab). The visibilitychange handler restarts the loop when we come back.
+    if (document.hidden) { _raf = null; return; }
+
+    _raf = requestAnimationFrame(frame);
+
+    // --- Frame-rate cap ---
+    // Skip draw work if we're ahead of the target interval. _t advances by real
+    // elapsed seconds so the animation runs at identical wall-clock speed
+    // regardless of the cap (previously _t += 1/60 assumed a locked 60fps).
+    var now = (typeof nowMs === 'number') ? nowMs : performance.now();
+    if (_lastMs) {
+      var elapsed = now - _lastMs;
+      if (elapsed < (1000 / _fpsCap) - 0.5) return;
+      _t += Math.min(elapsed, 100) / 1000;  // clamp to avoid a jump after a long pause
+    }
+    _lastMs = now;
+
     var w = _host.clientWidth || 1;
     var h = _host.clientHeight || 1;
     if (_canvas.width !== w || _canvas.height !== h) {
@@ -164,8 +187,6 @@
     var bg = readBgColor();
     _gl.uniform3f(_gl.getUniformLocation(_prog, 'u_bg'), bg[0], bg[1], bg[2]);
     _gl.drawArrays(_gl.TRIANGLE_STRIP, 0, 4);
-    _t += 1 / 60;
-    _raf = requestAnimationFrame(frame);
   }
 
   function start(hostEl, opts) {
@@ -173,6 +194,8 @@
     stop(0); // idempotent
     _host = hostEl;
     _cellDivisor = (opts && typeof opts.cellDivisor === 'number' && opts.cellDivisor > 0) ? opts.cellDivisor : 200;
+    _fpsCap = (opts && typeof opts.fpsCap === 'number' && opts.fpsCap > 0) ? opts.fpsCap : 30;
+    _lastMs = 0;
     _canvas = document.createElement('canvas');
     _canvas.className = 'hv-noise-field-canvas';
     // Legacy class kept so existing CSS selectors (Hypervisor: home-anchor-canvas) still match
@@ -182,12 +205,28 @@
     _canvas.height = _host.clientHeight;
     _t = Math.random() * 1000;
     if (initGL()) {
-      _raf = requestAnimationFrame(frame);
+      // Suspend/resume with document visibility so a minimized or occluded
+      // window costs nothing instead of rendering at the capped frame rate.
+      _visHandler = function () {
+        if (document.hidden) {
+          if (_raf) { cancelAnimationFrame(_raf); _raf = null; }
+        } else if (_gl && _canvas && _host && !_raf) {
+          _lastMs = 0;
+          _raf = requestAnimationFrame(frame);
+        }
+      };
+      document.addEventListener('visibilitychange', _visHandler);
+      if (!document.hidden) _raf = requestAnimationFrame(frame);
     }
   }
 
   function stop(fadeMs) {
     if (_raf) { cancelAnimationFrame(_raf); _raf = null; }
+    if (_visHandler) {
+      document.removeEventListener('visibilitychange', _visHandler);
+      _visHandler = null;
+    }
+    _lastMs = 0;
     if (_gl) {
       if (_prog) _gl.deleteProgram(_prog);
       _gl = null; _prog = null; _vao = null;
