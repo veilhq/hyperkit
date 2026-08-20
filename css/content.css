@@ -110,6 +110,7 @@
   color: var(--text-muted);
   background: var(--bg-surface);
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   font-style: italic;
 }
 .markdown-body blockquote p { margin: 0.3rem 0; }
@@ -140,6 +141,7 @@
 .markdown-body pre {
   background: var(--bg-card);
   border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
   padding: var(--space-4);
   overflow-x: auto;
   margin: var(--space-4) 0;
@@ -219,10 +221,13 @@
 /* ---- Tables ---- */
 .markdown-body table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: var(--space-5) 0;
   font-size: var(--fs-h5-6);
   border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 .markdown-body th, .markdown-body td {
   padding: 0.55rem 0.8rem;
@@ -323,6 +328,7 @@
   text-transform: lowercase;
   color: var(--text-muted);
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   white-space: nowrap;
   transition: color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease);
 }
@@ -635,6 +641,7 @@
   margin: var(--space-5) 0;
   padding: 0;
   border: var(--border-hair) solid color-mix(in srgb, var(--adm-color) 20%, var(--border));
+  border-radius: var(--radius);
   background: color-mix(in srgb, var(--adm-color) 4%, var(--bg));
   animation: fadeSlideIn var(--motion-slow) var(--ease) both;
 }
@@ -675,6 +682,7 @@
   padding: var(--space-3) var(--space-4);
   margin: var(--space-4) 0;
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   background: var(--bg-surface);
   text-decoration: none;
   transition: border-color var(--motion-fast) var(--ease),

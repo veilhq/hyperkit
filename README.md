@@ -47,7 +47,16 @@ Hyperkit expects to live as a sibling of every app that consumes it:
 ├── .hyperkit/               ← this package
 │   ├── css/
 │   │   ├── tokens.css       ← universal :root custom properties
-│   │   └── primitives.css   ← shared component classes (hv-chip, hv-row, hv-button, ...)
+│   │   ├── primitives.css   ← shared component classes (hv-chip, hv-row, hv-button, ...)
+│   │   ├── globals.css      ← universal behaviors (font-smoothing, scrollbars, keyframes)
+│   │   ├── components.css   ← section panels, confirm dialogs, overlays
+│   │   ├── content.css      ← markdown body rendering (headings, code, tables, admonitions)
+│   │   ├── cards.css        ← card grids, dashboard, doc lists, pin cards, pulse rows
+│   │   ├── features.css     ← TOC, tabs, search, tag filters, app-shelf
+│   │   └── accessibility.css ← a11y preference overrides
+│   ├── layouts/
+│   │   └── cyberdeck/
+│   │       └── layout.css   ← page structure (topbar, nav rail, page grid, footer, drawer)
 │   ├── js/
 │   │   ├── noise-field.js   ← window.HvNoiseField
 │   │   ├── greeting.js      ← window.HvGreeting
@@ -65,6 +74,44 @@ Hyperkit expects to live as a sibling of every app that consumes it:
 Each consuming app's `build.py` reads Hyperkit's CSS and JS **before** its own local files — app-local content loads after, so it can override a shared primitive via normal CSS cascade order when it needs to look or behave differently.
 
 ## Features
+
+### Centralized Style Architecture
+
+Hyperkit's CSS cascade is the single source of truth for the visual language across all ecosystem apps. Changes to tokens propagate to every consumer on their next build — no per-app updates needed.
+
+**How new elements hook into the system:**
+
+1. **Use token variables** — never hardcode colors, spacing, radius, or motion durations. Reference `var(--radius)`, `var(--border)`, `var(--space-3)`, `var(--motion-fast)`, etc.
+2. **Use `var(--radius)` for all border-radius** — this single token controls the ecosystem's corner rounding. Currently `4px`.
+3. **Use `var(--border-hair) solid var(--border)` for borders** — consistent 1px borders in the ecosystem border color.
+4. **Use the text hierarchy** — `var(--text-bright)` for emphasis, `var(--text)` for body, `var(--text-muted)` for secondary, `var(--text-dim)` for tertiary.
+5. **Use motion tokens for transitions** — `var(--motion-fast)` (0.15s) for micro-interactions, `var(--motion-base)` (0.2s) for standard UI, `var(--motion-medium)` (0.25s) for reveals.
+
+**CSS cascade order (each layer can override the previous):**
+
+```
+1. tokens.css         — :root custom properties (colors, scale, motion)
+2. primitives.css     — shared component classes (hv-chip, hv-row, hv-button)
+3. globals.css        — universal behaviors (font-smoothing, scrollbars, selection)
+4. components.css     — section panels, confirm dialogs, shared structures
+5. content.css        — markdown body rendering (headings, code, tables, blockquotes)
+6. cards.css          — card grids, dock, dashboard, doc lists, pin cards
+7. features.css       — TOC, tabs, search, tag filters, app-shelf
+8. accessibility.css  — a11y overrides
+9. layouts/*/         — layout pack (topbar, nav, page grid, footer, drawer)
+10. app-local css/    — per-app overrides (numbered, sorted)
+```
+
+**When to edit where:**
+
+| Change scope | Edit location |
+|-------------|--------------|
+| All apps (token-level: colors, radius, spacing) | `.hyperkit/css/tokens.css` |
+| All apps (global behaviors) | `.hyperkit/css/globals.css` |
+| All apps (component/content/card styling) | `.hyperkit/css/{module}.css` |
+| Hypervisor page structure only | `.hyperkit/layouts/cyberdeck/layout.css` |
+| Hypervisor app-specific behavior | `.hypervisor/assets/css/` |
+| Hyperagent app-specific behavior | `.hyperagent/assets/css/` |
 
 ### CSS Tokens & Primitives
 

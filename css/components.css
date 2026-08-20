@@ -144,6 +144,7 @@
   margin-bottom: var(--section-gap);
   padding: var(--section-padding);
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   background: var(--bg-surface);
   animation: fadeSlideIn var(--motion-slow) var(--ease) 0.1s both;
 }
@@ -151,9 +152,10 @@
 .markdown-body .hv-section > h2 {
   margin-top: 0;
   padding-top: 0;
+  padding-bottom: var(--space-3);
   font-size: var(--fs-heading);
-  border-bottom: none;
-  margin-bottom: var(--space-2);
+  border-bottom: var(--border-hair) solid var(--border);
+  margin-bottom: var(--space-4);
 }
 
 /* ---- Confirm dialog (custom replacement for window.confirm) ---- */

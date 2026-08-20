@@ -9,13 +9,13 @@
 @import url('https://db.onlinewebfonts.com/c/4571adf8e6d8270ea61a4f43a3ef31d2?family=Departure+Mono');
 
 :root {
-  --bg:            #000000;
-  --bg-surface:    #050505;
-  --bg-card:       #0a0a0a;
-  --bg-card-hover: #111111;
-  --bg-elevated:   #0e0e0e;
-  --border:        #222222;
-  --border-strong: #333333;
+  --bg:            #030305;
+  --bg-surface:    #060608;
+  --bg-card:       #0a0a0e;
+  --bg-card-hover: #111115;
+  --bg-elevated:   #0d0d11;
+  --border:        #1a1a22;
+  --border-strong: #282832;
   --text:          #c0c0c0;
   --text-bright:   #e0e0e0;
   --text-muted:    #909090;
@@ -109,7 +109,7 @@
   --shadow-glow:  0 0 12px var(--accent-glow);
 
   /* Border radius — ecosystem toggle. Set to 0 for pure brutalist. */
-  --radius: 1px;
+  --radius: 4px;
 
   /* Chip primitives — silhouette for all chip variants */
   --chip-height:         1.4;       /* line-height unit; sizes via padding */
