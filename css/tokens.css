@@ -47,8 +47,10 @@
 
   /* Type scale — replaces ad-hoc rem font-sizes */
   --fs-micro:   0.55rem;   /* badge/chip text */
+  --fs-detail:  0.6rem;    /* metadata, group counts, compact detail text */
   --fs-caption: 0.65rem;   /* tooltip, tiny labels, panel headers */
   --fs-label:   0.7rem;    /* button labels, small nav */
+  --fs-sm:      0.75rem;   /* card text, descriptions, list items */
   --fs-body:    0.85rem;   /* body copy in dense UI, confirm messages */
   --fs-heading: 0.9rem;    /* h2 in section panel, prominent labels */
   --fs-hero:    1rem;      /* h1 tagline; hero tagline uses flag style overrides */

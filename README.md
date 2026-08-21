@@ -12,7 +12,7 @@ Hyperkit is not an app — it has no entry point, no window, nothing to launch. 
 
 - **Universal design tokens** — the `:root` custom properties (colors, type scale, space scale, motion, z-index, shadows) that every hyper app renders from
 - **Shared component primitives** — `hv-chip`, `hv-row`, `hv-button`, `hv-overlay`, `hv-progress-*`, and friends — the CSS class vocabulary that gives every app the same visual language
-- **Ecosystem JS modules** — `HvNoiseField`, `HvGreeting`, `HvCursorTrail`, `HvToast` — self-contained IIFEs that ship byte-identical to every consumer
+- **Ecosystem JS modules** — `HvUtils`, `HvCursorBox`, `HvNoiseField`, `HvGreeting`, `HvCursorTrail`, `HvToast` — self-contained IIFEs that ship byte-identical to every consumer
 - **Shared structured logging** — `setup_logger()` for consistent, rotated logs across every app
 
 Before Hyperkit, these lived as byte-mirrored copies inside each app's own `assets/` folder — the same file, pasted twice, drifting apart the moment anyone edited one copy without the other. Hyperkit replaces the copy-paste with a single canonical source both apps import from at build time.
@@ -36,7 +36,7 @@ cd .hypervisor  # or .hyperagent
 python build.py
 ```
 
-If `.hyperkit/css/tokens.css`, `primitives.css`, or any of the four JS modules are missing, the build raises `FileNotFoundError` immediately rather than shipping a broken or stale site.
+If `.hyperkit/css/tokens.css`, `primitives.css`, or any of the six JS modules are missing, the build raises `FileNotFoundError` immediately rather than shipping a broken or stale site.
 
 ## How It Works
 
@@ -58,6 +58,8 @@ Hyperkit expects to live as a sibling of every app that consumes it:
 │   │   └── cyberdeck/
 │   │       └── layout.css   ← page structure (topbar, nav rail, page grid, footer, drawer)
 │   ├── js/
+│   │   ├── utils.js         ← window.HvUtils
+│   │   ├── cursor-box.js    ← window.HvCursorBox
 │   │   ├── noise-field.js   ← window.HvNoiseField
 │   │   ├── greeting.js      ← window.HvGreeting
 │   │   ├── cursor-trail.js  ← window.HvCursorTrail
@@ -123,10 +125,12 @@ The one deliberate divergence in the whole primitive set is `.hv-tab`: Hyperviso
 
 ### Ecosystem JS Modules
 
-Four self-contained modules, each exporting one object to `window`:
+Six self-contained modules, each exporting one object to `window`:
 
 | Module | Exports | What it does |
 |--------|---------|---------------|
+| `utils.js` | `window.HvUtils` | Shared utility functions (escapeHtml) |
+| `cursor-box.js` | `window.HvCursorBox` | Pointer-following box that lights up over clickable elements |
 | `noise-field.js` | `window.HvNoiseField` | WebGL2 Bayer-dither background texture |
 | `greeting.js` | `window.HvGreeting` | Rotating kaomoji/text welcome-screen greeting |
 | `cursor-trail.js` | `window.HvCursorTrail` | WebGL2 ping-pong cursor smear effect |
@@ -147,7 +151,7 @@ Every module is idempotent (`if (window.HvX) return;` guard) and self-wrapped in
 Edit source files here, never in a local copy inside an app's `assets/`:
 
 - **CSS** → `css/tokens.css`, `css/primitives.css`
-- **JS** → `js/*.js` (four modules, each its own file)
+- **JS** → `js/*.js` (six modules, each its own file)
 - **Python** → `python/hyper_logging.py`, `python/chips.py`
 
 After editing, rebuild each consuming app (`python build.py` inside `.hypervisor/` and `.hyperagent/`) to pick up the change — Hyperkit itself has nothing to build.

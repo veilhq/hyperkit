@@ -52,6 +52,20 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
+/* Exclude dashboard/index section headers from markdown h2 styling */
+.markdown-body .dashboard-wrap h2,
+.markdown-body .home-section h2,
+.markdown-body .hv-section h2,
+.markdown-body .documents-section h2,
+.markdown-body .root-docs-section h2 {
+  margin: 0 0 var(--space-4);
+  padding-bottom: 0;
+  border-bottom: none;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: inherit;
+  color: inherit;
+}
 .markdown-body h3 {
   font-size: var(--fs-h3);
   font-weight: 700;
@@ -166,7 +180,7 @@
   top: 0;
   right: 0;
   padding: 0.15rem var(--space-2);
-  font-size: 0.6rem;
+  font-size: var(--fs-detail);
   color: var(--text-dim);
   background: var(--bg-elevated);
   border-left: var(--border-hair) solid var(--border);
@@ -180,7 +194,7 @@
   top: 0;
   right: 0;
   padding: var(--space-0-3) var(--space-0-6);
-  font-size: 0.6rem;
+  font-size: var(--fs-detail);
   font-family: var(--font);
   color: var(--text-dim);
   background: var(--bg-elevated);
@@ -353,13 +367,13 @@
   align-items: baseline;
 }
 .doc-header-date-label {
-  font-size: 0.6rem;
+  font-size: var(--fs-detail);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-dim);
 }
 .doc-header-date-value {
-  font-size: 0.72rem;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
 }
 
@@ -377,13 +391,13 @@
   display: flex;
   gap: var(--space-0-4);
   align-items: baseline;
-  font-size: 0.72rem;
+  font-size: var(--fs-sm);
 }
 .doc-header-extra-key {
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: 0.62rem;
+  font-size: var(--fs-caption);
 }
 .doc-header-extra-key::after { content: ':'; margin-right: 0.25rem; }
 .doc-header-extra-val {
@@ -481,7 +495,7 @@
   top: 0.85rem;
   right: var(--space-3);
   padding: var(--space-0-2) var(--space-2);
-  font-size: 0.6rem;
+  font-size: var(--fs-detail);
   font-family: var(--font);
   color: var(--text-dim);
   background: var(--bg-elevated);
@@ -650,7 +664,7 @@
   align-items: center;
   gap: var(--space-0-4);
   padding: var(--space-2) var(--space-4);
-  font-size: 0.75rem;
+  font-size: var(--fs-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
