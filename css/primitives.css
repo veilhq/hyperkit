@@ -499,6 +499,7 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
   color: var(--text);
   background: var(--bg-card, var(--surface));
   border: 1px solid var(--border-strong, var(--border));
+  border-radius: var(--radius);
   padding: var(--space-3, 8px);
   opacity: 0;
   transform: translateY(8px);
@@ -578,3 +579,92 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
   .hv-toast { transition: opacity 0.1s linear; transform: none; }
   .hv-toast-visible, .hv-toast-exit { transform: none; }
 }
+
+/* ---- Skeleton loading primitives --------------------------------------------
+   Pulsing placeholder shapes for content that hasn't loaded yet.
+   Compose these on any element to indicate pending data.
+
+   Usage:
+     <div class="hv-skeleton hv-skeleton-line" style="width: 60%"></div>
+     <div class="hv-skeleton hv-skeleton-line hv-skeleton-sm"></div>
+     <div class="hv-skeleton hv-skeleton-block"></div>
+     <div class="hv-skeleton hv-skeleton-circle"></div>
+     <li class="hv-skeleton hv-skeleton-row"></li>
+
+   Width is set inline or via parent grid — the primitives only define height
+   and shape. Pulse animation is shared across all variants.
+   ============================================================================ */
+
+/* Base — applies the pulse animation to any skeleton element */
+.hv-skeleton {
+  background: var(--border);
+  border-radius: var(--radius);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* Line — single text-line placeholder (default height matches body text) */
+.hv-skeleton-line {
+  height: 0.85em;
+  width: 100%;
+}
+
+/* Line size variants */
+.hv-skeleton-xs  { height: 0.6em; }
+.hv-skeleton-sm  { height: 0.75em; }
+.hv-skeleton-lg  { height: 1.1em; }
+.hv-skeleton-xl  { height: 1.4em; }
+
+/* Block — rectangular area placeholder (cards, images, sections) */
+.hv-skeleton-block {
+  height: 4rem;
+  width: 100%;
+}
+
+/* Circle — avatar or icon placeholder */
+.hv-skeleton-circle {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+}
+
+/* Row — full list-item placeholder matching doc-list grid layout */
+.hv-skeleton-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: var(--space-5) var(--space-3);
+  min-height: 4rem;
+  border-bottom: var(--border-hair) solid var(--border);
+  background: transparent;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* Card — bordered card-shaped placeholder */
+.hv-skeleton-card {
+  height: 6rem;
+  width: 100%;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+}
+
+/* Section — tall section placeholder */
+.hv-skeleton-section {
+  height: 12rem;
+  width: 100%;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+}
+
+/* Inline children — for composing lines inside a skeleton-row */
+.hv-skeleton-row > .hv-skeleton {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hv-skeleton { animation: none !important; opacity: 0.6; }
+  .hv-skeleton-row { animation: none !important; opacity: 0.6; }
+}
+html.a11y-reduce-motion .hv-skeleton { animation: none !important; opacity: 0.6; }
+html.a11y-reduce-motion .hv-skeleton-row { animation: none !important; opacity: 0.6; }

@@ -86,25 +86,32 @@
 }
 
 .a11y-reset-wrap {
-  padding: var(--space-2) var(--space-3) var(--space-1);
+  padding: var(--space-3) var(--space-3) var(--space-2);
   border-top: var(--border-hair) solid var(--border);
 }
 .a11y-reset {
   width: 100%;
-  padding: 0.35rem;
-  background: var(--bg);
-  border: var(--border-hair) solid var(--border-strong);
+  height: 28px;
+  background: transparent;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   color: var(--text-dim);
   font-family: var(--font);
-  font-size: 0.62rem;
+  font-size: 0.65rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
-  transition: color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease);
+  transition: color var(--motion-fast) var(--ease),
+              background var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease),
+              box-shadow var(--motion-fast) var(--ease);
 }
 .a11y-reset:hover {
   color: var(--comp);
+  background: color-mix(in srgb, var(--comp) 8%, transparent);
   border-color: var(--comp);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--comp) 20%, transparent);
 }
 
 /* ============================================================
@@ -121,7 +128,7 @@ html.a11y-high-contrast {
   --border-strong: #666666;
 }
 
-/* ---- Black & White theme (light mode) ---- */
+/* ---- Light mode (a11y-bw-theme) ---- */
 html.a11y-bw-theme {
   --bg:            #e4e4e4;
   --bg-surface:    #d9d9d9;
@@ -141,14 +148,14 @@ html.a11y-bw-theme {
   --warm:          #0000ff;
   --cool:          #0000ff;
   --comp:          #0000ff;
+  --success:       #007a00;
+  --warning:       #b35900;
+  --error:         #cc0000;
+  --info:          #0000ff;
 }
 html.a11y-bw-theme body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-html.a11y-bw-theme .nav-panel,
-html.a11y-bw-theme .hv-dropdown {
-  background: #dedede;
 }
 html.a11y-bw-theme ::selection {
   background: var(--accent);
@@ -157,18 +164,6 @@ html.a11y-bw-theme ::selection {
 html.a11y-bw-theme ::-webkit-scrollbar-track { background: var(--bg); }
 html.a11y-bw-theme ::-webkit-scrollbar-thumb { background: var(--border-strong); border-color: var(--bg); }
 html.a11y-bw-theme ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-html.a11y-bw-theme .topbar::before { background: rgba(228, 228, 228, 0.85); }
-html.a11y-bw-theme .page-footer { background: rgba(228, 228, 228, 0.85); }
-html.a11y-bw-theme .topbar-clock { background: rgba(228, 228, 228, 0.85); }
-html.a11y-bw-theme .cmd-palette-overlay { background: rgba(200, 200, 200, 0.75); }
-html.a11y-bw-theme .cmd-palette { background: #dedede; box-shadow: 0 0 24px rgba(0, 0, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.15); }
-html.a11y-bw-theme .cmd-palette-input-wrap { background: #d0d0d0; }
-html.a11y-bw-theme .hv-splash { background: #e4e4e4; }
-html.a11y-bw-theme .shortcuts-overlay { background: rgba(200, 200, 200, 0.7); }
-html.a11y-bw-theme .hv-overlay { background: rgba(200, 200, 200, 0.75); }
-html.a11y-bw-theme .hv-confirm-overlay { background: rgba(200, 200, 200, 0.75); }
-html.a11y-bw-theme .nav-backdrop { background: rgba(200, 200, 200, 0.5); }
-html.a11y-bw-theme .scratch-panel { box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1); }
 
 /* ---- Large text ---- */
 html.a11y-large-text { font-size: 18px; }

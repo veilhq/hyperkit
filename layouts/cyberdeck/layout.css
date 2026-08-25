@@ -348,6 +348,7 @@
   z-index: var(--z-topbar);
   background: var(--bg-elevated);
   border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
   color: var(--text-muted);
   width: 36px;
   height: 36px;
@@ -374,13 +375,13 @@
 
 /* ---- Route transitions ---- */
 #content-target {
-  transition: opacity 140ms ease-out, transform 140ms ease-out;
+  transition: opacity var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease);
 }
 
 #content-target.rt-fade-out {
   opacity: 0;
   transform: translateY(4px);
-  transition: opacity 140ms ease-out, transform 140ms ease-out;
+  transition: opacity var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease);
 }
 
 #content-target.rt-fade-in {
@@ -429,7 +430,7 @@
   width: 0%;
   background: var(--accent);
   z-index: var(--z-dropdown);
-  transition: width 60ms linear;
+  transition: width var(--motion-tick) linear;
   pointer-events: none;
   opacity: 0.8;
 }
@@ -761,31 +762,45 @@
   color: var(--text);
 }
 
-/* ---- Toggle button (width, fullscreen) ---- */
+/* ---- Toggle button (width, fullscreen, rebuild, MCP) ---- */
 .settings-toggle-btn {
   display: flex;
   align-items: center;
-  gap: var(--space-0-4);
-  background: var(--bg);
-  border: var(--border-hair) solid var(--border-strong);
-  color: var(--text-muted);
-  padding: var(--space-0-3) var(--space-0-6);
+  justify-content: center;
+  gap: var(--space-1);
+  height: 28px;
+  min-width: 28px;
+  background: transparent;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-dim);
+  padding: 0 var(--space-2);
   font-family: var(--font);
-  font-size: var(--fs-caption);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease);
+  transition: color var(--motion-fast) var(--ease),
+              background var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease),
+              box-shadow var(--motion-fast) var(--ease);
 }
 .settings-toggle-btn:hover {
   color: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-glow);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 6px var(--accent-glow);
 }
 .settings-toggle-btn.active {
   color: var(--accent);
-  border-color: var(--accent-border);
+  background: var(--accent-glow);
+  border-color: var(--accent);
 }
 .settings-toggle-icon {
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
 /* ---- MCP service control ----
@@ -807,33 +822,46 @@
 }
 .mcp-stop-btn:hover:not(:disabled) {
   color: var(--comp);
+  background: color-mix(in srgb, var(--comp) 8%, transparent);
   border-color: var(--comp);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--comp) 20%, transparent);
 }
 .mcp-actions .settings-toggle-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
   cursor: default;
 }
 .mcp-actions .settings-toggle-btn:disabled:hover {
-  color: var(--text-muted);
-  border-color: var(--border-strong);
+  color: var(--text-dim);
+  background: transparent;
+  border-color: var(--border);
+  box-shadow: none;
 }
 .settings-toggle-state {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-/* ---- Zoom controls (compact) ---- */
+/* ---- Zoom controls (pill) ---- */
 .settings-zoom {
   display: flex;
   align-items: center;
-  border: var(--border-hair) solid var(--border-strong);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: transparent;
+  transition: border-color var(--motion-fast) var(--ease),
+              box-shadow var(--motion-fast) var(--ease);
+}
+.settings-zoom:hover {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 6px var(--accent-glow);
 }
 .settings-zoom-btn {
-  background: var(--bg);
+  background: transparent;
   border: none;
-  color: var(--text-muted);
-  width: 26px;
-  height: 26px;
+  color: var(--text-dim);
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -851,31 +879,36 @@
 .settings-zoom-level {
   font-family: var(--font);
   font-size: 0.62rem;
-  color: var(--text-dim);
+  color: var(--text-muted);
   letter-spacing: 0.06em;
   min-width: 2.8rem;
   text-align: center;
   border-left: var(--border-hair) solid var(--border);
   border-right: var(--border-hair) solid var(--border);
   padding: 0 var(--space-1);
-  line-height: 26px;
+  line-height: 28px;
   user-select: none;
 }
 
-/* ---- Color input (large, fills column) ---- */
+/* ---- Color input (accent picker) ---- */
 .settings-color-input {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   width: 100%;
   height: 100%;
-  border: var(--border-hair) solid var(--border-strong);
-  background: var(--bg);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
   cursor: pointer;
   padding: 0;
-  transition: border-color var(--motion-base) var(--ease);
+  transition: border-color var(--motion-base) var(--ease),
+              box-shadow var(--motion-base) var(--ease);
 }
-.settings-color-input:hover { border-color: var(--accent); }
+.settings-color-input:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 6px var(--accent-glow);
+}
 .settings-color-input::-webkit-color-swatch-wrapper { padding: 3px; }
 .settings-color-input::-webkit-color-swatch { border: none; }
 .settings-color-input::-moz-color-swatch { border: none; }
@@ -886,24 +919,32 @@
 }
 .preset-select {
   width: 100%;
-  padding: 4px 6px;
+  height: 28px;
+  padding: 0 var(--space-4) 0 var(--space-2);
   border: var(--border-hair) solid var(--border);
-  background: var(--bg);
+  border-radius: var(--radius);
+  background: transparent;
   font-family: var(--font);
-  font-size: var(--fs-micro);
-  color: var(--text);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 6px center;
+  background-position: right 8px center;
   background-size: 8px 5px;
-  transition: border-color var(--motion-fast) var(--ease);
+  transition: color var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease),
+              box-shadow var(--motion-fast) var(--ease);
 }
 .preset-select:hover,
 .preset-select:focus {
-  border-color: var(--accent);
+  color: var(--accent);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 6px var(--accent-glow);
   outline: none;
 }
 .preset-select option {
@@ -923,17 +964,25 @@
 .settings-theme-row .palette-preview {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3px;
+  gap: var(--space-0-4);
   place-items: center;
-  border: var(--border-hair) solid var(--border-strong);
-  padding: 6px;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-0-6);
   width: 100%;
   height: 100%;
   box-sizing: border-box;
+  transition: border-color var(--motion-fast) var(--ease),
+              box-shadow var(--motion-fast) var(--ease);
+}
+.settings-theme-row .palette-preview:hover {
+  border-color: var(--accent-border);
+  box-shadow: 0 0 6px var(--accent-glow);
 }
 .settings-theme-row .palette-preview .swatch {
   width: 100%;
   height: 100%;
+  border-radius: 2px;
   transition: background var(--motion-slow) var(--ease), transform var(--motion-fast) var(--ease), box-shadow var(--motion-base) var(--ease);
 }
 .settings-theme-row .palette-preview .swatch:nth-child(1) { background: var(--accent); }
@@ -947,20 +996,27 @@
 }
 .settings-palette-mode {
   font-family: var(--font);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--text-dim);
-  background: var(--bg);
-  border: var(--border-hair) solid var(--border-strong);
+  background: transparent;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   width: 100%;
   height: 100%;
   cursor: pointer;
   text-transform: uppercase;
-  transition: color var(--motion-base) var(--ease), border-color var(--motion-base) var(--ease);
+  transition: color var(--motion-base) var(--ease),
+              background var(--motion-base) var(--ease),
+              border-color var(--motion-base) var(--ease),
+              box-shadow var(--motion-base) var(--ease);
 }
 .settings-palette-mode:hover {
   color: var(--accent);
-  border-color: var(--accent);
+  background: var(--accent-glow);
+  border-color: var(--accent-border);
+  box-shadow: 0 0 6px var(--accent-glow);
 }
 
 /* ---- Width toggle / Fullscreen toggle ---- */

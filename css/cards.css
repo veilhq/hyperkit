@@ -386,12 +386,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   display: inline-block;
   animation: emote-glow 8s infinite ease-in-out;
 }
-@keyframes emote-glow {
-  0%, 100% { color: var(--accent); text-shadow: 0 0 6px var(--accent), 0 0 12px var(--accent-glow); }
-  25%      { color: var(--warm);   text-shadow: 0 0 6px var(--warm),   0 0 12px var(--warm); }
-  50%      { color: var(--cool);   text-shadow: 0 0 6px var(--cool),   0 0 12px var(--cool); }
-  75%      { color: var(--comp);   text-shadow: 0 0 6px var(--comp),   0 0 12px var(--comp); }
-}
+/* emote-glow keyframe — see keyframes.css */
 .home-anchor + .dashboard-panels { margin-top: -1px; }
 
 /* =========================================================
@@ -725,13 +720,16 @@ h1 + .home-dock { margin-top: var(--space-4); }
   height: 12px;
   color: var(--text-dim);
 }
-.activity-icon-new {
-  border-color: var(--accent-border);
-}
 .activity-icon-new .activity-indicator-icon {
-  color: var(--accent-dim);
+  color: var(--text-dim);
 }
 .activity-icon-upd .activity-indicator-icon {
+  color: var(--text-dim);
+}
+.activity-icon-start .activity-indicator-icon {
+  color: var(--text-dim);
+}
+.activity-icon-done .activity-indicator-icon {
   color: var(--text-dim);
 }
 .pulse-row-recent {
@@ -761,6 +759,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   color: var(--text-dim);
   background: transparent;
   border: var(--border-hair) dashed var(--border);
+  border-radius: var(--radius);
   font-weight: 400;
 }
 .pulse-row:hover .pulse-chip-missing { filter: none; }
@@ -945,6 +944,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   padding: var(--space-3) var(--space-4);
   background: var(--bg-card);
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   font-size: var(--fs-sm);
   margin-bottom: 0;
   animation: fadeSlideIn var(--motion-slow) var(--ease) both;
@@ -1050,7 +1050,7 @@ h2 + .doc-list { border-top: none; }
   align-items: baseline;
   column-gap: var(--space-4);
   row-gap: var(--space-1);
-  padding: var(--space-3) var(--space-3);
+  padding: var(--space-3) calc(var(--space-3) + 1.5rem) var(--space-3) var(--space-3);
   border-bottom: var(--border-hair) solid var(--border);
 }
 .doc-list li:last-child { border-bottom: none; }

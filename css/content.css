@@ -150,6 +150,7 @@
   background: var(--bg-elevated);
   padding: 0.15em 0.45em;
   border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
   color: var(--accent-dim);
 }
 .markdown-body pre {
@@ -219,6 +220,7 @@
   padding: var(--space-5);
   background: var(--bg-card);
   border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
   overflow-x: auto;
 }
 .mermaid-wrap pre.mermaid {
@@ -500,6 +502,7 @@
   color: var(--text-dim);
   background: var(--bg-elevated);
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -532,6 +535,7 @@
   margin: 3rem 0 0;
   padding: var(--space-1-25) var(--space-1-25) var(--space-3);
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   background: var(--bg-surface);
   animation: fadeSlideIn var(--motion-slow) var(--ease) var(--motion-tick) both;
 }
@@ -725,6 +729,7 @@
 .collapsible {
   margin: var(--space-5) 0;
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   background: var(--bg-surface);
 }
 .collapsible-title {

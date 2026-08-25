@@ -8,16 +8,7 @@
    each app's own local CSS, layered after this via cascade order.
    ====================================================================== */
 
-/* ---- Shared keyframes ---- */
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
+/* ---- Shared keyframes — see keyframes.css ---- */
 
 /* ---- Selection ---- */
 ::selection { background: var(--selection-bg); color: var(--selection-fg); }
@@ -103,6 +94,7 @@ textarea, [contenteditable="true"] {
   color: var(--accent);
   background: var(--bg);
   border: var(--border-hair) solid var(--accent-border);
+  border-radius: var(--radius);
   padding: var(--space-1) var(--space-2);
   pointer-events: none;
   opacity: 0;

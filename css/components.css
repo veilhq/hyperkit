@@ -202,6 +202,7 @@
   letter-spacing: var(--chip-letter-spacing);
   padding: var(--space-2) var(--space-4);
   border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
