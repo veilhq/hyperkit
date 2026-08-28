@@ -73,6 +73,7 @@
     'void main() {',
     '  vec4 prev = texture(u_prev, vUv);',
     '  vec4 faded = prev * u_decay;',
+    '  if (faded.a < 0.02) faded = vec4(0.0);',
     '  if (u_doStamp > 0.5 && u_stampCount > 0) {',
     '    vec2 pix = vUv * u_resolution;',
     '    float bestAlpha = 0.0;',

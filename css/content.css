@@ -532,12 +532,17 @@
 
 /* ---- Backlinks section ---- */
 .backlinks-section {
-  margin: 3rem 0 0;
+  margin: var(--space-5) 0 0;
   padding: var(--space-1-25) var(--space-1-25) var(--space-3);
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-surface);
   animation: fadeSlideIn var(--motion-slow) var(--ease) var(--motion-tick) both;
+}
+.backlinks-section + .doc-section,
+.doc-section + .backlinks-section,
+.backlinks-section + .backlinks-section {
+  margin-top: var(--space-3);
 }
 .backlinks-section h2 {
   margin-top: 0;
@@ -592,6 +597,41 @@
 /* ---- Related / See Also section ---- */
 .related-section-content li {
   overflow-wrap: anywhere;
+}
+
+/* ---- Connections section (unified Related + Referenced By) ---- */
+.connections-section {
+  margin: var(--space-5) 0 0;
+  padding: var(--space-1-25) var(--space-1-25) var(--space-3);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-surface);
+  animation: fadeSlideIn var(--motion-slow) var(--ease) var(--motion-tick) both;
+}
+.connections-section h2 {
+  margin-top: 0;
+  padding-top: 0;
+  font-size: var(--fs-heading);
+  border-bottom: none;
+  margin-bottom: var(--space-3);
+  color: var(--cool);
+}
+.connections-group {
+  margin-bottom: var(--space-3);
+}
+.connections-group:last-child {
+  margin-bottom: 0;
+}
+.connections-group-label {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0 0 var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 .related-section-content code {
   overflow-wrap: anywhere;

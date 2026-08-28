@@ -80,10 +80,11 @@
 
 /* ---- Input row ---- */
 .search-input-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
+  column-gap: var(--row-gap);
+  padding: var(--row-padding-y) var(--space-4);
   border-bottom: var(--border-hair) solid var(--border);
 }
 .search-input-icon {
@@ -128,29 +129,32 @@
   display: none;
 }
 
-/* ---- Result card (pin-card style) ---- */
+/* ---- Result card ---- */
 .search-results .sr-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-0-6);
-  padding: var(--space-1-25) var(--space-5) var(--space-4);
+  gap: var(--space-0-4);
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-2) var(--space-3);
   color: var(--text);
   text-decoration: none;
   position: relative;
   background: var(--bg-card);
-  border: none;
-  border-bottom: var(--border-hair) solid var(--border);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   cursor: pointer;
-  transition: background var(--motion-base) var(--ease),
-              box-shadow var(--motion-medium) var(--ease);
+  transition: border-color var(--motion-base) var(--ease),
+              box-shadow var(--motion-medium) var(--ease),
+              transform var(--motion-base) var(--ease);
 }
 .search-results .sr-card:last-child {
-  border-bottom: none;
+  margin-bottom: var(--space-3);
 }
 .search-results .sr-card:hover,
 .search-results .sr-card.selected {
-  background: var(--bg-surface);
-  box-shadow: inset 2px 0 0 var(--warm);
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
 }
 
 /* Card header (category + work ID) */
@@ -179,15 +183,15 @@
 
 /* Title */
 .sr-card-title {
-  font-size: var(--fs-hero);
+  font-size: var(--fs-body);
   font-weight: 700;
   color: var(--text-bright);
-  line-height: 1.4;
+  line-height: var(--chip-height);
   transition: color var(--motion-fast) var(--ease);
 }
 .sr-card:hover .sr-card-title,
 .sr-card.selected .sr-card-title {
-  color: var(--warm);
+  color: var(--accent);
 }
 
 /* Snippet */
@@ -207,9 +211,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-4);
-  margin-top: auto;
-  padding-top: var(--space-2);
-  border-top: var(--border-hair) solid var(--border);
+  margin-top: var(--space-0-1);
 }
 .sr-card-path {
   font-size: var(--fs-caption);
@@ -393,27 +395,41 @@
 .todo-filters {
   display: grid;
   grid-template-columns: 1fr auto auto auto;
-  gap: var(--space-2);
-  padding: var(--space-0-4) var(--space-2);
+  align-items: center;
+  column-gap: var(--row-gap);
+  padding: var(--row-padding-y) var(--space-2);
   margin-bottom: var(--space-3);
+  border-bottom: var(--border-hair) solid var(--border);
+  background: transparent;
 }
 .todo-filter-input,
 .todo-filter-select {
   font-family: var(--font);
   font-size: var(--fs-label);
-  color: var(--accent);
-  background: var(--bg);
+  color: var(--text-muted);
+  background: transparent;
   border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
   padding: var(--space-1) var(--space-2);
   outline: none;
+  transition: border-color var(--motion-fast) var(--ease),
+              color var(--motion-fast) var(--ease),
+              background var(--motion-fast) var(--ease);
+}
+.todo-filter-input:hover,
+.todo-filter-select:hover {
+  border-color: var(--accent-border);
+  color: var(--text);
 }
 .todo-filter-input:focus,
 .todo-filter-select:focus {
-  border-color: var(--accent);
+  border-color: var(--accent-border);
+  color: var(--text-bright);
+  background: var(--bg-card);
 }
 .todo-filter-input::placeholder { color: var(--text-dim); }
-.todo-filter-select { color: var(--text-muted); cursor: pointer; }
-.todo-filter-select option { background: var(--bg); color: var(--text); }
+.todo-filter-select { cursor: pointer; }
+.todo-filter-select option { background: var(--bg-card); color: var(--text); }
 
 /* ---- App group shelves ---- */
 .app-shelf {

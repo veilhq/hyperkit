@@ -220,3 +220,113 @@
   background: var(--error);
   color: var(--bg);
 }
+
+/* ---- Context Menu (right-click) ---- */
+.hv-context-menu {
+  position: fixed;
+  z-index: var(--z-dropdown);
+  min-width: 200px;
+  padding: var(--space-3);
+  background: var(--bg-elevated);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  opacity: 0;
+  transform: scale(0.95);
+  pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease),
+              transform var(--motion-fast) var(--ease);
+}
+.hv-context-menu.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+.hv-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-0-2) 0;
+  border: var(--border-hair) solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--motion-fast) var(--ease),
+              color var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease);
+}
+.hv-context-menu-item:hover {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--accent);
+}
+.hv-context-menu-item:hover .hv-context-menu-icon {
+  color: var(--accent);
+}
+.hv-context-menu-item.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.hv-context-menu-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+.hv-context-menu-label {
+  flex: 1;
+}
+.hv-context-menu-separator {
+  height: 1px;
+  margin: var(--space-2) var(--space-2);
+  background: var(--border);
+}
+.hv-context-menu-item-parent {
+  justify-content: space-between;
+}
+.hv-context-menu-chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--text-dim);
+  transition: transform var(--motion-fast) var(--ease);
+}
+.hv-context-menu-group-open .hv-context-menu-chevron {
+  transform: rotate(90deg);
+}
+.hv-context-menu-children {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height var(--motion-base) var(--ease),
+              opacity var(--motion-fast) var(--ease);
+}
+.hv-context-menu-group-open .hv-context-menu-children {
+  max-height: 300px;
+  opacity: 1;
+}
+.hv-context-menu-item-child {
+  padding-left: var(--space-5);
+  font-size: 0.75rem;
+}
+
+/* ---- Shared Editor Header ---- */
+.hv-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+}
+
+.hv-editor-filename {
+  font-family: var(--font);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
