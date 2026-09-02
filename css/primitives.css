@@ -93,6 +93,39 @@
   color: var(--accent);
 }
 
+/* ---- Card primitive — bordered content surface ------------------------------
+   A standalone bordered surface for list items that should read as discrete
+   objects rather than divider-separated rows. Where .hv-row is a flat list row
+   sharing edges with its siblings, .hk-card is an inset tile with its own
+   border and hover lift.
+
+   Prefixed hk- (Hyperkit), not hv- (Hypervisor): this is a shared primitive that
+   did not originate in Hypervisor, and the bare .card class is already taken by
+   Hypervisor's dashboard-tile component. Layout-agnostic — set display/grid/flex
+   on the element as the surface needs.
+*/
+.hk-card {
+  background: var(--bg-card);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color var(--motion-base) var(--ease),
+              background var(--motion-base) var(--ease),
+              box-shadow var(--motion-medium) var(--ease),
+              transform var(--motion-base) var(--ease);
+}
+.hk-card:hover {
+  border-color: var(--accent-border);
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+}
+/* Active/selected — steady accent border without the hover lift. */
+.hk-card-active {
+  border-color: var(--accent-border);
+}
+
 /* ---- Section primitive (quiet) — frameless content section ------------------
    Companion to .hv-section (bordered). Groups content with generous spacing
    and heading weight — no colored rail. Use for content sections that should
@@ -427,6 +460,8 @@
   .hv-chip-outlined-accent:hover,
   .hv-chip-outlined-muted:hover { filter: none !important; }
   .hv-row { transition: none !important; }
+  .hk-card { transition: none !important; }
+  .hk-card:hover { transform: none !important; box-shadow: none !important; }
   .hv-hover-lift { transition: none !important; }
   .hv-hover-lift:hover {
     transform: none !important;
@@ -452,6 +487,8 @@ html.a11y-reduce-motion .hv-chip-filled:hover,
 html.a11y-reduce-motion .hv-chip-outlined-accent:hover,
 html.a11y-reduce-motion .hv-chip-outlined-muted:hover { filter: none !important; }
 html.a11y-reduce-motion .hv-row { transition: none !important; }
+html.a11y-reduce-motion .hk-card { transition: none !important; }
+html.a11y-reduce-motion .hk-card:hover { transform: none !important; box-shadow: none !important; }
 html.a11y-reduce-motion .hv-hover-lift { transition: none !important; }
 html.a11y-reduce-motion .hv-hover-lift:hover {
   transform: none !important;

@@ -130,6 +130,30 @@
   --section-padding:    var(--space-5) var(--space-5) var(--space-2);
   --section-gap:        var(--space-6);
 
+  /* Sticky-note primitives — square, fully-filled note cards for an ephemeral
+     pinboard. The card surface is the full-strength cycle color, so all inner
+     content switches to --note-ink (the app background color) for contrast.
+     The peeled corner reads as the paper lifting to reveal the board behind.
+     Color cycle deliberately excludes --comp, reserved for alerts/indicators. */
+  --note-padding:      var(--space-3);
+  --note-body-pad:     var(--space-2);        /* inset for the note body text */
+  --note-gap:          var(--space-2);
+  --note-fold-size:    18px;                  /* peeled-corner triangle leg */
+  --note-font-size:    var(--fs-sm);
+  --note-time-size:    var(--fs-detail);
+  --note-shadow:       0 2px 10px rgba(0, 0, 0, 0.35);
+  --note-color-1:      var(--accent);   /* cycle position 0 */
+  --note-color-2:      var(--warm);     /* cycle position 1 */
+  --note-color-3:      var(--cool);     /* cycle position 2 */
+  /* Ink — content color on a filled note. The cycle colors are all bright, so
+     the app background reads as high-contrast "ink on paper". */
+  --note-ink:          var(--bg);
+  --note-ink-soft:     color-mix(in srgb, var(--bg) 65%, transparent);
+  /* Moved marker on a filled note: full --comp on bright green/amber/cyan is
+     low-contrast and clashes, so it is deepened toward the background while
+     still reading as alert red. */
+  --note-marker:       color-mix(in srgb, var(--comp) 72%, var(--bg));
+
   /* Scrollbar tokens */
   --scrollbar-width:        6px;
   --scrollbar-track:        var(--bg);

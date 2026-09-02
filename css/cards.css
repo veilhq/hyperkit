@@ -413,18 +413,17 @@ h1 + .home-dock { margin-top: var(--space-4); }
   opacity: 0;
   transform: translateY(20px);
   animation: launcherHop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  /* Stagger scales to any number of tiles. --launcher-i is a 0-based index
+     emitted per tile by the generator; the fallback keeps a stray tile at the
+     first slot rather than breaking the calc. This must stay after the
+     animation shorthand above, which resets animation-delay to 0. */
+  animation-delay: calc(0.1s + var(--launcher-i, 0) * 0.08s);
   animation-play-state: running;
 }
 /* Pause hop animation while splash screen is visible */
 .hv-splash-active .launcher-box {
   animation-play-state: paused;
 }
-.launcher-box:nth-child(1) { animation-delay: 0.1s; }
-.launcher-box:nth-child(2) { animation-delay: 0.18s; }
-.launcher-box:nth-child(3) { animation-delay: 0.26s; }
-.launcher-box:nth-child(4) { animation-delay: 0.34s; }
-.launcher-box:nth-child(5) { animation-delay: 0.42s; }
-.launcher-box:nth-child(6) { animation-delay: 0.50s; }
 
 @keyframes launcherHop {
   0% { opacity: 0; transform: translateY(20px); }
@@ -1256,3 +1255,238 @@ h2 + .doc-list { border-top: none; }
 .learn-index .card-title { font-size: var(--fs-hero); font-weight: 700; color: var(--text-bright); text-transform: uppercase; letter-spacing: 0.03em; }
 .learn-index .card:hover .card-title { color: var(--accent); }
 .learn-index .card-desc { font-size: var(--fs-h5-6, 0.8rem); color: var(--text-muted); line-height: 1.4; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Skill Row (.hv-skill-row) — expandable capability rows
+   ───────────────────────────────────────────────────────────────────────
+   A bordered list of skills as collapsible rows. Each row is a native
+   <details>: the <summary> is the always-visible line (icon, name, trigger,
+   chevron), and the body reveals description + section outline + refs.
+   No JS required for expand/collapse. Structure:
+     .hv-skill-list
+       details.hv-skill-row
+         summary.hv-skill-rowhead ( icon, name, trigger, chevron )
+         .hv-skill-rowbody ( desc, outline, refs )
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Multi-column masonry: each column packs independently, so expanding one
+   row only reflows rows below it in the same column — never the other column.
+   (Native grid masonry is not yet shippable; multicol is the zero-JS path.) */
+.hv-skill-list {
+  column-count: 2;
+  column-gap: var(--space-3);
+}
+
+.hv-skill-row {
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  overflow: hidden;
+  break-inside: avoid;           /* never split a row across columns */
+  margin-bottom: var(--space-3); /* multicol uses margin, not gap, for vertical rhythm */
+  transition: border-color var(--motion-fast) var(--ease);
+}
+.hv-skill-row[open] { border-color: var(--accent-border, var(--border)); }
+
+/* Collapse to a single column on narrow viewports. */
+@media (max-width: 900px) {
+  .hv-skill-list { column-count: 1; }
+}
+
+/* Summary = the visible row line */
+.hv-skill-rowhead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background var(--motion-fast) var(--ease);
+}
+.hv-skill-rowhead::-webkit-details-marker { display: none; }
+.hv-skill-rowhead:hover { background: var(--bg-card-hover); }
+.hv-skill-row[open] > .hv-skill-rowhead {
+  background: var(--bg-card-hover);
+  border-bottom: var(--border-hair) solid var(--border);
+}
+
+.hv-skill-row-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.hv-skill-row-name {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--text-bright);
+  flex-shrink: 0;
+  transition: color var(--motion-fast) var(--ease);
+}
+.hv-skill-rowhead:hover .hv-skill-row-name { color: var(--accent); }
+
+/* Trigger sits inline, muted, filling the middle; truncates on narrow rows. */
+.hv-skill-row-trigger {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hv-skill-row-trigger::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--warm);
+  vertical-align: middle;
+  margin-right: var(--space-2);
+}
+
+.hv-skill-row-chevron {
+  width: 15px;
+  height: 15px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  transition: transform var(--motion-base) var(--ease),
+              color var(--motion-fast) var(--ease);
+}
+.hv-skill-row[open] > .hv-skill-rowhead .hv-skill-row-chevron {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+/* Expanded body */
+.hv-skill-rowbody {
+  padding: var(--space-4) var(--space-4) var(--space-5)
+           calc(var(--space-4) + 16px + var(--space-3));  /* align under the name */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.hv-skill-row-desc {
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin: 0;
+}
+.hv-skill-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+}
+.hv-skill-row-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+}
+.hv-skill-row-meta-item [data-lucide],
+.hv-skill-row-meta-item svg { width: 13px; height: 13px; }
+
+.hv-skill-row-sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.hv-skill-row-section {
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  line-height: 1.5;
+  padding-left: var(--space-3);
+  border-left: var(--border-hair) solid var(--border);
+}
+.hv-skill-row-section.hv-skill-row-lvl3 {
+  padding-left: var(--space-5);
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+.hv-skill-row-refs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1, 4px);
+}
+.hv-skill-row-refs-label {
+  font-size: var(--fs-detail);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  margin-right: var(--space-1, 4px);
+}
+.hv-skill-row-ref {
+  font-size: var(--fs-sm);
+  color: var(--cool);
+  background: var(--bg-elevated, var(--bg));
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px var(--space-2);
+}
+
+
+/* ---- Directory dashboard cards (subject-area entry points) ----
+   Extends .card: adds an icon+title head, an in-card doc preview list, and a
+   flex column so the doc count pins to the card bottom. Used on category
+   landings (e.g. Project Context) to make subdirectories navigable from the
+   page body. */
+.dir-dashboard-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dir-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dir-card-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.dir-dashboard-card .card-name {
+  margin-bottom: 0;
+}
+.dir-card-preview {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.dir-card-preview li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  overflow: hidden;
+}
+.dir-card-preview li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dir-card-preview-icon {
+  width: 12px;
+  height: 12px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.dir-dashboard-card .card-count {
+  margin-top: auto;
+  padding-top: var(--space-2);
+}

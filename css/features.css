@@ -1658,7 +1658,7 @@ ul.todo-list li.todo-hidden { display: none; }
   top: 0;
   right: 0;
   bottom: 0;
-  width: clamp(320px, 40vw, 560px);
+  width: clamp(320px, 28vw, 400px);
   background: var(--bg);
   border-left: var(--border-hair) solid var(--border);
   z-index: 9000;
@@ -1681,13 +1681,10 @@ ul.todo-list li.todo-hidden { display: none; }
   border-bottom: var(--border-hair) solid var(--border);
   flex-shrink: 0;
 }
+/* Composes on .hv-chip + .hv-chip-outlined-accent (see primitives.css) for the
+   shared chip silhouette. Kept as a stub for JS queries and future overrides —
+   the old bespoke solid-comp flag treatment was replaced by the chip system. */
 .scratch-date-flag {
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  color: var(--bg);
-  background: var(--comp);
-  padding: var(--space-0-3) var(--space-0-6);
   white-space: nowrap;
 }
 .scratch-actions {
@@ -1800,36 +1797,239 @@ ul.todo-list li.todo-hidden { display: none; }
   color: var(--text-dim);
 }
 
-/* --- Log entries --- */
+/* --- Sticky-note cards --- */
 .scratch-entries {
   flex: 1;
   overflow-y: auto;
-  padding: 0 var(--space-4);
+  overflow-x: hidden;       /* columns grow vertically only — never sideways */
+  padding: var(--note-gap) var(--space-4);
+  /* Two explicit column stacks in a grid. Each column is its own flex column,
+     so a tall note pushes only the notes below it in the same column. Unlike
+     CSS multi-column, the split is controlled in JS and never rebalanced by
+     the browser — visual position and array index stay in lockstep, which is
+     what makes drag-and-drop targeting exact. */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--note-gap);
+  align-items: start;
+  min-width: 0;
 }
-.scratch-entry {
+.scratch-col {
   display: flex;
-  gap: var(--space-2);
-  padding: var(--space-0-4) 0;
-  border-bottom: var(--border-hair) solid var(--bg-elevated);
-  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--note-gap);
+  min-width: 0;
 }
-.scratch-entry:last-child {
-  border-bottom: none;
+
+.scratch-card {
+  position: relative;
+  padding: var(--note-padding);
+  /* Height is content-driven: a short note is squared up to a minimum by JS
+     (min-height set to the rendered width), a long note simply grows taller. */
+  /* Fully filled: the surface is the full-strength cycle color, so it reads as
+     colored paper. All inner content uses --note-ink for contrast. */
+  border: none;
+  border-radius: var(--radius);
+  background: var(--note-card-color, var(--accent));
+  color: var(--note-ink);
+  box-shadow: var(--note-shadow);
+  cursor: grab;
+  transition: box-shadow var(--motion-fast) var(--ease),
+              transform var(--motion-fast) var(--ease),
+              background var(--motion-fast) var(--ease);
 }
-.scratch-entry-time {
-  font-size: var(--fs-detail);
-  color: var(--text-dim);
-  min-width: 3rem;
+.scratch-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* --- Card motion ---------------------------------------------------------
+   Entrance, exit, and drop-pulse. Reduced-motion is handled globally by the
+   accessibility catch-all (animation-duration collapses to ~0), so these need
+   no per-rule guard — the JS exit path uses a duration-matched timeout so
+   removal still fires when the animation is suppressed. */
+
+/* Entrance: a fresh note "sticks" to the board — scale up from slightly small
+   with a gentle overshoot. */
+@keyframes scratchCardIn {
+  from { opacity: 0; transform: scale(0.9) translateY(-4px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.scratch-card-entering {
+  animation: scratchCardIn var(--motion-medium) var(--ease-bounce);
+}
+
+/* Exit: fade + collapse before the DOM node is removed, softening the reflow. */
+@keyframes scratchCardOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.85); }
+}
+.scratch-card-leaving {
+  animation: scratchCardOut var(--motion-base) var(--ease) forwards;
+  pointer-events: none;
+}
+
+/* Drop pulse: a brief ring so the eye can follow a just-moved note (we
+   intentionally skip full reorder settle animation with masonry). The ring is
+   ink-colored — a cycle-color ring would be invisible against a filled card of
+   that same color. */
+@keyframes scratchCardPulse {
+  0%   { box-shadow: 0 0 0 0 var(--note-ink), var(--note-shadow); }
+  60%  { box-shadow: 0 0 0 var(--border-rail) var(--note-ink), var(--shadow-hover); }
+  100% { box-shadow: var(--note-shadow); }
+}
+.scratch-card-pulse {
+  animation: scratchCardPulse var(--motion-slow) var(--ease);
+}
+
+/* Simulated peeled corner — a triangle in the top-right. The visible wedge is
+   painted with the card's cycle color; the inner cut reads as the panel
+   background so it looks like the paper has lifted. Grows slightly on hover to
+   reinforce the paper-lift metaphor. */
+.scratch-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 var(--note-fold-size) var(--note-fold-size) 0;
+  border-color: transparent var(--note-ink) transparent transparent;
+  opacity: 0.9;
+  transition: border-width var(--motion-fast) var(--ease-bounce),
+              opacity var(--motion-fast) var(--ease);
+}
+.scratch-card:hover::after {
+  border-width: 0 calc(var(--note-fold-size) + 5px) calc(var(--note-fold-size) + 5px) 0;
+  opacity: 1;
+}
+
+/* Palette cycle — accent, warm, cool (comp deliberately excluded).
+   Each card exposes its assigned hue via --note-card-color, which is now the
+   card's fill; inner content keys off --note-ink for contrast. */
+.scratch-card-c1 { --note-card-color: var(--note-color-1); }
+.scratch-card-c2 { --note-card-color: var(--note-color-2); }
+.scratch-card-c3 { --note-card-color: var(--note-color-3); }
+
+.scratch-card-dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+/* Skeleton drop placeholder — a ghost sticky-note marking the exact slot the
+   dragged card will land in. Lives inside a column's flex stack, so the gap
+   spacing comes from the column's own `gap`. Statically tinted rather than
+   animated: a pulsing opacity/border caused layout reflow on every frame,
+   which made drop targeting inconsistent. */
+.scratch-card-placeholder {
+  height: 88px;
   flex-shrink: 0;
-  font-weight: 700;
-  padding-top: var(--space-0-1);
+  border: var(--border-hair) solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent-glow);
 }
-.scratch-entry-text {
-  font-size: var(--fs-label);
-  color: var(--text);
+
+.scratch-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-4);
+  margin-bottom: var(--space-1);
+  /* Leave room for the corner fold so actions/time don't sit under it. */
+  padding-right: var(--note-fold-size);
+}
+.scratch-card-handle {
+  color: var(--note-ink-soft);
+  font-size: var(--fs-detail);
+  cursor: grab;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.scratch-card-time {
+  font-size: var(--note-time-size);
+  font-weight: 700;
+  color: var(--note-ink);
+  letter-spacing: 0.03em;
+}
+/* Moved-out-of-order marker — alert color, so it reads as a deviation from
+   chronological order rather than part of the timestamp. Deepened toward the
+   background (--note-marker) because full --comp on a bright filled card is
+   low-contrast and clashes with the cycle colors. */
+.scratch-card-moved {
+  font-size: var(--note-time-size);
+  font-weight: 700;
+  color: var(--note-marker);
+  letter-spacing: 0.03em;
+}
+.scratch-card-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-3);
+  opacity: 0;
+  transition: opacity var(--motion-fast) var(--ease);
+}
+.scratch-card:hover .scratch-card-actions,
+.scratch-card:focus-within .scratch-card-actions {
+  opacity: 1;
+}
+.scratch-card-btn {
+  background: none;
+  border: none;
+  color: var(--note-ink-soft);
+  font-family: inherit;
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  padding: var(--space-0-1) var(--space-0-3);
+  transition: color var(--motion-fast) var(--ease);
+}
+/* On a filled card both actions darken to full ink; delete additionally shifts
+   toward alert red. Hover states must stay legible against a bright fill. */
+.scratch-card-edit:hover { color: var(--note-ink); }
+.scratch-card-delete:hover { color: var(--note-marker); }
+
+.scratch-card-body {
+  font-size: var(--note-font-size);
+  color: var(--note-ink);
   line-height: 1.5;
   white-space: pre-wrap;
   word-break: break-word;
+  padding: var(--note-body-pad);
+}
+
+/* Inline edit textarea — a dark inset panel on the filled card. Inverting to
+   the app background (rather than tinting the fill) gives an unambiguous
+   "edit mode" affordance and keeps the caret and selection legible. */
+.scratch-card-editor {
+  width: 100%;
+  background: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--text-bright);
+  caret-color: var(--note-card-color, var(--accent));
+  font-family: inherit;
+  font-size: var(--note-font-size);
+  line-height: 1.5;
+  padding: var(--space-1) var(--space-2);
+  resize: none;
+  outline: none;
+  min-height: 2.5rem;
+  max-height: 8rem;
+}
+
+/* Visually-hidden live region for screen-reader action announcements. */
+.scratch-sr-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* --- History view --- */
@@ -1903,6 +2103,9 @@ ul.todo-list li.todo-hidden { display: none; }
   font-size: var(--fs-caption);
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  /* The entries container is a 2-column grid; span both so the message centers
+     across the full width instead of sitting in column 1. */
+  grid-column: 1 / -1;
 }
 
 /* ---- 08-utilities.css ---- */

@@ -163,6 +163,17 @@ html.a11y-bw-theme ::selection {
 }
 html.a11y-bw-theme ::-webkit-scrollbar-track { background: var(--bg); }
 html.a11y-bw-theme ::-webkit-scrollbar-thumb { background: var(--border-strong); border-color: var(--bg); }
+
+/* ---- Filled sticky notes in BW theme ----
+   This theme collapses --accent/--warm/--cool/--comp to a single blue, so a
+   filled note card and its --note-marker moved-flag end up blue-on-blue and the
+   flag becomes illegible. Since hue carries no information here, distinguish the
+   flag by ink color plus an underline instead. */
+html.a11y-bw-theme .scratch-card-moved,
+html.a11y-bw-theme .scratch-card-delete:hover {
+  color: var(--note-ink);
+  text-decoration: underline;
+}
 html.a11y-bw-theme ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
 /* ---- Large text ---- */
