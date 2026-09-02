@@ -10,7 +10,7 @@
    new clickable element is added anywhere in the app. Plain <button> does
    NOT get `cursor: pointer` from the browser's default stylesheet, so any
    button-like element that should trigger the box must declare it in CSS
-   (the existing `.hv-icon-btn` / `.hv-button` primitives already do).
+   (the existing `.icon-button` / `.action-button` primitives already do).
 
    Public API exposed on window.HvCursorBox:
      start(container?)   — mounts the box <div> into container (default

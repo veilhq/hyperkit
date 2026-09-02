@@ -34,26 +34,26 @@ function create(opts) {
 
   function build() {
     wrap = document.createElement("div");
-    wrap.className = "hv-editor-wrap";
+    wrap.className = "inline-editor-wrap";
     wrap.style.display = "none";
 
     // Header row: filename + indicator
     var header = document.createElement("div");
-    header.className = "hv-editor-header";
+    header.className = "inline-editor-header";
 
     filenameEl = document.createElement("span");
-    filenameEl.className = "hv-editor-filename";
+    filenameEl.className = "inline-editor-filename";
     header.appendChild(filenameEl);
 
     indicator = document.createElement("span");
-    indicator.className = "hv-editor-indicator";
+    indicator.className = "inline-editor-indicator";
     header.appendChild(indicator);
 
     wrap.appendChild(header);
 
     // Textarea
     textarea = document.createElement("textarea");
-    textarea.className = "hv-editor-textarea";
+    textarea.className = "inline-editor-textarea";
     textarea.setAttribute("spellcheck", "false");
     textarea.setAttribute("autocomplete", "off");
     textarea.setAttribute("autocorrect", "off");
@@ -63,15 +63,15 @@ function create(opts) {
 
     // Action bar
     var actions = document.createElement("div");
-    actions.className = "hv-editor-actions";
+    actions.className = "inline-editor-actions";
 
     var cancelBtn = document.createElement("button");
-    cancelBtn.className = "hv-editor-cancel";
+    cancelBtn.className = "inline-editor-cancel";
     cancelBtn.textContent = "cancel";
     cancelBtn.addEventListener("click", close);
 
     var saveBtn = document.createElement("button");
-    saveBtn.className = "hv-editor-save";
+    saveBtn.className = "inline-editor-save";
     saveBtn.textContent = "save";
     saveBtn.addEventListener("click", save);
 

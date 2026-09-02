@@ -128,11 +128,11 @@
 .hero-ascii + .dashboard-panels,
 .hero-ascii + .kpi-strip { margin-top: 0; }
 .kpi-strip + .dashboard-panels { margin-top: -1px; }
-.kpi-strip + .hv-section { margin-top: -1px; }
-.build-stats + .hv-section { margin-top: -1px; }
-.dashboard-panels + .hv-section { margin-top: -1px; }
-.hv-section + .hv-section { margin-top: -1px; margin-bottom: 0; }
-.home-dock + .hv-section { margin-top: -1px; margin-bottom: 0; }
+.kpi-strip + .content-section { margin-top: -1px; }
+.build-stats + .content-section { margin-top: -1px; }
+.dashboard-panels + .content-section { margin-top: -1px; }
+.content-section + .content-section { margin-top: -1px; margin-bottom: 0; }
+.home-dock + .content-section { margin-top: -1px; margin-bottom: 0; }
 h1 + .home-dock { margin-top: var(--space-4); }
 
 /* ---- Hero info button (?) ---- */
@@ -248,7 +248,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .dir-stat-val { font-weight: 700; color: var(--text-bright); }
 .dir-stat-label { color: var(--text-dim); }
 .dir-header + .home-dock { margin-top: var(--space-3); }
-.dir-header + .hv-section { margin-top: var(--space-3); }
+.dir-header + .content-section { margin-top: var(--space-3); }
 
 /* ---- KPI / Hero ASCII ---- */
 .hero-ascii {
@@ -320,7 +320,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   border-radius: 0;
 }
 .dashboard-wrap .home-section,
-.dashboard-wrap .hv-section {
+.dashboard-wrap .content-section {
   background: transparent;
 }
 
@@ -421,7 +421,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   animation-play-state: running;
 }
 /* Pause hop animation while splash screen is visible */
-.hv-splash-active .launcher-box {
+.splash-screen-active .launcher-box {
   animation-play-state: paused;
 }
 
@@ -1168,7 +1168,7 @@ h2 + .doc-list { border-top: none; }
   letter-spacing: 0.04em;
   text-transform: lowercase;
 }
-.doc-list .hv-badge { justify-self: end; }
+.doc-list .label-badge { justify-self: end; }
 .doc-badges { display: flex; gap: var(--space-0-3, 0.3rem); justify-self: end; align-items: center; }
 .empty-msg { color: var(--text-dim); font-size: var(--fs-h5-6, 0.8rem); padding: var(--space-6) 0; }
 
@@ -1194,7 +1194,7 @@ h2 + .doc-list { border-top: none; }
   background: var(--comp);
 }
 
-/* Section variants (extend .hv-section) */
+/* Section variants (extend .content-section) */
 .root-docs-section h2 { color: var(--cool); }
 .root-docs-section .doc-list li { grid-template-columns: 1fr auto auto; }
 .documents-section { padding-left: 0; padding-right: var(--space-5); }
@@ -1208,7 +1208,7 @@ h2 + .doc-list { border-top: none; }
 .active-shelf .card-grid { margin-top: var(--space-2); margin-bottom: var(--space-2); }
 .active-shelf .card-meta { display: flex; align-items: center; gap: var(--space-3); }
 
-/* Status badges (extend .hv-badge) */
+/* Status badges (extend .label-badge) */
 .status-in-progress { color: var(--accent); border-color: var(--accent); }
 .status-in-discussion { color: var(--warm); border-color: var(--warm); }
 .status-requirements-created { color: var(--cool); border-color: var(--cool); }
@@ -1257,27 +1257,27 @@ h2 + .doc-list { border-top: none; }
 .learn-index .card-desc { font-size: var(--fs-h5-6, 0.8rem); color: var(--text-muted); line-height: 1.4; }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   Skill Row (.hv-skill-row) — expandable capability rows
+   Skill Row (.skill-row) — expandable capability rows
    ───────────────────────────────────────────────────────────────────────
    A bordered list of skills as collapsible rows. Each row is a native
    <details>: the <summary> is the always-visible line (icon, name, trigger,
    chevron), and the body reveals description + section outline + refs.
    No JS required for expand/collapse. Structure:
-     .hv-skill-list
-       details.hv-skill-row
-         summary.hv-skill-rowhead ( icon, name, trigger, chevron )
-         .hv-skill-rowbody ( desc, outline, refs )
+     .skill-list
+       details.skill-row
+         summary.skill-rowhead ( icon, name, trigger, chevron )
+         .skill-rowbody ( desc, outline, refs )
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Multi-column masonry: each column packs independently, so expanding one
    row only reflows rows below it in the same column — never the other column.
    (Native grid masonry is not yet shippable; multicol is the zero-JS path.) */
-.hv-skill-list {
+.skill-list {
   column-count: 2;
   column-gap: var(--space-3);
 }
 
-.hv-skill-row {
+.skill-row {
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-card);
@@ -1286,15 +1286,15 @@ h2 + .doc-list { border-top: none; }
   margin-bottom: var(--space-3); /* multicol uses margin, not gap, for vertical rhythm */
   transition: border-color var(--motion-fast) var(--ease);
 }
-.hv-skill-row[open] { border-color: var(--accent-border, var(--border)); }
+.skill-row[open] { border-color: var(--accent-border, var(--border)); }
 
 /* Collapse to a single column on narrow viewports. */
 @media (max-width: 900px) {
-  .hv-skill-list { column-count: 1; }
+  .skill-list { column-count: 1; }
 }
 
 /* Summary = the visible row line */
-.hv-skill-rowhead {
+.skill-rowhead {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -1304,30 +1304,30 @@ h2 + .doc-list { border-top: none; }
   user-select: none;
   transition: background var(--motion-fast) var(--ease);
 }
-.hv-skill-rowhead::-webkit-details-marker { display: none; }
-.hv-skill-rowhead:hover { background: var(--bg-card-hover); }
-.hv-skill-row[open] > .hv-skill-rowhead {
+.skill-rowhead::-webkit-details-marker { display: none; }
+.skill-rowhead:hover { background: var(--bg-card-hover); }
+.skill-row[open] > .skill-rowhead {
   background: var(--bg-card-hover);
   border-bottom: var(--border-hair) solid var(--border);
 }
 
-.hv-skill-row-icon {
+.skill-row-icon {
   width: 16px;
   height: 16px;
   color: var(--accent);
   flex-shrink: 0;
 }
-.hv-skill-row-name {
+.skill-row-name {
   font-size: var(--fs-body);
   font-weight: 700;
   color: var(--text-bright);
   flex-shrink: 0;
   transition: color var(--motion-fast) var(--ease);
 }
-.hv-skill-rowhead:hover .hv-skill-row-name { color: var(--accent); }
+.skill-rowhead:hover .skill-row-name { color: var(--accent); }
 
 /* Trigger sits inline, muted, filling the middle; truncates on narrow rows. */
-.hv-skill-row-trigger {
+.skill-row-trigger {
   flex: 1;
   min-width: 0;
   font-size: var(--fs-sm);
@@ -1336,7 +1336,7 @@ h2 + .doc-list { border-top: none; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.hv-skill-row-trigger::before {
+.skill-row-trigger::before {
   content: '';
   display: inline-block;
   width: 3px;
@@ -1347,7 +1347,7 @@ h2 + .doc-list { border-top: none; }
   margin-right: var(--space-2);
 }
 
-.hv-skill-row-chevron {
+.skill-row-chevron {
   width: 15px;
   height: 15px;
   color: var(--text-dim);
@@ -1355,26 +1355,26 @@ h2 + .doc-list { border-top: none; }
   transition: transform var(--motion-base) var(--ease),
               color var(--motion-fast) var(--ease);
 }
-.hv-skill-row[open] > .hv-skill-rowhead .hv-skill-row-chevron {
+.skill-row[open] > .skill-rowhead .skill-row-chevron {
   transform: rotate(180deg);
   color: var(--accent);
 }
 
 /* Expanded body */
-.hv-skill-rowbody {
+.skill-rowbody {
   padding: var(--space-4) var(--space-4) var(--space-5)
            calc(var(--space-4) + 16px + var(--space-3));  /* align under the name */
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
-.hv-skill-row-desc {
+.skill-row-desc {
   font-size: var(--fs-body);
   color: var(--text-muted);
   line-height: 1.7;
   margin: 0;
 }
-.hv-skill-row-meta {
+.skill-row-meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
@@ -1383,15 +1383,15 @@ h2 + .doc-list { border-top: none; }
   letter-spacing: 0.05em;
   color: var(--text-dim);
 }
-.hv-skill-row-meta-item {
+.skill-row-meta-item {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1, 4px);
 }
-.hv-skill-row-meta-item [data-lucide],
-.hv-skill-row-meta-item svg { width: 13px; height: 13px; }
+.skill-row-meta-item [data-lucide],
+.skill-row-meta-item svg { width: 13px; height: 13px; }
 
-.hv-skill-row-sections {
+.skill-row-sections {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -1399,33 +1399,33 @@ h2 + .doc-list { border-top: none; }
   flex-direction: column;
   gap: var(--space-2);
 }
-.hv-skill-row-section {
+.skill-row-section {
   font-size: var(--fs-body);
   color: var(--text-muted);
   line-height: 1.5;
   padding-left: var(--space-3);
   border-left: var(--border-hair) solid var(--border);
 }
-.hv-skill-row-section.hv-skill-row-lvl3 {
+.skill-row-section.skill-row-lvl3 {
   padding-left: var(--space-5);
   color: var(--text-dim);
   font-size: var(--fs-sm);
 }
 
-.hv-skill-row-refs {
+.skill-row-refs {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-1, 4px);
 }
-.hv-skill-row-refs-label {
+.skill-row-refs-label {
   font-size: var(--fs-detail);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-dim);
   margin-right: var(--space-1, 4px);
 }
-.hv-skill-row-ref {
+.skill-row-ref {
   font-size: var(--fs-sm);
   color: var(--cool);
   background: var(--bg-elevated, var(--bg));

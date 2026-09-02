@@ -46,7 +46,7 @@
   line-height: 1;
 }
 
-/* ---- Search overlay (composes .hv-overlay) ---- */
+/* ---- Search overlay (composes .modal-overlay) ---- */
 .search-overlay {
   z-index: calc(var(--z-modal) + 10);
   align-items: flex-start;
@@ -57,7 +57,7 @@
 }
 
 /* Noise field canvas inside the overlay */
-.search-overlay .hv-noise-field-canvas {
+.search-overlay .noise-field-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -66,7 +66,7 @@
   pointer-events: none;
 }
 
-/* ---- Search modal panel (composes .hv-panel-modal) ---- */
+/* ---- Search modal panel (composes .modal-panel) ---- */
 .search-modal {
   max-width: 960px;
   width: 90%;
@@ -562,7 +562,7 @@ ul.todo-list li.doc-recent::after {
   white-space: nowrap;
   padding-left: 1.4rem;
 }
-/* ---- Type badges (extend .hv-badge) ---- */
+/* ---- Type badges (extend .label-badge) ---- */
 .type-badge-personal {
   color: var(--accent);
   border-color: var(--accent);
@@ -587,7 +587,7 @@ ul.todo-list li.todo-hidden { display: none; }
   margin-left: auto;
   flex-shrink: 0;
 }
-.todo-badges .hv-badge {
+.todo-badges .label-badge {
   text-align: center;
   margin: 0;
   min-width: 5.5rem;
@@ -906,7 +906,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 
 /* ---- TOC header ---- */
-.toc-sidebar .hv-panel-header {
+.toc-sidebar .panel-header {
   padding: var(--space-3);
   font-size: 0.65rem;
   font-weight: 700;
@@ -1187,7 +1187,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 
 /* Skeleton row inserted into doc-list while import builds —
-   uses .hv-skeleton-row primitive from primitives.css */
+   uses .loading-skeleton-row primitive from primitives.css */
 .doc-skeleton {
   border-bottom: var(--border-hair) solid var(--border);
 }
@@ -1418,7 +1418,7 @@ ul.todo-list li.todo-hidden { display: none; }
 /* --- Inline Document Editor --- */
 
 /* Editor wrapper — replaces article when active */
-.hv-editor-wrap {
+.inline-editor-wrap {
   position: relative;
   width: 100%;
   min-height: 400px;
@@ -1428,7 +1428,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 
 /* Textarea — full-width, matches app aesthetic */
-.hv-editor-textarea {
+.inline-editor-textarea {
   width: 100%;
   min-height: 70vh;
   padding: var(--space-1-25);
@@ -1448,17 +1448,17 @@ ul.todo-list li.todo-hidden { display: none; }
   -moz-osx-font-smoothing: unset;
 }
 
-.hv-editor-textarea:focus {
+.inline-editor-textarea:focus {
   border-color: var(--accent);
   box-shadow: inset 0 0 0 1px var(--accent-border);
 }
 
-.hv-editor-textarea::placeholder {
+.inline-editor-textarea::placeholder {
   color: var(--text-dim);
 }
 
 /* Save indicator — floats top-right of the editor */
-.hv-editor-indicator {
+.inline-editor-indicator {
   position: absolute;
   top: var(--space-2);
   right: var(--space-3);
@@ -1474,20 +1474,20 @@ ul.todo-list li.todo-hidden { display: none; }
   z-index: 10;
 }
 
-.hv-editor-indicator.visible {
+.inline-editor-indicator.visible {
   opacity: 1;
 }
 
 /* Editor action bar (save / cancel buttons) */
-.hv-editor-actions {
+.inline-editor-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
   margin-top: var(--space-2);
 }
 
-.hv-editor-save,
-.hv-editor-cancel {
+.inline-editor-save,
+.inline-editor-cancel {
   font-family: var(--font);
   font-size: var(--fs-label);
   font-weight: 700;
@@ -1502,12 +1502,12 @@ ul.todo-list li.todo-hidden { display: none; }
   transition: color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);
 }
 
-.hv-editor-save:hover {
+.inline-editor-save:hover {
   color: var(--accent);
   border-color: var(--accent);
 }
 
-.hv-editor-cancel:hover {
+.inline-editor-cancel:hover {
   color: var(--comp);
   border-color: var(--comp);
 }
@@ -1681,7 +1681,7 @@ ul.todo-list li.todo-hidden { display: none; }
   border-bottom: var(--border-hair) solid var(--border);
   flex-shrink: 0;
 }
-/* Composes on .hv-chip + .hv-chip-outlined-accent (see primitives.css) for the
+/* Composes on .status-chip + .status-chip-outlined-accent (see primitives.css) for the
    shared chip silhouette. Kept as a stub for JS queries and future overrides —
    the old bespoke solid-comp flag treatment was replaced by the chip system. */
 .scratch-date-flag {
@@ -2345,12 +2345,12 @@ ul.todo-list li.todo-hidden { display: none; }
 /* === Splash Screen === */
 
 /* Suppress scrollbars while splash is active */
-html.hv-splash-active,
-html.hv-splash-active body {
+html.splash-screen-active,
+html.splash-screen-active body {
   overflow: hidden;
 }
 
-.hv-splash {
+.splash-screen {
   position: fixed;
   inset: 0;
   z-index: var(--z-splash);
@@ -2363,12 +2363,12 @@ html.hv-splash-active body {
   pointer-events: all;
 }
 
-.hv-splash.hv-splash-hidden {
+.splash-screen.splash-screen-hidden {
   opacity: 0;
   pointer-events: none;
 }
 
-.hv-splash-flag {
+.splash-screen-flag {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2380,7 +2380,7 @@ html.hv-splash-active body {
   animation: splash-fade-in var(--motion-slow) ease var(--motion-tick) forwards;
 }
 
-.hv-splash-eye {
+.splash-screen-eye {
   width: 30px;
   height: 24px;
   color: var(--bg, #000000);
@@ -2392,8 +2392,8 @@ html.hv-splash-active body {
 }
 
 /* Respect reduced-motion */
-.a11y-reduce-motion .hv-splash,
-.a11y-reduce-motion .hv-splash-flag {
+.a11y-reduce-motion .splash-screen,
+.a11y-reduce-motion .splash-screen-flag {
   animation: none;
   opacity: 1;
   transition: opacity var(--motion-tick) ease;

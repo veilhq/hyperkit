@@ -55,7 +55,7 @@
 /* Exclude dashboard/index section headers from markdown h2 styling */
 .markdown-body .dashboard-wrap h2,
 .markdown-body .home-section h2,
-.markdown-body .hv-section h2,
+.markdown-body .content-section h2,
 .markdown-body .documents-section h2,
 .markdown-body .root-docs-section h2 {
   margin: 0 0 var(--space-4);
@@ -407,21 +407,21 @@
 }
 
 /* Status chip — click-to-cycle in desktop app */
-.hv-desktop .doc-header-chip[data-writeback-key="status"] {
+.app-mode-desktop .doc-header-chip[data-writeback-key="status"] {
   cursor: pointer;
   position: relative;
   transition: filter var(--motion-fast) var(--ease);
 }
-.hv-desktop .doc-header-chip[data-writeback-key="status"]:hover {
+.app-mode-desktop .doc-header-chip[data-writeback-key="status"]:hover {
   filter: brightness(1.15);
 }
-.hv-desktop .doc-header-chip[data-writeback-key="status"]::after {
+.app-mode-desktop .doc-header-chip[data-writeback-key="status"]::after {
   content: ' ⟳';
   margin-left: 0.35rem;
   font-size: 0.75em;
   opacity: 0.6;
 }
-.hv-desktop .doc-header-chip[data-writeback-key="status"]:hover::after {
+.app-mode-desktop .doc-header-chip[data-writeback-key="status"]:hover::after {
   opacity: 1;
 }
 
@@ -431,10 +431,10 @@
 .meta-item-status {}
 .meta-key {}
 .meta-val {}
-.hv-desktop .meta-item-status .meta-val {}
-.hv-desktop .meta-item-status .meta-val:hover {}
-.hv-desktop .meta-item-status .meta-val::after {}
-.hv-desktop .meta-item-status .meta-val:hover::after {}
+.app-mode-desktop .meta-item-status .meta-val {}
+.app-mode-desktop .meta-item-status .meta-val:hover {}
+.app-mode-desktop .meta-item-status .meta-val::after {}
+.app-mode-desktop .meta-item-status .meta-val:hover::after {}
 
 /* ---- H2 section panels (collapsible) ---- */
 .doc-section {

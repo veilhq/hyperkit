@@ -24,7 +24,7 @@
   if (window.HvToast) return; // idempotent
 
   var container = document.createElement('div');
-  container.className = 'hv-toast-container';
+  container.className = 'notification-toast-container';
   container.setAttribute('aria-live', 'polite');
   container.setAttribute('aria-atomic', 'false');
   function attach() { document.body.appendChild(container); }
@@ -52,8 +52,8 @@
     if (!toast || toast.__dismissed) return;
     toast.__dismissed = true;
     if (toast.__timer) clearTimeout(toast.__timer);
-    toast.classList.remove('hv-toast-visible');
-    toast.classList.add('hv-toast-exit');
+    toast.classList.remove('notification-toast-visible');
+    toast.classList.add('notification-toast-exit');
     var idx = visible.indexOf(toast);
     if (idx >= 0) visible.splice(idx, 1);
     if (toast.__dedupeKey && dedupeMap[toast.__dedupeKey] === toast) {
@@ -79,30 +79,30 @@
     if (dedupeKey && dedupeMap[dedupeKey]) dismiss(dedupeMap[dedupeKey]);
 
     var toast = document.createElement('div');
-    toast.className = 'hv-toast hv-toast-' + variant;
+    toast.className = 'notification-toast notification-toast-' + variant;
     if (defaults.assertive) toast.setAttribute('role', 'alert');
     toast.__dedupeKey = dedupeKey;
 
     var iconEl = document.createElement('i');
-    iconEl.className = 'hv-toast-icon';
+    iconEl.className = 'notification-toast-icon';
     iconEl.setAttribute('data-lucide', icon);
     toast.appendChild(iconEl);
 
     var body = document.createElement('div');
-    body.className = 'hv-toast-body';
+    body.className = 'notification-toast-body';
     if (title) {
       var titleEl = document.createElement('div');
-      titleEl.className = 'hv-toast-title';
+      titleEl.className = 'notification-toast-title';
       titleEl.textContent = title;
       body.appendChild(titleEl);
     }
     var msgEl = document.createElement('div');
-    msgEl.className = 'hv-toast-message';
+    msgEl.className = 'notification-toast-message';
     msgEl.textContent = message;
     body.appendChild(msgEl);
     if (action) {
       var actionBtn = document.createElement('button');
-      actionBtn.className = 'hv-button hv-button-ghost hv-toast-action';
+      actionBtn.className = 'action-button action-button-ghost notification-toast-action';
       actionBtn.type = 'button';
       actionBtn.textContent = action.label;
       actionBtn.addEventListener('click', function () {
@@ -115,7 +115,7 @@
 
     if (sticky || action) {
       var closeBtn = document.createElement('button');
-      closeBtn.className = 'hv-toast-close';
+      closeBtn.className = 'notification-toast-close';
       closeBtn.type = 'button';
       closeBtn.setAttribute('aria-label', 'Dismiss notification');
       closeBtn.textContent = '\u00d7';
@@ -133,7 +133,7 @@
       try { window.lucide.createIcons(); } catch (e) {}
     }
 
-    requestAnimationFrame(function () { toast.classList.add('hv-toast-visible'); });
+    requestAnimationFrame(function () { toast.classList.add('notification-toast-visible'); });
 
     if (!sticky) {
       toast.__timer = setTimeout(function () { dismiss(toast); }, duration);

@@ -338,7 +338,7 @@
     _host = hostEl;
 
     _canvas = document.createElement('canvas');
-    _canvas.className = 'hv-cursor-trail-canvas';
+    _canvas.className = 'cursor-trail-canvas';
     _canvas.style.position = 'fixed';
     _canvas.style.top = '0';
     _canvas.style.left = '0';

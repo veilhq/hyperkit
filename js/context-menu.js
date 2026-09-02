@@ -32,7 +32,7 @@
 
   function createMenuEl() {
     var el = document.createElement('div');
-    el.className = 'hv-context-menu';
+    el.className = 'context-menu';
     el.setAttribute('role', 'menu');
     el.setAttribute('aria-hidden', 'true');
     document.body.appendChild(el);
@@ -80,7 +80,7 @@
       var item = items[i];
       if (item.separator) {
         var sep = document.createElement('div');
-        sep.className = 'hv-context-menu-separator';
+        sep.className = 'context-menu-separator';
         sep.setAttribute('role', 'separator');
         menu.appendChild(sep);
         continue;
@@ -90,42 +90,42 @@
       if (item.children && item.children.length) {
         (function (parentItem) {
           var group = document.createElement('div');
-          group.className = 'hv-context-menu-group';
+          group.className = 'context-menu-group';
 
           var trigger = document.createElement('button');
-          trigger.className = 'hv-context-menu-item hv-context-menu-item-parent';
+          trigger.className = 'context-menu-item context-menu-item-parent';
           trigger.setAttribute('role', 'menuitem');
           trigger.setAttribute('aria-expanded', 'false');
           var triggerHtml = '';
           if (parentItem.icon) {
-            triggerHtml += '<i data-lucide="' + parentItem.icon + '" class="hv-context-menu-icon"></i>';
+            triggerHtml += '<i data-lucide="' + parentItem.icon + '" class="context-menu-icon"></i>';
           }
-          triggerHtml += '<span class="hv-context-menu-label">' + parentItem.label + '</span>';
-          triggerHtml += '<i data-lucide="chevron-right" class="hv-context-menu-chevron"></i>';
+          triggerHtml += '<span class="context-menu-label">' + parentItem.label + '</span>';
+          triggerHtml += '<i data-lucide="chevron-right" class="context-menu-chevron"></i>';
           trigger.innerHTML = triggerHtml;
 
           var childWrap = document.createElement('div');
-          childWrap.className = 'hv-context-menu-children';
+          childWrap.className = 'context-menu-children';
           childWrap.setAttribute('aria-hidden', 'true');
 
           for (var c = 0; c < parentItem.children.length; c++) {
             var child = parentItem.children[c];
             if (child.separator) {
               var csep = document.createElement('div');
-              csep.className = 'hv-context-menu-separator';
+              csep.className = 'context-menu-separator';
               csep.setAttribute('role', 'separator');
               childWrap.appendChild(csep);
               continue;
             }
             var cbtn = document.createElement('button');
-            cbtn.className = 'hv-context-menu-item hv-context-menu-item-child';
+            cbtn.className = 'context-menu-item context-menu-item-child';
             cbtn.setAttribute('role', 'menuitem');
             if (child.disabled) { cbtn.disabled = true; cbtn.classList.add('disabled'); }
             var chtml = '';
             if (child.icon) {
-              chtml += '<i data-lucide="' + child.icon + '" class="hv-context-menu-icon"></i>';
+              chtml += '<i data-lucide="' + child.icon + '" class="context-menu-icon"></i>';
             }
-            chtml += '<span class="hv-context-menu-label">' + child.label + '</span>';
+            chtml += '<span class="context-menu-label">' + child.label + '</span>';
             cbtn.innerHTML = chtml;
             (function (action) {
               cbtn.addEventListener('click', function (e) {
@@ -139,7 +139,7 @@
 
           trigger.addEventListener('click', function (e) {
             e.stopPropagation();
-            var expanded = group.classList.toggle('hv-context-menu-group-open');
+            var expanded = group.classList.toggle('context-menu-group-open');
             trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
             childWrap.setAttribute('aria-hidden', expanded ? 'false' : 'true');
           });
@@ -152,7 +152,7 @@
       }
 
       var btn = document.createElement('button');
-      btn.className = 'hv-context-menu-item';
+      btn.className = 'context-menu-item';
       btn.setAttribute('role', 'menuitem');
       if (item.disabled) {
         btn.disabled = true;
@@ -161,9 +161,9 @@
       // Icon (Lucide name) + label
       var html = '';
       if (item.icon) {
-        html += '<i data-lucide="' + item.icon + '" class="hv-context-menu-icon"></i>';
+        html += '<i data-lucide="' + item.icon + '" class="context-menu-icon"></i>';
       }
-      html += '<span class="hv-context-menu-label">' + item.label + '</span>';
+      html += '<span class="context-menu-label">' + item.label + '</span>';
       btn.innerHTML = html;
       // Bind action
       (function (action) {

@@ -1020,7 +1020,7 @@
 }
 
 /* ---- Width toggle / Fullscreen toggle ---- */
-.width-toggle { /* extends .hv-text-btn via HTML class */ }
-.fullscreen-toggle { /* extends .hv-text-btn via HTML class */ }
+.width-toggle { /* extends .text-button via HTML class */ }
+.fullscreen-toggle { /* extends .text-button via HTML class */ }
 .width-toggle-icon,
-.fullscreen-toggle-icon { /* extends .hv-icon-btn-icon via HTML class */ }
+.fullscreen-toggle-icon { /* extends .icon-button-glyph via HTML class */ }

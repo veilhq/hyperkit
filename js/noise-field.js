@@ -197,7 +197,7 @@
     _fpsCap = (opts && typeof opts.fpsCap === 'number' && opts.fpsCap > 0) ? opts.fpsCap : 30;
     _lastMs = 0;
     _canvas = document.createElement('canvas');
-    _canvas.className = 'hv-noise-field-canvas';
+    _canvas.className = 'noise-field-canvas';
     // Legacy class kept so existing CSS selectors (Hypervisor: home-anchor-canvas) still match
     _canvas.classList.add('home-anchor-canvas');
     _host.insertBefore(_canvas, _host.firstChild);

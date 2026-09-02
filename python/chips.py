@@ -1,7 +1,7 @@
 """
 Chip rendering helper — Hyperkit shared Python module.
 
-Composes the ecosystem primitive class `.hv-chip` with a semantic variant and
+Composes the ecosystem primitive class `.status-chip` with a semantic variant and
 optional specific class names for JS hooks or unique overrides. Replaces
 scattered inline `<span class="...">` construction across emit-side Python
 modules in any consuming app.
@@ -33,7 +33,7 @@ def render_chip(
         data_attrs: Optional dict of data-* attributes; keys become `data-{k}`.
 
     Returns:
-        HTML string like `<span class="hv-chip hv-chip-filled pulse-chip-work">text</span>`.
+        HTML string like `<span class="status-chip status-chip-filled pulse-chip-work">text</span>`.
 
     Raises:
         ValueError: If variant is not one of the canonical set.
@@ -43,7 +43,7 @@ def render_chip(
             f"Unknown chip variant '{variant}'; expected one of {sorted(CHIP_VARIANTS)}"
         )
 
-    classes = f"hv-chip hv-chip-{variant}"
+    classes = f"status-chip status-chip-{variant}"
     if extra_class:
         classes += f" {extra_class.strip()}"
 
