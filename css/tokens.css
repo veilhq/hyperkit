@@ -28,11 +28,21 @@
   --comp:           #ff3333;
   --cool:          #00cccc;
 
+  /* Token vocabulary convention:
+     - Palette-position names (--accent, --warm, --cool, --comp) are the base
+       aesthetic layer. Reference these for decorative/aesthetic color - a
+       cyan section heading, a category swatch, a syntax-highlight color.
+     - Semantic roles (--success, --warning, --error, --info) communicate STATE.
+       Reference these whenever the color means something (an error toast, a
+       validation failure, an info banner) so intent survives a palette reskin.
+     The two layers share values today; the roles alias the palette so a palette
+     change propagates to both without drift. */
+
   /* Semantic color roles — state communication, independent of palette aesthetic */
-  --success:        #00ff41;
-  --warning:        #ffb000;
-  --error:          #ff3333;
-  --info:           #00cccc;
+  --success:        var(--accent);
+  --warning:        var(--warm);
+  --error:          var(--comp);
+  --info:           var(--cool);
   --highlight:      var(--accent);
   --surface-active: var(--accent-glow);
 
@@ -91,6 +101,11 @@
   --border-hair: 1px;      /* default frame */
   --border-rail: 2px;      /* section accent stripe, focus emphasis */
 
+  /* Layout — shared structural heights. The topbar, the clock flag that hangs
+     from its bottom edge, and the doc tab-bar that docks beneath it all key off
+     this so their horizontal dividers align by construction. */
+  --topbar-height: 2.9rem;
+
   /* Z-index scale */
   --z-base:        0;
   --z-topbar:      100;
@@ -99,9 +114,11 @@
   --z-modal:       400;
   --z-toast:       500;
   --z-screensaver: 600;
-  /* Hypervisor-local extensions above the canonical WI-111 scale — needed
-     for surfaces that don't exist in Hyperagent (splash, cursor floater,
-     legacy overlays). Not part of the ecosystem parity contract. */
+  /* Extra layers above the base scale, shared across the ecosystem:
+     --z-cursor sits below the screensaver for the cursor companion box
+     (a shared primitive in primitives.css); --z-splash is the top layer for
+     boot splash screens (used by both Hypervisor's .splash-screen and
+     Hyperagent's .ha-splash). */
   --z-cursor:      550;    /* cursor companion box (persistent floater) */
   --z-splash:      700;    /* boot splash — highest layer */
 
@@ -167,6 +184,84 @@
   /* Progress bar gradient — opacity ramp over cool (not a hue spectrum,
      not the bare accent) for a calmer progress signal than the accent color. */
   --progress-gradient: linear-gradient(90deg, transparent 0%, var(--cool) 100%);
+
+  /* ========================================================================
+     Alpha tint ramp — named color-mix surfaces
+     Consolidates the ad-hoc color-mix() tint surfaces that recurred across the
+     CSS layer. A tint at percentage N of a role color over transparent, so a
+     hover/glow surface is one token reference instead of an inline mix. The
+     ramp aliases through the semantic roles, so a palette reskin propagates.
+     ======================================================================== */
+  --accent-a08:  color-mix(in srgb, var(--accent) 8%,  transparent);
+  --accent-a20:  color-mix(in srgb, var(--accent) 20%, transparent);
+  --error-a08:   color-mix(in srgb, var(--error) 8%,   transparent);
+  --error-a20:   color-mix(in srgb, var(--error) 20%,  transparent);
+  --warning-a08: color-mix(in srgb, var(--warning) 8%, transparent);
+  --warning-a20: color-mix(in srgb, var(--warning) 20%, transparent);
+  --info-a08:    color-mix(in srgb, var(--info) 8%,    transparent);
+  --info-a20:    color-mix(in srgb, var(--info) 20%,   transparent);
+  /* Danger-hover pair — the exact recipe repeated by destructive-action hovers
+     (row delete buttons, a11y reset). Reference both together for a consistent
+     "about to destroy" affordance. */
+  --danger-hover-bg:     var(--error-a08);
+  --danger-hover-shadow: 0 0 6px var(--error-a20);
+
+  /* ========================================================================
+     State-layer tokens — shared hover/active interaction vocabulary
+     Centralizes the hover/active recipe that each interactive primitive
+     re-specified locally. Tune the ecosystem interaction feel here rather than
+     at every primitive. Values pinned to the prior per-primitive usage.
+     ======================================================================== */
+  --state-hover-bg:        var(--bg-card-hover);   /* row/card hover surface */
+  --state-hover-border:    var(--accent-border);   /* hover border accent */
+  --state-active-bg:       var(--accent-glow);      /* selected/active tinted wash */
+  --state-hover-brightness: 1.15;                  /* filter lift for chips/filled */
+  --state-hover-lift:      -1px;                    /* card hover translateY (subtle) */
+  --state-hover-lift-lg:   -2px;                    /* card hover translateY (pronounced) */
+
+  /* ========================================================================
+     Focus-ring tokens — unified focus indicator vocabulary
+     The default focus style and the a11y enhanced-focus mode share these so a
+     change to the focus vocabulary is one edit. Widths stay distinct (default
+     is a hairline; enhanced is a thick 3px ring) but the color and the ring
+     recipe are shared. --focus-ring is the box-shadow form used by inputs whose
+     own accent border is the primary indicator.
+     ======================================================================== */
+  --focus-ring-color:    var(--accent);
+  --focus-ring-width:    var(--border-hair);   /* default outline width */
+  --focus-ring-width-lg: 3px;                  /* a11y enhanced-focus width */
+  --focus-ring-offset:   2px;                  /* default outline offset */
+  --focus-ring-offset-lg: 3px;                 /* a11y enhanced-focus offset */
+  --focus-ring: 0 0 0 var(--border-hair) var(--accent-border), var(--shadow-glow);
+
+  /* ========================================================================
+     Fluid type scale — opt-in clamp() sizes (WI-112 lineage)
+     Net-new, additive. The fixed --fs-* scale above is unchanged and remains
+     the default; these fluid variants are adopted deliberately per element
+     where viewport-responsive sizing is wanted. min/max bracket the existing
+     fixed sizes so adoption stays within the established type rhythm.
+     ======================================================================== */
+  --fs-fluid-sm:      clamp(0.7rem, 0.66rem + 0.2vw,  0.8rem);   /* brackets --fs-sm */
+  --fs-fluid-body:    clamp(0.8rem, 0.75rem + 0.25vw, 0.95rem);  /* brackets --fs-body */
+  --fs-fluid-heading: clamp(0.85rem, 0.8rem + 0.3vw,  1.05rem);  /* brackets --fs-heading */
+  --fs-fluid-hero:    clamp(1rem, 0.9rem + 0.6vw,     1.35rem);  /* brackets --fs-hero */
+
+  /* ========================================================================
+     Transition recipes — named multi-property transition bundles
+     Consolidates transition property-lists that were retyped verbatim at many
+     interactive elements. Shapes are pinned to the most-repeated exact strings
+     in the layer (not idealized): a single-property color transition is by far
+     the most common (17x); the lift bundle recurs on card-like surfaces (4x).
+     The duration tokens were already adopted; these promote the recipe so
+     retuning a whole class of transitions is one edit. Elements with a
+     different property list or timing keep their inline transition — these
+     cover the dominant cases, not every case.
+     ======================================================================== */
+  --transition-color:     color var(--motion-fast) var(--ease);
+  --transition-transform: transform var(--motion-base) var(--ease);
+  --transition-lift:      transform var(--motion-base) var(--ease),
+                          border-color var(--motion-base) var(--ease),
+                          box-shadow var(--motion-medium) var(--ease);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

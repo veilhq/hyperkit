@@ -32,7 +32,7 @@
 
   function createMenuEl() {
     var el = document.createElement('div');
-    el.className = 'context-menu';
+    el.className = 'floating-panel context-menu';
     el.setAttribute('role', 'menu');
     el.setAttribute('aria-hidden', 'true');
     document.body.appendChild(el);
@@ -80,7 +80,7 @@
       var item = items[i];
       if (item.separator) {
         var sep = document.createElement('div');
-        sep.className = 'context-menu-separator';
+        sep.className = 'menu-item-separator';
         sep.setAttribute('role', 'separator');
         menu.appendChild(sep);
         continue;
@@ -93,14 +93,14 @@
           group.className = 'context-menu-group';
 
           var trigger = document.createElement('button');
-          trigger.className = 'context-menu-item context-menu-item-parent';
+          trigger.className = 'menu-item context-menu-item-parent';
           trigger.setAttribute('role', 'menuitem');
           trigger.setAttribute('aria-expanded', 'false');
           var triggerHtml = '';
           if (parentItem.icon) {
-            triggerHtml += '<i data-lucide="' + parentItem.icon + '" class="context-menu-icon"></i>';
+            triggerHtml += '<i data-lucide="' + parentItem.icon + '" class="menu-item-icon"></i>';
           }
-          triggerHtml += '<span class="context-menu-label">' + parentItem.label + '</span>';
+          triggerHtml += '<span class="menu-item-label">' + parentItem.label + '</span>';
           triggerHtml += '<i data-lucide="chevron-right" class="context-menu-chevron"></i>';
           trigger.innerHTML = triggerHtml;
 
@@ -112,20 +112,20 @@
             var child = parentItem.children[c];
             if (child.separator) {
               var csep = document.createElement('div');
-              csep.className = 'context-menu-separator';
+              csep.className = 'menu-item-separator';
               csep.setAttribute('role', 'separator');
               childWrap.appendChild(csep);
               continue;
             }
             var cbtn = document.createElement('button');
-            cbtn.className = 'context-menu-item context-menu-item-child';
+            cbtn.className = 'menu-item context-menu-item-child';
             cbtn.setAttribute('role', 'menuitem');
             if (child.disabled) { cbtn.disabled = true; cbtn.classList.add('disabled'); }
             var chtml = '';
             if (child.icon) {
-              chtml += '<i data-lucide="' + child.icon + '" class="context-menu-icon"></i>';
+              chtml += '<i data-lucide="' + child.icon + '" class="menu-item-icon"></i>';
             }
-            chtml += '<span class="context-menu-label">' + child.label + '</span>';
+            chtml += '<span class="menu-item-label">' + child.label + '</span>';
             cbtn.innerHTML = chtml;
             (function (action) {
               cbtn.addEventListener('click', function (e) {
@@ -152,7 +152,7 @@
       }
 
       var btn = document.createElement('button');
-      btn.className = 'context-menu-item';
+      btn.className = 'menu-item';
       btn.setAttribute('role', 'menuitem');
       if (item.disabled) {
         btn.disabled = true;
@@ -161,9 +161,9 @@
       // Icon (Lucide name) + label
       var html = '';
       if (item.icon) {
-        html += '<i data-lucide="' + item.icon + '" class="context-menu-icon"></i>';
+        html += '<i data-lucide="' + item.icon + '" class="menu-item-icon"></i>';
       }
-      html += '<span class="context-menu-label">' + item.label + '</span>';
+      html += '<span class="menu-item-label">' + item.label + '</span>';
       btn.innerHTML = html;
       // Bind action
       (function (action) {

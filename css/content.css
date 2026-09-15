@@ -458,7 +458,7 @@
   user-select: none;
   list-style: none;
   border-bottom: var(--border-hair) solid var(--border);
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
 }
 .doc-section-summary::-webkit-details-marker { display: none; }
 .doc-section-summary::marker { display: none; content: ""; }
@@ -571,7 +571,7 @@
   color: var(--text);
   text-decoration: none;
   font-size: var(--fs-h5-6);
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
   border: none !important;
 }
 .backlinks-list a:hover {
@@ -684,7 +684,7 @@
   color: var(--text);
   text-decoration: none;
   font-size: var(--fs-h5-6);
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
   border: none !important;
 }
 .related-section-content a:hover {

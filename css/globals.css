@@ -40,8 +40,8 @@
 
 /* ---- Focus ring (accessibility) ---- */
 :focus-visible {
-  outline: var(--border-hair) solid var(--accent);
-  outline-offset: 2px;
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
 }
 
 /* ---- Custom cursors (accent-colored Lucide SVGs) ----
@@ -78,16 +78,14 @@ textarea, [contenteditable="true"] {
   cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='m4.9 4.9 14.2 14.2'/></svg>") 10 10, not-allowed;
 }
 
-/* ---- Custom tooltips ---- */
-[data-tooltip] {
-  position: relative;
-}
-[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%);
+/* ---- Tooltips (behavioral primitive; rendered by HvTooltip in tooltip.js) ----
+   The [data-tooltip] attribute is the trigger contract. HvTooltip renders a
+   single shared .hk-tooltip node appended to <body>, so it escapes any
+   overflow-clipped ancestor and repositions to stay on-screen. Style below
+   preserves the prior ::after appearance (accent border, bg, caption font). */
+.hk-tooltip {
+  position: fixed;
+  z-index: var(--z-dropdown);
   white-space: nowrap;
   font-family: var(--font);
   font-size: var(--fs-caption);
@@ -99,8 +97,15 @@ textarea, [contenteditable="true"] {
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--motion-fast) var(--ease);
-  z-index: var(--z-dropdown);
 }
-[data-tooltip]:hover::after {
+/* Measuring pass: laid out for size/position calc but not yet painted. */
+.hk-tooltip-measuring {
+  opacity: 0;
+}
+.hk-tooltip-visible {
   opacity: 1;
 }
+@media (prefers-reduced-motion: reduce) {
+  .hk-tooltip { transition: none; }
+}
+html.a11y-reduce-motion .hk-tooltip { transition: none; }

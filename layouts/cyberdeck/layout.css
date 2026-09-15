@@ -13,6 +13,7 @@
 .topbar {
   position: sticky;
   top: 0;
+  min-height: var(--topbar-height);
   z-index: var(--z-topbar);
   border-bottom: var(--border-hair) solid var(--border);
   transition: box-shadow var(--motion-slow) var(--ease);

@@ -1,0 +1,254 @@
+/* ===== Hyperkit — Visualization Primitives =====
+   Shared, token-driven chart primitives for every hyper ecosystem app.
+   Class vocabulary: hv-viz-*. Rendered/populated by window.HvViz (js/viz.js).
+
+   Techniques by primitive:
+     - Bar / stacked bar / legend / donut  → CSS + SVG (theme via tokens directly)
+     - Line chart / sparkline              → <canvas> (HvViz draws, reads token
+                                              colors via getComputedStyle)
+
+   Extracted from the inline chart CSS/JS that previously lived only in
+   Hypervisor's ado-dashboard.html, generalized so any app can consume them.
+   Do not hardcode colors, spacing, radius, or motion — reference tokens. */
+
+/* ---- Horizontal bar chart ------------------------------------------------ */
+.hv-viz-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-4);
+}
+.hv-viz-bar-row {
+  display: grid;
+  grid-template-columns: 1fr max-content;
+  align-items: center;
+  gap: var(--space-2);
+}
+.hv-viz-bar-track {
+  height: 28px;
+  background: var(--bg-surface);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  position: relative;
+  overflow: hidden;
+}
+.hv-viz-bar-fill {
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  border-radius: var(--radius);
+  background: var(--accent);
+  transition: width var(--motion-slow) var(--ease);
+}
+/* Label overlaid inside the track. White text + mix-blend-mode:exclusion
+   renders inverted against whatever is beneath it (fill color or the empty
+   track), keeping contrast across the whole bar. Exclusion is softer than
+   difference on mid-tones, avoiding harsh off-palette color. */
+.hv-viz-bar-label {
+  position: absolute;
+  top: 0;
+  left: var(--space-2);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: var(--fs-body);
+  color: #fff;
+  mix-blend-mode: exclusion;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+}
+.hv-viz-bar-val {
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+}
+
+/* ---- Stacked bar --------------------------------------------------------- */
+.hv-viz-stacked {
+  height: 28px;
+  display: flex;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.hv-viz-stacked-seg {
+  height: 100%;
+  opacity: 1;
+  transition: width var(--motion-slow) var(--ease);
+}
+
+/* ---- Team bars (labeled multi-row stacked: name + bar + meta) ---------- */
+.hv-viz-team {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.hv-viz-team-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 50px;
+  align-items: center;
+  gap: var(--space-0-6);
+}
+.hv-viz-team-name {
+  font-size: var(--fs-body);
+  color: var(--text-bright);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hv-viz-team-bar {
+  height: 24px;
+  display: flex;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.hv-viz-team-seg {
+  height: 100%;
+  opacity: 1;
+}
+.hv-viz-team-meta {
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* ---- Legend (shared by donut, stacked bar, line chart) ------------------- */
+.hv-viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-1-2);
+  margin-top: var(--space-2);
+}
+.hv-viz-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-3);
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+}
+.hv-viz-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  opacity: 0.85;
+  flex: none;
+}
+/* Line-series legend marker — a short rule instead of a square swatch */
+.hv-viz-legend-line {
+  width: 16px;
+  height: 2px;
+  flex: none;
+}
+.hv-viz-legend-line-dashed {
+  width: 16px;
+  height: 0;
+  border-top: var(--border-rail) dashed var(--text-dim);
+  flex: none;
+}
+
+/* ---- Donut / ring (SVG) -------------------------------------------------- */
+.hv-viz-donut-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+.hv-viz-donut {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+}
+.hv-viz-donut svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg); /* start first segment at 12 o'clock */
+}
+.hv-viz-donut-track {
+  fill: none;
+  stroke: var(--bg-surface);
+}
+.hv-viz-donut-seg {
+  fill: none;
+  opacity: 1;
+  transition: stroke-dasharray var(--motion-slow) var(--ease);
+}
+.hv-viz-donut-dot {
+  opacity: 1;
+}
+.hv-viz-donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.hv-viz-donut-total {
+  font-size: var(--fs-hero);
+  color: var(--text-bright);
+  line-height: 1;
+}
+.hv-viz-donut-total-label {
+  font-size: var(--fs-caption);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: var(--space-0-2);
+}
+
+/* ---- Line chart (canvas — e.g. burndown) --------------------------------- */
+.hv-viz-line {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+.hv-viz-line canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Sparkline (canvas) -------------------------------------------------- */
+.hv-viz-sparkline {
+  position: relative;
+  width: 100%;
+  height: 120px;
+}
+.hv-viz-sparkline canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.hv-viz-sparkline-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-micro);
+  color: var(--text-dim);
+  margin-top: var(--space-0-2);
+}
+
+/* ---- Empty state (shared) ------------------------------------------------ */
+.hv-viz-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-5) var(--space-2);
+  text-align: center;
+  color: var(--text-dim);
+  font-size: var(--fs-sm);
+}
+
+/* ---- Responsive ---------------------------------------------------------- */
+/* Responsive — bar rows are label-in-track now, no column adjustment needed. */

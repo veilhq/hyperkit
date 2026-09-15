@@ -60,7 +60,7 @@
 .status-chip-filled:hover,
 :hover > .status-chip-filled,
 .element-hover-parent:hover .status-chip-filled {
-  filter: brightness(1.15);
+  filter: brightness(var(--state-hover-brightness));
 }
 .status-chip-outlined-accent:hover,
 :hover > .status-chip-outlined-accent,
@@ -85,8 +85,8 @@
               border-color var(--motion-fast) var(--ease);
 }
 .list-row:hover {
-  background: var(--bg-card-hover);
-  border-bottom-color: var(--accent-border);
+  background: var(--state-hover-bg);
+  border-bottom-color: var(--state-hover-border);
 }
 .list-row:hover .list-row-title,
 .list-row:hover > *:nth-child(2) {
@@ -116,10 +116,10 @@
               transform var(--motion-base) var(--ease);
 }
 .content-card:hover {
-  border-color: var(--accent-border);
-  background: var(--bg-card-hover);
+  border-color: var(--state-hover-border);
+  background: var(--state-hover-bg);
   box-shadow: var(--shadow-hover);
-  transform: translateY(-1px);
+  transform: translateY(var(--state-hover-lift));
 }
 /* Active/selected — steady accent border without the hover lift. */
 .content-card-active {
@@ -146,31 +146,43 @@
   margin-bottom: var(--space-2);
 }
 
-/* ---- Tab card primitive — shared base only, shape is app-local --------------
-   Ecosystem apps disagree on tab-card geometry by deliberate design choice:
-   Hypervisor uses a bordered box, Hyperagent uses a clip-path notched corner.
-   Neither is "correct" — both are intentional (see each app's local override
-   file for the specific comment/rationale). This base provides only the
-   properties both apps agree on: position context, card background, and the
-   background-transition on hover/active. Border, clip-path, or any other
-   shape-defining property is a local override, layered on top of this rule
-   via normal CSS cascade order (Hyperkit loads before local app CSS).
+/* ---- Tab card primitive — notched-corner card, shared across the ecosystem --
+   The top-right corner notch (clip-path) is the ecosystem tab shape: both
+   Hyperagent's session tabs and Hypervisor's document tabs use it. No border —
+   the clip IS the shape language. Base provides position context, card surface,
+   the hover/active background transition, and the notch geometry. Apps add only
+   sizing/layout specifics (padding, grid) on top; the shape is shared.
 
-   Compose: .nav-tab (this base) + app-local shape override + specific class
-   for size/state overrides.
+   Active state uses --accent-glow (subtle tinted wash), matching the ecosystem's
+   restrained active-state vocabulary — not a solid fill.
+
+   Compose: .nav-tab (this base, incl. shape) + a specific class for size/layout.
 */
 .nav-tab {
   --tab-notch: 10px;
   position: relative;
   background: var(--bg-card);
+  clip-path: polygon(
+    0% 0%,
+    calc(100% - var(--tab-notch)) 0%,
+    100% var(--tab-notch),
+    100% 100%,
+    0% 100%
+  );
   transition: background var(--motion-fast) var(--ease);
 }
+/* No focus outline: the clip-path notch slices a normal outline, and Hyperagent's
+   tabs carry no focus style. Match that - the active-glow is the state signal. */
+.nav-tab:focus,
+.nav-tab:focus-visible {
+  outline: none;
+}
 .nav-tab:hover {
-  background: var(--bg-card-hover);
+  background: var(--state-hover-bg);
 }
 .nav-tab.active,
 .nav-tab.nav-tab-active {
-  background: var(--accent-glow);
+  background: var(--state-active-bg);
 }
 
 /* ---- Hover primitives -------------------------------------------------------- */
@@ -182,8 +194,8 @@
               box-shadow var(--motion-base) var(--ease);
 }
 .element-hover-lift:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent-border);
+  transform: translateY(var(--state-hover-lift-lg));
+  border-color: var(--state-hover-border);
   box-shadow: var(--shadow-hover);
 }
 
@@ -192,7 +204,7 @@
   transition: filter var(--motion-fast) var(--ease);
 }
 .element-hover-brightness:hover {
-  filter: brightness(1.15);
+  filter: brightness(var(--state-hover-brightness));
 }
 
 /* ---- Noise field container hook ---------------------------------------------
@@ -272,7 +284,7 @@
 .form-input::placeholder { color: var(--text-dim); }
 .form-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 var(--border-hair) var(--accent-border), var(--shadow-glow);
+  box-shadow: var(--focus-ring);
 }
 /* Suppress the base :focus-visible outline — the primitive's own accent
    border + accent-border ring is the focus indicator. Otherwise text inputs
@@ -417,6 +429,87 @@
   transform: translateX(0);
 }
 
+/* ============================================================================
+   Floating panel + menu item primitives
+   Shared surface + row vocabulary for the behavioral primitives that show a
+   panel of choices: HvContextMenu (right-click menu), HvDisclosure (dropdowns),
+   and any tab-overflow menu. The panel primitive owns the surface (border,
+   radius, elevation, z-index); consumers add their own positioning + reveal
+   animation as modifiers, since a cursor-anchored context menu and an
+   edge-anchored dropdown position differently. The item primitive owns the
+   icon + label + hover + disabled + separator row.
+   ============================================================================ */
+
+/* Surface only — position and reveal transition are the consumer's concern. */
+.floating-panel {
+  background: var(--bg-elevated);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  z-index: var(--z-dropdown);
+}
+
+/* Raised variant — the "model-picker flavor": lighter card surface, stronger
+   border. Reach for this when a panel should read as a raised control surface
+   rather than the default elevated menu. Overrides only the two tokens that
+   differ from the base; radius/shadow/z-index stay shared. */
+.floating-panel-raised {
+  background: var(--bg-card);
+  border-color: var(--border-strong);
+}
+
+/* Menu row — icon + label, hover-accent, disabled. */
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  margin: var(--space-0-2) 0;
+  border: var(--border-hair) solid transparent;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--motion-fast) var(--ease),
+              color var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease);
+}
+.menu-item:hover {
+  background: var(--bg-card);
+  border-color: var(--border);
+  color: var(--accent);
+}
+.menu-item:hover .menu-item-icon {
+  color: var(--accent);
+}
+.menu-item.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.menu-item-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+.menu-item-label {
+  flex: 1;
+}
+.menu-item-separator {
+  height: 1px;
+  margin: var(--space-2) var(--space-2);
+  background: var(--border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-item { transition: none !important; }
+}
+html.a11y-reduce-motion .menu-item { transition: none !important; }
+
 /* ---- Cursor companion box — bordered box that follows the pointer ----------
    Lights up solid on hover over clickable elements, blinks briefly on click.
    Mounted by window.HvCursorBox.start() (see hyperkit/js/cursor-box.js).
@@ -525,7 +618,7 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
 }
 
 .notification-toast {
-  --variant-color: var(--cool);
+  --variant-color: var(--info);
   display: grid;
   grid-template-columns: auto 1fr auto;
   gap: var(--space-3, 8px);
@@ -540,14 +633,14 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
   padding: var(--space-3, 8px);
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--motion-base) ease, transform var(--motion-base) ease;
   pointer-events: auto;
 }
 
-.notification-toast-success { --variant-color: var(--accent); }
-.notification-toast-info    { --variant-color: var(--cool); }
-.notification-toast-warn    { --variant-color: var(--warm); }
-.notification-toast-error   { --variant-color: var(--comp); }
+.notification-toast-success { --variant-color: var(--success); }
+.notification-toast-info    { --variant-color: var(--info); }
+.notification-toast-warn    { --variant-color: var(--warning); }
+.notification-toast-error   { --variant-color: var(--error); }
 
 .notification-toast-visible { opacity: 1; transform: translateY(0); }
 .notification-toast-exit    { opacity: 0; transform: translateY(8px); }
@@ -608,9 +701,9 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
   line-height: 1;
   padding: 0 2px;
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: var(--transition-color);
 }
-.notification-toast-close:hover { color: var(--comp); }
+.notification-toast-close:hover { color: var(--error); }
 
 @media (prefers-reduced-motion: reduce) {
   .notification-toast { transition: opacity 0.1s linear; transform: none; }

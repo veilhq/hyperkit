@@ -109,9 +109,9 @@
 }
 .a11y-reset:hover {
   color: var(--comp);
-  background: color-mix(in srgb, var(--comp) 8%, transparent);
+  background: var(--danger-hover-bg);
   border-color: var(--comp);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--comp) 20%, transparent);
+  box-shadow: var(--danger-hover-shadow);
 }
 
 /* ============================================================
@@ -188,8 +188,8 @@ html.a11y-font-smoothing body {
 
 /* ---- Enhanced focus indicators ---- */
 html.a11y-focus-indicators :focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
+  outline: var(--focus-ring-width-lg) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset-lg);
 }
 
 /* ---- Reduce motion ---- */

@@ -53,6 +53,7 @@ Hyperkit expects to live as a sibling of every app that consumes it:
 │   │   ├── content.css      ← markdown body rendering (headings, code, tables, admonitions)
 │   │   ├── cards.css        ← card grids, dashboard, doc lists, pin cards, pulse rows
 │   │   ├── features.css     ← TOC, tabs, search, tag filters, app-shelf
+│   │   ├── viz.css          ← data-visualization primitives (hv-viz-* : donut, bars, stacked, legend, line, sparkline)
 │   │   └── accessibility.css ← a11y preference overrides
 │   ├── layouts/
 │   │   └── cyberdeck/
@@ -64,6 +65,7 @@ Hyperkit expects to live as a sibling of every app that consumes it:
 │   │   ├── greeting.js      ← window.HvGreeting
 │   │   ├── cursor-trail.js  ← window.HvCursorTrail
 │   │   └── toast.js         ← window.HvToast + window.__hypervisorToast
+│   │   └── viz.js           ← window.HvViz (donut/bars/stacked/legend/line/sparkline renderers)
 │   ├── python/
 │   │   ├── hyper_logging.py ← setup_logger() for all ecosystem apps
 │   │   └── chips.py         ← render_chip() for semantic chip HTML
@@ -99,9 +101,10 @@ Hyperkit's CSS cascade is the single source of truth for the visual language acr
 5. content.css        — markdown body rendering (headings, code, tables, blockquotes)
 6. cards.css          — card grids, dock, dashboard, doc lists, pin cards
 7. features.css       — TOC, tabs, search, tag filters, app-shelf
-8. accessibility.css  — a11y overrides
-9. layouts/*/         — layout pack (topbar, nav, page grid, footer, drawer)
-10. app-local css/    — per-app overrides (numbered, sorted)
+8. viz.css            — data-visualization primitives (hv-viz-*)
+9. accessibility.css  — a11y overrides
+10. layouts/*/        — layout pack (topbar, nav, page grid, footer, drawer)
+11. app-local css/    — per-app overrides (numbered, sorted)
 ```
 
 **When to edit where:**
@@ -135,6 +138,7 @@ Six self-contained modules, each exporting one object to `window`:
 | `greeting.js` | `window.HvGreeting` | Rotating kaomoji/text welcome-screen greeting |
 | `cursor-trail.js` | `window.HvCursorTrail` | WebGL2 ping-pong cursor smear effect |
 | `toast.js` | `window.HvToast` (+ legacy `window.__hypervisorToast` alias) | Variant-aware toast notifications |
+| `viz.js` | `window.HvViz` | Data-visualization renderers: donut, bars, stacked bar, legend, line chart, sparkline (SVG + canvas, token-themed) |
 
 Every module is idempotent (`if (window.HvX) return;` guard) and self-wrapped in strict-mode IIFEs — safe to load exactly once, ahead of every other script.
 

@@ -103,7 +103,7 @@
   height: 14px;
   color: var(--text-muted);
   flex-shrink: 0;
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
 }
 .dock-label {
   font-size: var(--fs-sm);
@@ -111,7 +111,7 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-bright);
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
 }
 .dock-count {
   font-size: var(--fs-caption);
@@ -623,9 +623,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   text-decoration: none;
-  transition: transform var(--motion-base) var(--ease),
-              border-color var(--motion-base) var(--ease),
-              box-shadow var(--motion-medium) var(--ease);
+  transition: var(--transition-lift);
 }
 .work-card:hover {
   transform: translateY(-1px);
@@ -665,7 +663,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   font-size: var(--fs-body);
   font-weight: 700;
   line-height: 1.4;
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
 }
 .work-card-desc {
   color: var(--text-muted);
@@ -713,9 +711,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   text-decoration: none;
-  transition: transform var(--motion-base) var(--ease),
-              border-color var(--motion-base) var(--ease),
-              box-shadow var(--motion-medium) var(--ease);
+  transition: var(--transition-lift);
 }
 .idea-card:hover {
   transform: translateY(-1px);
@@ -730,7 +726,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   font-size: var(--fs-body);
   font-weight: 500;
   line-height: 1.4;
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
 }
 .idea-card-desc {
   color: var(--text-muted);
@@ -906,7 +902,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
 }
 .pin-row:hover .pin-row-title { color: var(--accent); }
 .pin-row-snippet {
@@ -953,9 +949,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   text-decoration: none;
-  transition: transform var(--motion-base) var(--ease),
-              border-color var(--motion-base) var(--ease),
-              box-shadow var(--motion-medium) var(--ease);
+  transition: var(--transition-lift);
 }
 .pin-card:hover {
   transform: translateY(-1px);
@@ -970,7 +964,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   font-size: var(--fs-body);
   font-weight: 700;
   line-height: 1.4;
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
 }
 .pin-card-desc {
   color: var(--text-muted);
@@ -1119,7 +1113,7 @@ h2 + .doc-list { border-top: none; }
   color: var(--text-bright);
   text-decoration: none;
   font-size: var(--fs-body);
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1210,10 +1204,10 @@ h2 + .doc-list { border-top: none; }
 
 /* Status badges (extend .label-badge) */
 .status-in-progress { color: var(--accent); border-color: var(--accent); }
-.status-in-discussion { color: var(--warm); border-color: var(--warm); }
-.status-requirements-created { color: var(--cool); border-color: var(--cool); }
-.recent-badge-new { color: var(--cool); border-color: var(--cool); }
-.recent-badge-updated { color: var(--warm); border-color: var(--warm); }
+.status-in-discussion { color: var(--warning); border-color: var(--warning); }
+.status-requirements-created { color: var(--info); border-color: var(--info); }
+.recent-badge-new { color: var(--info); border-color: var(--info); }
+.recent-badge-updated { color: var(--warning); border-color: var(--warning); }
 
 /* Group headers in backlog */
 .doc-list li.group-header {
@@ -1322,7 +1316,7 @@ h2 + .doc-list { border-top: none; }
   font-weight: 700;
   color: var(--text-bright);
   flex-shrink: 0;
-  transition: color var(--motion-fast) var(--ease);
+  transition: var(--transition-color);
 }
 .skill-rowhead:hover .skill-row-name { color: var(--accent); }
 
