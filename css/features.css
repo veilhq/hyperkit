@@ -402,19 +402,24 @@
   border-bottom: var(--border-hair) solid var(--border);
   background: transparent;
 }
-.todo-filter-input,
-.todo-filter-select {
-  font-family: var(--font);
+.todo-filter-input {
+  /* Compact toolbar-filter text field. Base silhouette from .form-input; these
+     are the muted/transparent deltas and tighter padding (no chevron gap). */
   font-size: var(--fs-label);
   color: var(--text-muted);
-  background: transparent;
-  border: var(--border-hair) solid var(--border);
-  border-radius: var(--radius);
+  background-color: transparent;
+  border-color: var(--border);
   padding: var(--space-1) var(--space-2);
-  outline: none;
-  transition: border-color var(--motion-fast) var(--ease),
-              color var(--motion-fast) var(--ease),
-              background var(--motion-fast) var(--ease);
+}
+.todo-filter-select {
+  /* Compact toolbar-filter variant of .form-select: muted, transparent, tighter
+     padding. Base silhouette + chevron come from the shared primitive; the
+     right padding clears the chevron. */
+  font-size: var(--fs-label);
+  color: var(--text-muted);
+  background-color: transparent;
+  border-color: var(--border);
+  padding: var(--space-1) var(--space-5) var(--space-1) var(--space-2);
 }
 .todo-filter-input:hover,
 .todo-filter-select:hover {
@@ -615,21 +620,6 @@ ul.todo-list li.todo-hidden { display: none; }
 /* ---- 06-pinboard.css ---- */
 
 /* ---- Pinboard page ---- */
-.pinboard-page h1 {
-  color: var(--text-bright);
-  text-transform: uppercase;
-  font-size: var(--fs-h1);
-  letter-spacing: 0.05em;
-  margin-bottom: var(--space-2);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-.pinboard-page h1 .section-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--warm);
-}
 .pinboard-intro {
   color: var(--text-muted);
   font-size: var(--fs-body);
@@ -882,52 +872,92 @@ ul.todo-list li.todo-hidden { display: none; }
 
 /* ===== Table of Contents ===== */
 
-.toc-sidebar {
+/* ===== Floating TOC — a compact, collapsible card pinned top-right =====
+   Modeled on the Hyperagent task panel: always-present bordered card in the
+   corner (not a modal overlay), reserves no layout width, click the header to
+   collapse/expand. Sits below the topbar; capped height with its own scroll. */
+.toc-float {
   position: fixed;
-  top: 0;
-  left: var(--site-nav-width, 0px);
-  bottom: 0;
-  width: 220px;
-  z-index: 40;
-  background: var(--bg);
-  border-right: var(--border-hair) solid var(--border);
-  transform: translateX(-100%);
-  opacity: 0;
-  transition: transform var(--motion-fast) var(--ease), opacity var(--motion-fast) var(--ease);
-  pointer-events: none;
+  /* Sit inside the doc surface's top area, not in the negative-space gap above
+     it. The surface starts at topbar + the doc top pad (50px); nudge the card
+     just inside that with space-4 so it reads as resting on the surface. */
+  top: calc(var(--topbar-height) + 50px + var(--space-4));
+  right: var(--space-5);
+  width: 260px;
+  max-height: 60vh;
+  z-index: calc(var(--z-topbar, 100) - 10);
+  background: var(--bg-card);
+  border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-panel, 0 6px 24px rgba(0,0,0,0.4));
   display: flex;
   flex-direction: column;
-  padding-top: 3.25rem;
+  overflow: hidden;
+  /* revealed by toc.js when the doc has a TOC */
+  transform: translateX(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--motion-medium) var(--ease), opacity var(--motion-medium) var(--ease);
 }
-.toc-sidebar.visible {
+.toc-float.visible {
   transform: translateX(0);
-  opacity: 1;
+  /* Idle: dimmed so it recedes and doesn't block content while reading. */
+  opacity: 0.35;
   pointer-events: auto;
 }
+/* Focused (hover or keyboard focus within): come forward to full opacity. */
+.toc-float.visible:hover,
+.toc-float.visible:focus-within {
+  opacity: 1;
+}
 
-/* ---- TOC header ---- */
-.toc-sidebar .panel-header {
-  padding: var(--space-3);
-  font-size: 0.65rem;
+/* Header — click to collapse/expand (chevron rotates) */
+.toc-float-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-hair) solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+.toc-float-head .panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-caption);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
-  gap: var(--space-2);
-  flex-shrink: 0;
-  border-bottom: var(--border-hair) solid var(--border);
 }
+.toc-float-head:hover .panel-header { color: var(--accent); }
+.toc-float-head::after {
+  content: '\25B4';
+  font-size: var(--fs-caption);
+  color: var(--text-dim);
+  transition: transform var(--motion-base) var(--ease);
+}
+.toc-float.collapsed .toc-float-head::after { transform: rotate(180deg); }
 .toc-icon {
   width: 13px;
   height: 13px;
   color: var(--text-muted);
 }
 
-/* ---- TOC body (scrollable) ---- */
+/* ---- TOC body (scrollable; collapses with the card) ---- */
 .toc-body {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-2) 0;
+  max-height: 50vh;
+  transition: max-height var(--motion-medium) var(--ease), padding var(--motion-medium) var(--ease);
+}
+.toc-float.collapsed .toc-body {
+  max-height: 0;
+  padding: 0;
+  overflow: hidden;
 }
 .toc-body ul {
   list-style: none;
@@ -983,32 +1013,12 @@ ul.todo-list li.todo-hidden { display: none; }
 .toc-body::-webkit-scrollbar-track { background: transparent; }
 .toc-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius); }
 
-/* ---- Page offset when TOC visible ---- */
-.page.has-toc {
-  padding-left: calc(var(--site-nav-width, 0px) + 220px + 5rem);
-}
-
-/* ---- Hide on narrow screens ---- */
-@media (max-width: 1199px) {
-  .toc-sidebar,
-  .toc-sidebar.visible {
-    display: none;
-  }
-  .page.has-toc {
-    padding-left: calc(5rem + var(--site-nav-width, 0px));
-  }
-}
-
-
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .toc-sidebar {
-    transition: none;
-  }
+  .toc-float, .toc-body { transition: none; }
 }
-.a11y-reduce-motion .toc-sidebar {
-  transition: none;
-}
+.a11y-reduce-motion .toc-float,
+.a11y-reduce-motion .toc-body { transition: none; }
 
 /* ===== Related Docs (inline section, RAG-powered) ===== */
 /* Styling handled by .backlinks-section reuse — no additional rules needed. */
@@ -1231,9 +1241,14 @@ ul.todo-list li.todo-hidden { display: none; }
 .doc-list li {
   position: relative;
 }
+/* Dir-item rows (drawer model) also host the absolute-positioned delete button
+   and reveal it on hover, same as the legacy doc-list rows. */
+.dir-item { position: relative; }
 
 .doc-list li:hover .external-delete-btn,
-.doc-list li:hover .doc-delete-btn {
+.doc-list li:hover .doc-delete-btn,
+.dir-item:hover .external-delete-btn,
+.dir-item:hover .doc-delete-btn {
   opacity: 1;
 }
 
@@ -1632,10 +1647,10 @@ ul.todo-list li.todo-hidden { display: none; }
   color: var(--text-dim);
 }
 .cmd-palette-footer kbd {
-  font-family: var(--font);
+  /* Denser footer: smaller size, dimmer/lighter frame than the base kbd. */
   font-size: var(--fs-micro);
   padding: var(--space-0-1) var(--space-0-3);
-  border: var(--border-hair) solid var(--border);
+  border-color: var(--border);
   color: var(--text-muted);
 }
 
@@ -2256,16 +2271,9 @@ ul.todo-list li.todo-hidden { display: none; }
   border-bottom: none;
 }
 .shortcut-row kbd {
-  display: inline-block;
-  font-family: var(--font);
-  font-size: var(--fs-caption);
-  color: var(--text-bright);
-  background: var(--bg-elevated);
-  border: var(--border-hair) solid var(--border-strong);
-  padding: 0.15rem var(--space-0-4);
+  /* Aligned hint column: fixed min width so keys line up. Rest inherits the
+     shared kbd primitive. */
   min-width: 1.4rem;
-  text-align: center;
-  letter-spacing: 0.04em;
 }
 .shortcut-row span {
   color: var(--text-muted);

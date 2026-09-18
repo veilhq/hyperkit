@@ -305,6 +305,103 @@
   max-width: 1480px;
 }
 
+/* ---- Directory-index pages: the content area IS the drawer ----
+   On directory pages the recessed .dir-surface runs edge-to-edge horizontally
+   (flush past the standard content padding, up to the nav rail) and fills down
+   to the bottom of the viewport so the drawer bleeds off the bottom edge. The
+   page becomes a flex column so the surface can grow to fill the space; the
+   header sits above it. Applied by the router (page-dir-index) for pageType
+   "index". */
+.page-dir-index {
+  /* Generous negative space above the header. Tunable via --dir-top-pad; the
+     surface min-height below subtracts the same value so short-content drawers
+     still land near the bottom rather than overshooting by this amount. */
+  --dir-top-pad: 50px;
+  padding: var(--dir-top-pad) 0 0;
+  padding-left: var(--site-nav-width, 0px);
+  /* Fill from just below the sticky topbar to the window bottom. Using
+     min-height (not height) still lets tall content grow the page and scroll,
+     but guarantees short-content pages reach the bottom edge so the drawer
+     doesn't stop short with only 1-2 items. */
+  min-height: calc(100vh - var(--topbar-height));
+  display: flex;
+  flex-direction: column;
+}
+/* Header above the drawer keeps a normal inset; the surface goes full width. */
+.page-dir-index .dir-head { margin: 0 var(--space-5) var(--space-5); flex-shrink: 0; }
+
+/* ---- Document pages: the reading content sits inside a recessed surface ----
+   Same drawer language as directories, adapted for long-form: edge-to-edge
+   horizontally (the floating TOC reserves no width), the whole document
+   (header strip + body) inside one recessed .markdown-body surface that grows
+   with content and is open at the bottom. Applied by the router
+   (page-doc-surface) for pageType "doc". */
+.page-doc-surface {
+  --doc-top-pad: 50px;
+  padding: var(--doc-top-pad) 0 0;
+  padding-left: var(--site-nav-width, 0px);
+  min-height: calc(100vh - var(--topbar-height));
+  display: flex;
+  flex-direction: column;
+}
+.page-doc-surface .markdown-body {
+  /* top + side edges frame the surface; the bottom is open and bleeds off */
+  border: var(--border-hair) solid var(--border-strong);
+  border-bottom: none;
+  border-radius: var(--radius-dir-surface) var(--radius-dir-surface) 0 0;
+  background: var(--bg-raised);
+  box-shadow:
+    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
+    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: var(--space-6);
+  flex: 1;
+  /* fill the first viewport for short docs; grow beyond it for long ones */
+  min-height: calc(100vh - var(--topbar-height) - var(--doc-top-pad, 50px) - 3rem);
+  animation: dirSurfaceIn var(--surface-dur, 0.55s) cubic-bezier(0.16, 0.84, 0.28, 1) both;
+}
+
+/* ---- Utility pages: the tool body sits inside a full-width raised surface ----
+   Same edge-to-edge fill as directory/document pages: the page becomes a flex
+   column with no horizontal content padding, the header strip keeps a normal
+   inset, and the .utility-surface spans the content area and grows to the
+   bottom. The standalone .utility-surface (in cards.css) is a closed panel for
+   any out-of-shell use; inside the shell it adopts the open-bottom drawer form
+   so it reads like the rest of the site. Applied by the router (page-utility)
+   for pageType "utility". */
+.page-utility {
+  --util-top-pad: 50px;
+  padding: var(--util-top-pad) 0 0;
+  padding-left: var(--site-nav-width, 0px);
+  min-height: calc(100vh - var(--topbar-height));
+  display: flex;
+  flex-direction: column;
+}
+/* The scaffold wrapper stretches so its surface child can fill the column. */
+.page-utility .utility-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+/* Header strip keeps a normal inset; the surface goes full width. */
+.page-utility .utility-head {
+  margin: 0 var(--space-5) var(--space-4);
+  flex-shrink: 0;
+}
+/* Surface spans edge-to-edge, opens at the bottom, and fills the column. */
+.page-utility .utility-surface {
+  border-bottom: none;
+  border-radius: var(--radius-dir-surface) var(--radius-dir-surface) 0 0;
+  box-shadow:
+    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
+    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  flex: 1;
+  min-height: calc(100vh - var(--topbar-height) - var(--util-top-pad, 50px) - 5rem);
+}
+
 /* ---- Footer ---- */
 .page-footer {
   position: fixed;
@@ -595,6 +692,9 @@
 }
 .nav-tab-bar .nav-tab {
   flex: 1;
+  /* No corner notch on these — they're a segmented control (rounded rects),
+     not document tabs. Override the base .nav-tab clip. */
+  clip-path: none;
   padding: var(--space-2) var(--space-2);
   margin: 0 var(--space-0-2);
   font-family: var(--font);
@@ -919,27 +1019,16 @@
   margin-bottom: var(--space-2);
 }
 .preset-select {
-  width: 100%;
+  /* Compact, bold, uppercase variant of .form-select. Base silhouette + chevron
+     + option colors come from the shared primitive; these are the deltas. */
   height: 28px;
   padding: 0 var(--space-4) 0 var(--space-2);
-  border: var(--border-hair) solid var(--border);
-  border-radius: var(--radius);
-  background: transparent;
-  font-family: var(--font);
+  background-color: transparent;
+  border-color: var(--border);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--text-muted);
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  background-size: 8px 5px;
-  transition: color var(--motion-fast) var(--ease),
-              border-color var(--motion-fast) var(--ease),
-              box-shadow var(--motion-fast) var(--ease);
 }
 .preset-select:hover,
 .preset-select:focus {

@@ -14,6 +14,10 @@
   --bg-card:       #0a0a0e;
   --bg-card-hover: #111115;
   --bg-elevated:   #0d0d11;
+  /* Raised panel fill. Sits clear of the near-black bg cluster (L* ~4.8 vs
+     bg-card L* 2.8, ~2 above the nav rail) so a content surface reads as a
+     distinct layer above both the page and the nav rail. */
+  --bg-raised:     #101014;
   --border:        #1a1a22;
   --border-strong: #282832;
   --text:          #c0c0c0;
@@ -27,6 +31,13 @@
   --warm:         #ffb000;
   --comp:           #ff3333;
   --cool:          #00cccc;
+
+  /* Brand colors — external-service identity hues used by tool/activity
+     indicators (AWS orange, Azure blue). Kept literal because they are brand
+     constants, not palette-derived, but tokenized so call sites reference a
+     name rather than a raw hex. */
+  --tool-aws:     #ff9900;
+  --tool-devops:  #0078d4;
 
   /* Token vocabulary convention:
      - Palette-position names (--accent, --warm, --cool, --comp) are the base
@@ -129,6 +140,11 @@
 
   /* Border radius — ecosystem toggle. Set to 0 for pure brutalist. */
   --radius: 4px;
+  /* Directory drawer surface — a larger, deliberately-rounder radius than the
+     ecosystem default. Keyed to --radius (calc multiple) so it tracks the
+     brutalist toggle: --radius 0 collapses this to 0 too. Tune the drawer
+     roundness here rather than at the .dir-surface rule. */
+  --radius-dir-surface: calc(var(--radius) * 5);
 
   /* Chip primitives — silhouette for all chip variants */
   --chip-height:         1.4;       /* line-height unit; sizes via padding */

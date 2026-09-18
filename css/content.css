@@ -294,6 +294,18 @@
   display: none;
 }
 
+/* Narrow screens: the 3-column strip (chips | tags | dates) squeezes; collapse
+   to a single column so each cluster gets its own row. The tag cap (+N) is the
+   primary crowding fix; this is the belt-and-suspenders reflow for very narrow. */
+@media (max-width: 720px) {
+  .doc-header-strip {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: var(--space-3);
+  }
+  .doc-header-dates { flex-wrap: wrap; }
+}
+
 /* Left cluster: WI + status chips */
 .doc-header-chips {
   display: flex;
@@ -353,6 +365,14 @@
   border-color: var(--border-strong);
 }
 .doc-header-tag-project {}
+/* +N overflow chip — shown when the visible-tag cap hides some; dashed and dim
+   to read as a count indicator, not a real tag. title lists the hidden tags. */
+.doc-header-tag-more {
+  color: var(--text-dim);
+  border-style: dashed;
+  cursor: default;
+  font-variant-numeric: tabular-nums;
+}
 
 /* Right: dates */
 .doc-header-dates {

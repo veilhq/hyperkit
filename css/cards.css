@@ -250,6 +250,207 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .dir-header + .home-dock { margin-top: var(--space-3); }
 .dir-header + .content-section { margin-top: var(--space-3); }
 
+/* ---- Directory as physical container (drawer / recessed surface) ----
+   A directory page reads as a raised panel standing above the page: one
+   continuous surface that runs the full content width, extends to the bottom of
+   the pane, and is open at the bottom (no bottom edge, top corners rounded) so
+   it bleeds off-screen rather than closing into a box. Files rest inside as
+   raised objects (.dir-item). The header sits above this surface, outside it. */
+
+/* Header strip above the drawer: title-over-subtitle stack on the left,
+   directory stats aligned to the right, on one line. */
+.dir-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  animation: fadeSlideIn var(--motion-slow) var(--ease) both;
+}
+.dir-headings { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.dir-title-row { display: flex; align-items: center; gap: var(--space-3); }
+.dir-title-icon { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
+/* Scoped to out-specify .markdown-body h1 (which sets --fs-h1 and an accent
+   underline); the directory title is a compact strip heading, not a doc H1. */
+.markdown-body .dir-title,
+.dir-title {
+  font-size: var(--fs-hero);
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 0;
+  border: none;
+  border-bottom: none;
+  text-shadow: 0 0 14px var(--accent-glow);
+}
+.dir-desc {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dir-head .dir-stats { display: flex; gap: var(--space-5); margin-left: auto; flex-shrink: 0; align-self: flex-end; }
+
+.dir-surface {
+  /* top + side edges frame the drawer; the bottom is open and bleeds off */
+  border: var(--border-hair) solid var(--border-strong);
+  border-bottom: none;
+  /* larger, drawer-specific radius from its own token; --radius stays the
+     ecosystem default everywhere else */
+  border-radius: var(--radius-dir-surface) var(--radius-dir-surface) 0 0;
+  /* raised panel: flat fill clear of the page and nav rail so the surface
+     reads as a distinct layer standing above them */
+  background: var(--bg-raised);
+  /* outward drop shadow (top + sides), no bottom band so the surface still
+     reads as continuing past the open bottom edge; a raised panel casts its
+     shadow outward, not an inset recess */
+  box-shadow:
+    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
+    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: var(--space-6);
+  /* the container slides up fast then eases to a stop, as a beat before its
+     contents arrive; a strong decelerate curve sells the upward settle */
+  animation: dirSurfaceIn var(--motion-slow) cubic-bezier(0.16, 0.84, 0.28, 1) both;
+}
+
+/* Fill the pane down to the bottom edge when the layout supplies a flex column
+   (the .page-dir-index modifier). Harmless as a standalone block otherwise. */
+/* Fill to the window bottom. flex:1 stretches it when the page column has
+   distributable height (tall content); the min-height floor guarantees it
+   reaches the bottom edge on short-content pages (1-2 items) where flex-grow
+   alone leaves the surface at content height. The floor subtracts the topbar,
+   the page top padding, and an allowance for the header block above it. */
+.page-dir-index .dir-surface {
+  flex: 1;
+  /* subtract the topbar, the top negative-space padding (--dir-top-pad, set on
+     .page-dir-index), and a ~5rem allowance for the header block, so a short
+     drawer still lands near the window bottom */
+  min-height: calc(100vh - var(--topbar-height) - var(--dir-top-pad, 200px) - 5rem);
+}
+
+@keyframes dirSurfaceIn {
+  from { opacity: 0; transform: translateY(120px); }
+  25%  { opacity: 1; transform: translateY(72px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Files as raised objects resting inside the drawer. Slight raise at rest
+   (elevated surface + soft shadow); hover lifts further with an accent glow.
+   Asymmetric timing: fast lift on, slower settle off. Staggered entrance keyed
+   off --i so rows cascade in after the surface has landed. */
+.dir-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-elevated);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  /* settle-off (default) is the slower of the asymmetric pair */
+  transition:
+    transform var(--motion-medium) var(--ease),
+    border-color var(--motion-medium) var(--ease),
+    box-shadow var(--motion-medium) var(--ease),
+    background var(--motion-medium) var(--ease);
+  animation: fadeSlideIn var(--motion-slow) var(--ease) both;
+  animation-delay: calc(var(--dir-content-start, 0.58s) + var(--i, 0) * 0.06s);
+}
+.dir-items { display: flex; flex-direction: column; gap: var(--space-2); }
+.dir-item:hover {
+  transform: translateY(var(--state-hover-lift-lg));
+  background: var(--bg-card-hover);
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-hover);
+  /* fast lift-on */
+  transition:
+    transform var(--motion-fast) var(--ease),
+    border-color var(--motion-fast) var(--ease),
+    box-shadow var(--motion-fast) var(--ease),
+    background var(--motion-fast) var(--ease);
+}
+.dir-item a {
+  color: var(--text-bright);
+  text-decoration: none;
+  font-size: var(--fs-body);
+  border: none !important;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.dir-item:hover a,
+.dir-item:hover .doc-icon { color: var(--accent); }
+.dir-item a .txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dir-item .doc-date {
+  font-size: var(--fs-label);
+  color: var(--text-dim);
+  white-space: nowrap;
+  text-align: right;
+  letter-spacing: 0.04em;
+}
+.dir-item .doc-row-snippet {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: var(--fs-h5-6);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dir-item .doc-row-tags { grid-column: 1 / -1; display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.dir-item-recent { position: relative; }
+.dir-item-recent::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--comp);
+}
+
+/* Frameless subsection inside the drawer — used by subdir listings that keep
+   a linked section header + .doc-list. No border/background/animation (that
+   was the bordered .content-section card the drawer replaces); carries over
+   the doc-list grid columns and filter padding the old .documents-section
+   supplied, so the rows keep their date/tag columns. */
+.dir-subsection { margin-bottom: var(--space-5); }
+.dir-subsection:last-child { margin-bottom: 0; }
+.dir-subsection > h2 { margin-bottom: var(--space-3); }
+.dir-subsection .doc-list li { grid-template-columns: 2fr 2.5fr 5.5rem 8.5rem; }
+
+/* Zones inside the drawer — subdirectories ("Folders") sit at the top, the
+   directory's own docs ("Files") below. Each zone is prefaced by a light
+   labeled ridge (icon + label + hairline), not a bordered card or an <h2>. */
+.dir-zone { margin-bottom: var(--space-6); }
+.dir-zone:last-child { margin-bottom: 0; }
+.dir-zone-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: var(--space-3);
+}
+.dir-zone-label .dir-zone-icon { width: 13px; height: 13px; }
+.dir-zone-label::after {
+  content: '';
+  flex: 1;
+  height: var(--border-hair);
+  background: var(--border);
+  margin-left: var(--space-2);
+}
+
 /* ---- KPI / Hero ASCII ---- */
 .hero-ascii {
   color: var(--text-bright);
@@ -1123,7 +1324,8 @@ h2 + .doc-list { border-top: none; }
 .doc-list li:hover a { color: var(--accent); }
 .doc-list li:hover .doc-icon { color: var(--accent); }
 .doc-list a:hover { color: var(--accent); text-decoration: none; border: none !important; }
-.doc-list .doc-path {
+.doc-list .doc-path,
+.dir-item .doc-path {
   font-size: var(--fs-h5-6, 0.8rem);
   color: var(--text-dim);
   white-space: nowrap;
@@ -1131,6 +1333,8 @@ h2 + .doc-list { border-top: none; }
   text-overflow: ellipsis;
   text-align: left;
 }
+/* On dir-item rows the path is a subordinate full-width line, like the snippet */
+.dir-item .doc-path { grid-column: 1 / -1; }
 .doc-list .doc-date {
   font-size: var(--fs-label);
   color: var(--text-dim);
@@ -1194,6 +1398,7 @@ h2 + .doc-list { border-top: none; }
 .documents-section { padding-left: 0; padding-right: var(--space-5); }
 .documents-section > h2 { padding-left: var(--space-5); }
 .documents-section .todo-filters { padding-left: var(--space-5); }
+.documents-section .preview-masonry { padding-left: var(--space-5); }
 .documents-section .doc-list li { grid-template-columns: 2fr 2.5fr 5.5rem 8.5rem; }
 .recent-section h2 { color: var(--comp); }
 .home-section-recent .pulse-day-header { display: none; }
@@ -1265,9 +1470,12 @@ h2 + .doc-list { border-top: none; }
 
 /* Multi-column masonry: each column packs independently, so expanding one
    row only reflows rows below it in the same column — never the other column.
-   (Native grid masonry is not yet shippable; multicol is the zero-JS path.) */
+   (Native grid masonry is not yet shippable; multicol is the zero-JS path.)
+   Width-driven columns: the browser fits as many ~340px columns as the
+   container allows, so the list fills a wide surface with 3+ columns and
+   collapses to 1 on a narrow one — no fixed count, no width media query. */
 .skill-list {
-  column-count: 2;
+  columns: 340px;
   column-gap: var(--space-3);
 }
 
@@ -1282,10 +1490,8 @@ h2 + .doc-list { border-top: none; }
 }
 .skill-row[open] { border-color: var(--accent-border, var(--border)); }
 
-/* Collapse to a single column on narrow viewports. */
-@media (max-width: 900px) {
-  .skill-list { column-count: 1; }
-}
+/* Column collapse is handled by the width-driven `columns: 340px` above —
+   the browser drops to a single column automatically on a narrow container. */
 
 /* Summary = the visible row line */
 .skill-rowhead {
@@ -1444,6 +1650,40 @@ h2 + .doc-list { border-top: none; }
   align-items: center;
   gap: var(--space-2);
 }
+
+/* Folders zone: one folder per row, compact. Reads as a folder (accent folder
+   icon + name + doc count + an "enter" chevron on the right), distinct from the
+   leaf doc rows below (which carry a date, not a chevron). No spine, no accent
+   rail — a tight horizontal row with the same raised-object hover as .dir-item. */
+.dir-zone .dir-dashboard { grid-template-columns: 1fr; gap: var(--space-2); }
+.dir-zone .dir-dashboard-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  overflow: visible;
+}
+.dir-zone .dir-dashboard-card::after { content: none; }  /* no accent rail */
+/* folder icon + name inline; folder icon stays accent to signal "folder" */
+.dir-zone .dir-card-head { flex-direction: row; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+.dir-zone .dir-card-icon { width: 16px; height: 16px; color: var(--accent); }
+.dir-zone .dir-dashboard-card .card-name { margin-bottom: 0; font-size: var(--fs-body); }
+/* hide the doc-preview and description in the compact row — the count carries it */
+.dir-zone .dir-dashboard-card > .card-desc,
+.dir-zone .dir-dashboard-card > .dir-card-preview { display: none; }
+/* count pinned to the right, just before the chevron */
+.dir-zone .dir-dashboard-card > .card-count { margin-left: auto; font-size: var(--fs-label); }
+/* the "enter folder" chevron affordance */
+.dir-zone .dir-dashboard-card::before {
+  content: '\203A';  /* single right angle quote — chevron */
+  order: 99;
+  color: var(--text-dim);
+  font-size: var(--fs-body);
+  transition: transform var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease);
+}
+.dir-zone .dir-dashboard-card:hover::before { color: var(--accent); transform: translateX(3px); }
+.dir-zone .dir-dashboard-card:hover .dir-card-icon { color: var(--accent); }
 .dir-card-icon {
   width: 18px;
   height: 18px;
@@ -1483,4 +1723,424 @@ h2 + .doc-list { border-top: none; }
 .dir-dashboard-card .card-count {
   margin-top: auto;
   padding-top: var(--space-2);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Preview cards (.preview-card) — visual gallery with live thumbnails
+   ───────────────────────────────────────────────────────────────────────
+   A masonry of cards whose media area is a bordered "screen" containing a
+   scaled, inert <iframe> of the target page (see hv-preview.js for the lazy
+   IntersectionObserver loader), over a quiet glyph poster shown until it
+   paints. Built for the prototypes gallery: standalone HTML apps shown as
+   framed live thumbnails instead of a flat filename list.
+
+   Containment is structural, not cosmetic: the iframe is a child of the
+   .preview-card-frame box, which is overflow:hidden. Whatever the iframe
+   renders at whatever size is clipped to that box — it can never overlap the
+   card title/description. The scale transform only tunes how much of the page
+   is visible; the clip is what guarantees containment.
+
+   Masonry uses the same zero-JS multicol pattern as .skill-list: columns +
+   break-inside:avoid. Native grid masonry isn't shippable yet — multicol is
+   the zero-dependency path.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.preview-masonry {
+  column-count: 3;
+  column-gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-6);
+}
+@media (max-width: 1100px) {
+  .preview-masonry { column-count: 2; }
+}
+@media (max-width: 720px) {
+  .preview-masonry { column-count: 1; }
+}
+
+.preview-card {
+  display: block;
+  break-inside: avoid;             /* never split a card across columns */
+  margin-bottom: var(--space-3);   /* multicol uses margin, not gap */
+  background: var(--bg-card);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text);
+  position: relative;
+  transition: transform var(--motion-slow) var(--ease),
+              border-color var(--motion-slow) var(--ease),
+              box-shadow var(--motion-slow) var(--ease),
+              background var(--motion-slow) var(--ease);
+  opacity: 0;
+  animation: cardIn var(--motion-slow) var(--ease) both;
+}
+.preview-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-hover);
+  background: var(--bg-card-hover);
+  /* Asymmetric hover: mouse-ON is slower (0.5s, intentionally off the motion
+     scale) for a languid power-on; mouse-OFF uses the base rule's --motion-slow
+     (0.3s), which already felt right. */
+  transition: transform 0.5s var(--ease),
+              border-color 0.5s var(--ease),
+              box-shadow 0.5s var(--ease),
+              background 0.5s var(--ease);
+}
+/* Override .markdown-body a (0,1,1), which paints a dashed accent border-bottom
+   on links at rest and a solid accent one on hover. This card anchor is not a
+   text link — keep its own uniform border. Scoped selectors (0,3,1 / 0,3,1)
+   win on specificity. */
+.markdown-body a.preview-card {
+  border-bottom: var(--border-hair) solid var(--border);
+}
+.markdown-body a.preview-card:hover {
+  border-bottom-color: var(--border-strong);
+}
+.preview-card:hover .preview-card-title { color: var(--accent); }
+
+/* ---- Media frame (the live thumbnail) ---- */
+.preview-card-media {
+  display: block;                  /* span defaults to inline — must be block
+                                      for width/height/overflow to apply */
+  position: relative;
+  width: 100%;
+  height: clamp(150px, 18vw, 220px);
+  background:
+    radial-gradient(120% 100% at 0% 0%,
+      color-mix(in srgb, var(--accent) 14%, var(--bg-card)) 0%,
+      var(--bg-card) 60%),
+    var(--bg-card);
+  padding: var(--space-3);
+  overflow: hidden;
+}
+/* Bordered inner frame — the "screen". In-flow block filling the padded media
+   box, so it always has the media's inner size and can never collapse. */
+.preview-card-frame {
+  display: block;                  /* same inline->block fix as the media */
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  overflow: hidden;
+  transition: border-color var(--motion-slow) var(--ease),
+              box-shadow var(--motion-slow) var(--ease);
+}
+/* Hover "power-on": the screen frame lights up — accent border + soft inner/
+   outer glow — drawing the eye to the preview itself rather than a decorative
+   bar. The iframe brightens slightly so the screen reads as coming alive. */
+.preview-card:hover .preview-card-frame {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent-border),
+    0 0 12px -2px var(--accent-glow, var(--accent-border)),
+    inset 0 0 18px -6px var(--accent-glow, var(--accent-border));
+  transition: border-color 0.5s var(--ease),
+              box-shadow 0.5s var(--ease);
+}
+/* The iframe renders at a real desktop viewport (1280px logical width) and is
+   scaled down, then CLIPPED by the frame's overflow:hidden — so the thumbnail
+   shows the top-left region of a true full-size render rather than squishing
+   the whole page into a tiny box. Now that the frame has real dimensions (the
+   display:block fix), the clip works. transform-origin top-left anchors the
+   scaled render flush to the frame corner. */
+.preview-card-frame iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1280px;
+  height: 800px;
+  border: 0;
+  transform: scale(0.5);
+  transform-origin: top left;
+  pointer-events: none;            /* thumbnail is inert; the card is the link */
+  opacity: 0;
+  /* Idle = softly blurred (a dormant screen). Hover sharpens to blur(0) and
+     lifts brightness — the "focus in / power on" beat. */
+  filter: blur(4px);
+  transition: opacity var(--motion-slow) var(--ease),
+              filter var(--motion-slow) var(--ease);
+}
+.preview-card-frame.preview-loaded iframe { opacity: 1; }
+/* Hover: sharpen + brighten. Placed AFTER the base rule so its filter wins on
+   equal specificity (last-declared). */
+.preview-card:hover .preview-card-frame iframe {
+  filter: blur(0) brightness(1.08);
+  transition: filter 0.5s var(--ease);
+}
+
+/* Fallback glyph — centered, quiet, shown before the iframe paints. Once the
+   iframe loads, .preview-loaded fades it out. */
+.preview-card-glyph {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  color: var(--text-dim);
+  opacity: 0.5;
+  transition: opacity var(--motion-base) var(--ease);
+}
+.preview-card-glyph [data-lucide],
+.preview-card-glyph svg { width: 26px; height: 26px; }
+.preview-card-frame.preview-loaded .preview-card-glyph { opacity: 0; }
+
+/* ---- Body ---- */
+.preview-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+.preview-card-title {
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  color: var(--text-bright);
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  transition: var(--transition-color);
+}
+.preview-card-desc {
+  font-size: var(--fs-h5-6);
+  color: var(--text-muted);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Meta row: status badge + reference chip. Sits at the card bottom, above the
+   accent underline, separated by a hairline so the detail reads as a footer. */
+.preview-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: var(--border-hair) solid var(--border);
+}
+/* Reference chip (idea doc / WI link) — a bordered pill with an icon, not bare
+   text, so it carries the same weight as the status chip beside it. */
+.preview-card-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: var(--fs-micro);
+  color: var(--cool);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.1rem 0.4rem;
+  letter-spacing: 0.03em;
+  text-transform: lowercase;
+  transition: border-color var(--motion-fast) var(--ease),
+              color var(--motion-fast) var(--ease);
+}
+.preview-card-ref [data-lucide],
+.preview-card-ref svg { width: 11px; height: 11px; }
+.preview-card:hover .preview-card-ref { border-color: var(--accent-border); }
+/* Kept for back-compat with any bare-text refs; prefer .preview-card-ref. */
+.preview-card-idea {
+  font-size: var(--fs-micro);
+  color: var(--cool);
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+.preview-card-idea:hover { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Utility page scaffold (.utility-page / .utility-head / .utility-surface)
+   ───────────────────────────────────────────────────────────────────────
+   The shared page-level frame for the Hypervisor devtool utilities. Every
+   utility fragment is wrapped in this scaffold at the build step so the pages
+   read as members of the same family as directory/document pages, instead of
+   each inventing its own top-level layout and heading. Structure:
+     .utility-page
+       .utility-head   ( icon + title, optional description )
+       .utility-surface ( raised panel; the page body composes primitives )
+   The head mirrors the .dir-head strip idiom; the surface reuses the raised
+   --bg-raised fill + outward drop shadow shared with .dir-surface, so the
+   utility body rests on the same layer language as the rest of the site.
+   ═══════════════════════════════════════════════════════════════════════ */
+.utility-page {
+  display: flex;
+  flex-direction: column;
+  animation: fadeSlideIn var(--motion-slow) var(--ease) both;
+  /* Utility pages read on the wide raised surface with more room than the old
+     cramped column, so the small end of the type scale ran too small here.
+     Bump the sub-body steps ~1 notch WITHIN utility scope only (custom-property
+     override cascades to every var(--fs-*) in the subtree), leaving the shared
+     ecosystem scale in tokens.css untouched. Body and up are unchanged. */
+  --fs-micro:   0.62rem;
+  --fs-detail:  0.68rem;
+  --fs-caption: 0.72rem;
+  --fs-label:   0.78rem;
+  --fs-sm:      0.82rem;
+}
+
+/* Header strip above the surface — title-over-description, icon-led. */
+.utility-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-4);
+}
+.utility-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.utility-title-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.markdown-body .utility-title,
+.utility-title {
+  font-size: var(--fs-hero);
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin: 0;
+  padding: 0;
+  border: none;
+  text-shadow: 0 0 14px var(--accent-glow);
+}
+.utility-desc {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  margin: 0;
+}
+
+/* Raised panel the utility body sits inside — same fill + shadow as the
+   directory drawer, but closed on all four sides (a self-contained tool
+   surface, not an open-bottom drawer that bleeds off-screen). */
+.utility-surface {
+  background: var(--bg-raised);
+  border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius-dir-surface);
+  box-shadow:
+    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
+    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    0 8px 24px -14px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: var(--space-6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .utility-page { animation: none !important; }
+}
+html.a11y-reduce-motion .utility-page { animation: none !important; }
+
+/* ---- Utility body layout family ------------------------------------------
+   The shared inner-wrapper vocabulary for utility page bodies, replacing the
+   per-page bespoke wrappers (.pw-layout, .quiz-layout, .rx-layout, .dash, ...).
+   All three fill the raised surface's width; pick by the body's shape:
+     .utility-body        single-column flow (the default)
+     .utility-body-split  main content + fixed side rail (--util-aside width)
+     .utility-body-grid   auto-fill card grid (--util-min min column width)
+   The split/grid knobs are local custom properties with token defaults, so a
+   page tunes its rail width or card min inline without abandoning the
+   primitive — same parameterization pattern as .list-row's --row-gap.
+*/
+.utility-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--util-gap, var(--space-4));
+  width: 100%;
+  min-width: 0;
+}
+.utility-body-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--util-aside, 300px);
+  gap: var(--util-gap, var(--space-6));
+  align-items: start;
+  width: 100%;
+}
+.utility-body-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--util-min, 320px), 1fr));
+  gap: var(--util-gap, var(--space-3));
+  width: 100%;
+}
+/* Split collapses to a single column when the rail no longer fits. */
+@media (max-width: 900px) {
+  .utility-body-split { grid-template-columns: 1fr; }
+}
+
+/* ---- Dashboard primitives: KPI tile + tile grid + dashboard card ----------
+   The stat-tile + chart-card vocabulary shared by the ecosystem dashboards
+   (portal-dashboard, ado-dashboard). A .kpi-tile is a big-number stat block;
+   .kpi-grid auto-fits a row of them; .dashboard-card is an icon-titled surface
+   that holds a chart (HvViz donut/bars), a list, or grouped content. Generalized
+   from portal-dashboard's local .range-kpi/.range-card so both dashboards
+   compose one source of truth. Tunable min tile width via --kpi-min.
+*/
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--kpi-min, 200px), 1fr));
+  gap: var(--util-gap, var(--space-4));
+}
+.kpi-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--bg-card);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+}
+.kpi-tile-label {
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+.kpi-tile-value {
+  font-size: var(--fs-h2);
+  color: var(--text-bright);
+  line-height: 1.1;
+}
+.kpi-tile-sub {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+/* Warn variant — warm border + value for a threshold/attention state. */
+.kpi-tile-warn {
+  border-color: var(--warm);
+}
+.kpi-tile-warn .kpi-tile-value {
+  color: var(--warm);
+}
+
+.dashboard-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--bg-card);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+}
+.dashboard-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-4);
+  font-size: var(--fs-label);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+.dashboard-card-title i,
+.dashboard-card-title [data-lucide] {
+  width: 14px;
+  height: 14px;
 }
