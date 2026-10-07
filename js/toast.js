@@ -6,13 +6,20 @@
    copy this back into either app's local assets/js/.
 
      HvToast.show("plain message")                    → info variant, 3s
-     HvToast.show({ variant, title, message, icon,
+     HvToast.show({ variant, title, message,
                     duration, action, dedupeKey })    → full options
 
      variant:   'success' | 'info' | 'warn' | 'error'   (default: 'info')
      duration:  ms number | 'sticky'                    (variant defaults apply)
      action:    { label: string, onClick: () => void }  (adds inline button)
      dedupeKey: string — replaces prior toast with same key (rebuild spam guard)
+
+   State is expressed the way a tool-indicator expresses it: the whole box is
+   filled in the variant color with the glyph + message knocked out in --bg,
+   and severity is carried by the icon mark + fill color (success check, info
+   `i`, warn triangle, error `x`). There is no level/title text. A legacy `icon`
+   option and a legacy `title` option are both accepted and ignored for
+   call-site compatibility.
 
    Also exposed as `window.__hypervisorToast` for the Hypervisor Python bridge
    and legacy call sites (drop-import.js, writeback.js, content.js, pins.js,
@@ -31,14 +38,29 @@
   if (document.body) attach();
   else document.addEventListener('DOMContentLoaded', attach);
 
+  // Per-variant behavior + icon mark. The box fills with the variant color
+  // (driven by the `.notification-toast-{variant}` class in CSS); the glyph is
+  // knocked out of that fill in --bg. Marks are hard-edged inline SVGs matching
+  // the ecosystem's lucide-style line icons: success check, info `i`, warn solid
+  // triangle, error `x`. The JS carries the mark SVG + duration/assertiveness.
+  var MARKS = {
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square" stroke-linejoin="miter"><path d="M4 12l5 5L20 6"/></svg>',
+    info:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><line x1="12" y1="10" x2="12" y2="17"/><line x1="12" y1="6.4" x2="12" y2="6.5"/></svg>',
+    warn:    '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3 L22 20 L2 20 Z"/></svg>',
+    error:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="square"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>'
+  };
   var VARIANTS = {
-    success: { icon: 'check-circle',   duration: 3000,     assertive: false },
-    info:    { icon: 'info',           duration: 3000,     assertive: false },
-    warn:    { icon: 'alert-triangle', duration: 5000,     assertive: true  },
-    error:   { icon: 'circle-x',       duration: 'sticky', assertive: true  }
+    success: { duration: 3000,     assertive: false },
+    info:    { duration: 3000,     assertive: false },
+    warn:    { duration: 5000,     assertive: true  },
+    error:   { duration: 'sticky', assertive: true  }
   };
   var MAX_VISIBLE = 5;
   var EXIT_MS = 300;
+  // Delay before unfurling: let the toolAppear scale-in (--motion-slow, 0.3s)
+  // settle as a square first, THEN grow the width open. Keeps the two entrance
+  // beats sequential rather than overlapping.
+  var UNFURL_MS = 320;
   var visible = [];       // ordered oldest → newest
   var dedupeMap = {};     // key → toast element
 
@@ -52,6 +74,8 @@
     if (!toast || toast.__dismissed) return;
     toast.__dismissed = true;
     if (toast.__timer) clearTimeout(toast.__timer);
+    if (toast.__unfurlTimer) clearTimeout(toast.__unfurlTimer);
+    toast.classList.remove('notification-toast-unfurled');
     toast.classList.remove('notification-toast-visible');
     toast.classList.add('notification-toast-exit');
     var idx = visible.indexOf(toast);
@@ -68,11 +92,11 @@
     var opts = normalize(input);
     var variant = VARIANTS[opts.variant] ? opts.variant : 'info';
     var defaults = VARIANTS[variant];
-    var icon = opts.icon || defaults.icon;
     var duration = opts.duration != null ? opts.duration : defaults.duration;
     var sticky = duration === 'sticky';
     var message = opts.message == null ? '' : String(opts.message);
-    var title = opts.title ? String(opts.title) : '';
+    // `title` is accepted for call-site compatibility but no longer rendered -
+    // severity is carried by the icon mark + fill color, not a level label.
     var action = opts.action && opts.action.label && typeof opts.action.onClick === 'function' ? opts.action : null;
     var dedupeKey = opts.dedupeKey || null;
 
@@ -83,22 +107,24 @@
     if (defaults.assertive) toast.setAttribute('role', 'alert');
     toast.__dedupeKey = dedupeKey;
 
-    var iconEl = document.createElement('i');
+    // Icon mark - the glyph knocked out of the variant-color fill. The mark SVG
+    // is set in JS (per variant); the fill/knockout is driven by the CSS class.
+    var iconEl = document.createElement('span');
     iconEl.className = 'notification-toast-icon';
-    iconEl.setAttribute('data-lucide', icon);
+    iconEl.setAttribute('aria-hidden', 'true');
+    iconEl.innerHTML = MARKS[variant] || MARKS.info;
     toast.appendChild(iconEl);
 
+    // Body - the unfurling region to the right of the icon. Holds the message
+    // and (when present) the inline action button.
     var body = document.createElement('div');
     body.className = 'notification-toast-body';
-    if (title) {
-      var titleEl = document.createElement('div');
-      titleEl.className = 'notification-toast-title';
-      titleEl.textContent = title;
-      body.appendChild(titleEl);
-    }
     var msgEl = document.createElement('div');
     msgEl.className = 'notification-toast-message';
     msgEl.textContent = message;
+    // Message truncates to a single line with an ellipsis; expose the full text
+    // as a native tooltip so a clipped message is still recoverable on hover.
+    if (message) msgEl.title = message;
     body.appendChild(msgEl);
     if (action) {
       var actionBtn = document.createElement('button');
@@ -129,11 +155,11 @@
 
     while (visible.length > MAX_VISIBLE) dismiss(visible[0]);
 
-    if (window.lucide && typeof window.lucide.createIcons === 'function') {
-      try { window.lucide.createIcons(); } catch (e) {}
-    }
-
-    requestAnimationFrame(function () { toast.classList.add('notification-toast-visible'); });
+    // Entry: the box scales in as a square (toolAppear, CSS), then unfurls its
+    // width open once the scale-in has settled.
+    toast.__unfurlTimer = setTimeout(function () {
+      toast.classList.add('notification-toast-unfurled');
+    }, UNFURL_MS);
 
     if (!sticky) {
       toast.__timer = setTimeout(function () { dismiss(toast); }, duration);

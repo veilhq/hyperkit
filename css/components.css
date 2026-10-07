@@ -283,6 +283,9 @@
   pointer-events: auto;
 }
 /* Submenu extras — not part of the shared .menu-item row. */
+.context-menu-group {
+  position: relative;
+}
 .context-menu-item-parent {
   justify-content: space-between;
 }
@@ -290,24 +293,50 @@
   width: 12px;
   height: 12px;
   color: var(--text-dim);
-  transition: transform var(--motion-fast) var(--ease);
 }
-.context-menu-group-open .context-menu-chevron {
-  transform: rotate(90deg);
-}
+/* Sideways flyout: children float to the right of the parent row, anchored to
+   its top edge, rather than expanding the menu vertically. A slight horizontal
+   slide-in mirrors the parent panel's reveal. Overlaps the parent's border by
+   1px so the two surfaces read as connected. */
 .context-menu-children {
-  overflow: hidden;
-  max-height: 0;
+  position: absolute;
+  top: calc(var(--space-3) * -1);
+  left: 100%;
+  /* The group is inset from the panel edge by the panel's padding
+     (var(--space-3)); clear that plus a small gap so the flyout starts
+     outside the parent panel rather than overlapping it. */
+  margin-left: calc(var(--space-3) + var(--space-1));
+  min-width: 160px;
+  padding: var(--space-3);
+  background: var(--bg-elevated);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
   opacity: 0;
-  transition: max-height var(--motion-base) var(--ease),
-              opacity var(--motion-fast) var(--ease);
+  transform: translateX(-4px);
+  pointer-events: none;
+  transition: opacity var(--motion-fast) var(--ease),
+              transform var(--motion-fast) var(--ease);
+  z-index: 1;
 }
 .context-menu-group-open .context-menu-children {
-  max-height: 300px;
   opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+/* Flip to the left of the parent when the flyout would overflow the viewport's
+   right edge (modifier set by context-menu.js after measuring). */
+.context-menu-children.flip-left {
+  left: auto;
+  right: 100%;
+  margin-left: 0;
+  margin-right: calc(var(--space-3) + var(--space-1));
+  transform: translateX(4px);
+}
+.context-menu-group-open .context-menu-children.flip-left {
+  transform: translateX(0);
 }
 .context-menu-item-child {
-  padding-left: var(--space-5);
   font-size: 0.75rem;
 }
 

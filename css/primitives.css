@@ -126,6 +126,75 @@
   border-color: var(--accent-border);
 }
 
+/* ---- Release-card primitive — a shipped PR as a discrete card ---------------
+   Used by release changelogs: each story or bug in a release renders as a card
+   instead of a table row. Composes on .content-card for the surface, border,
+   radius, and hover lift; adds the internal layout (title, meta, linked chips)
+   and a left accent stripe that distinguishes a story from a bug.
+
+   Markup:
+     <div class="release-card-grid">
+       <div class="release-card release-card-story">
+         <div class="release-card-title">...title...</div>
+         <div class="release-card-meta">
+           <span class="label-badge label-badge-cool">Story</span>
+           <span class="release-card-author">Matt Kinmon</span>
+         </div>
+         <div class="release-card-chips">
+           <a class="label-badge label-badge-accent" href="...">PR 1164</a>
+           <a class="label-badge label-badge-muted" href="...">#5554</a>
+         </div>
+       </div>
+     </div>
+*/
+.release-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+.release-card {
+  /* surface, border, radius, hover lift inherited by also applying .content-card */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-left-width: var(--space-1);
+  border-left-style: solid;
+  border-left-color: var(--border);
+}
+/* Story vs. bug — left stripe only; the rest of the card is identical. */
+.release-card-story { border-left-color: var(--cool); }
+.release-card-bug   { border-left-color: var(--comp); }
+
+.release-card-title {
+  font-size: var(--fs-heading);
+  color: var(--text-bright);
+  line-height: 1.3;
+}
+.release-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.release-card-author {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.release-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: auto; /* push chips to the card's bottom edge */
+  /* Scale the chips up for card context - these are the card's primary
+     clickable elements, not dense status markers. Overriding the chip tokens
+     here cascades into the .label-badge children without touching the global
+     badge size used elsewhere. */
+  --chip-font-size: var(--fs-sm);
+  --chip-padding-x: var(--space-2);
+  --chip-height: 1.9;
+}
+
 /* ---- Section primitive (quiet) — frameless content section ------------------
    Companion to .content-section (bordered). Groups content with generous spacing
    and heading weight — no colored rail. Use for content sections that should
@@ -780,8 +849,8 @@ html.a11y-reduce-motion .text-button { transition: none !important; }
   pointer-events: none;
 }
 .menu-item-icon {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-md);
+  height: var(--icon-md);
   flex-shrink: 0;
   color: var(--text-dim);
 }
@@ -890,114 +959,202 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
 
 
 /* ---- Toast notifications (HvToast) ------------------------------------------
-   Card anatomy: left rail (variant color) → icon → body (title + message
-   + optional action) → optional close button. Hard edges, variant-color
-   drives severity. Consumed by all hyper ecosystem apps. */
+   Tool-indicator form. The toast IS an oversized .tool-indicator: born as a
+   filled square (icon only), it scales in (toolAppear), then grows its width
+   open to a constant 420px while the message unfurls to the right. The whole
+   box is filled in the variant color (like .tool-indicator-running); the glyph
+   and message are knocked out in --bg. Severity is carried entirely by the icon
+   glyph + fill color - there is no level/title text. One --variant-color slot
+   per variant drives the fill, border, and marks, mirroring --indicator-color.
+   States: error adds toolFailShake after appearing; a sticky in-progress toast
+   runs the ambient pulse (the -long state). Consumed by all ecosystem apps. */
 
 .notification-toast-container {
   position: fixed;
-  bottom: 3.5rem;
-  right: var(--space-5, 1rem);
-  z-index: var(--z-toast, 9999);
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-toast, 500);
   display: flex;
   flex-direction: column-reverse;
+  align-items: center;
   gap: var(--space-2, 6px);
   pointer-events: none;
-  max-width: min(400px, calc(100vw - 2rem));
 }
 
+/* The indicator box. Mirrors .tool-indicator, scaled up for a toast: grows from
+   a collapsed square to a constant width, left-anchored so the icon never
+   shifts. The width transition carries the grow once .notification-toast-unfurled
+   is applied (JS adds it one tick after the scale-in settles). */
 .notification-toast {
   --variant-color: var(--info);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: var(--space-3, 8px);
+  /* Ink = the knocked-out glyph/message color. Auto-derived from the fill so it
+     stays legible on ANY --variant-color, not just the ecosystem's bright
+     semantic fills: a light/bright fill (success green, warn amber, info cyan)
+     gets dark ink; a dark fill (a reskin, a light-theme, or any darker custom
+     color) gets light ink. Change a palette color and the ink re-derives with
+     no edit here.
+
+     How: oklch(from <fill> L 0 0) rebuilds the fill as a neutral gray whose
+     lightness L we compute. The fill's own perceptual lightness `l` (0..1)
+     drives the switch - (0.62 - l) is positive for darker fills, negative for
+     lighter ones; the x1000 + clamp() snaps L to a hard 1 (white ink) or 0
+     (black ink) at the ~0.62 crossover, avoiding a muddy mid-gray. All math
+     stays inside the relative-color function where the `l` keyword is valid.
+     Verified: picks the higher-contrast extreme on every ecosystem fill and
+     every tested dark fill (dark fills jump from ~1.3:1 under the old fixed
+     --bg ink to 9-15:1). The two-line form keeps a --bg fallback for the rare
+     engine without relative-color-syntax (Chromium <119); current WebView2 is
+     well past that, and the native contrast-color() will supersede this when it
+     ships in stable WebView2. */
+  --toast-ink: var(--bg);
+  --toast-ink: oklch(from var(--variant-color) clamp(0, calc((0.62 - l) * 1000), 1) 0 0);
+  display: inline-flex;
   align-items: center;
+  justify-content: flex-start;
+  min-height: 1.9rem;
+  width: 1.9rem;                 /* collapsed = square (icon slot) */
+  max-width: calc(100vw - 2rem);
+  padding: 0 var(--space-0-2);
   font-family: var(--font);
-  font-size: 0.7rem;
+  font-size: var(--fs-sm);
   line-height: 1.4;
-  color: var(--text);
-  background: var(--bg-card, var(--surface));
-  border: 1px solid var(--border-strong, var(--border));
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--toast-ink);       /* glyph + message, legible on the variant fill */
+  background: var(--variant-color);
+  border: var(--border-hair) solid var(--variant-color);
   border-radius: var(--radius);
-  padding: var(--space-3, 8px);
-  opacity: 0;
-  transform: translateY(8px);
-  transition: opacity var(--motion-base) ease, transform var(--motion-base) ease;
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
   pointer-events: auto;
+  animation: toolAppear var(--motion-slow) var(--ease);
+  transition: width var(--motion-slow) var(--ease),
+              opacity var(--motion-base) var(--ease),
+              transform var(--motion-fast) var(--ease),
+              border-color var(--motion-base) var(--ease),
+              background var(--motion-base) var(--ease);
 }
+.notification-toast:hover { transform: translateY(-1px); opacity: 0.9; }
 
 .notification-toast-success { --variant-color: var(--success); }
 .notification-toast-info    { --variant-color: var(--info); }
 .notification-toast-warn    { --variant-color: var(--warning); }
 .notification-toast-error   { --variant-color: var(--error); }
 
-.notification-toast-visible { opacity: 1; transform: translateY(0); }
-.notification-toast-exit    { opacity: 0; transform: translateY(8px); }
+/* Unfurled - box eases from the collapsed square to a constant 420px; the icon
+   stays left-anchored and the message wrapper eases max-width open to fill. */
+.notification-toast-unfurled { width: 420px; padding-right: var(--space-3); }
 
+.notification-toast-visible { opacity: 1; }
+.notification-toast-exit    { opacity: 0; transform: scale(0.8) translateY(2px); }
+
+/* Icon - fixed-width left slot equal to the collapsed square; the glyph holds
+   position when the message unfurls (= .tool-indicator-icon). */
 .notification-toast-icon {
-  color: var(--variant-color);
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  display: inline-flex;
+  flex: 0 0 auto;
+  width: 1.5rem;
+  height: 1.9rem;
+  display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--toast-ink);
+  animation: toolFlash var(--motion-slow) var(--ease);
 }
-.notification-toast-icon svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-}
+.notification-toast-icon svg { width: 0.85rem; height: 0.85rem; display: block; }
 
+/* Body - unfurls to the right. Born collapsed (max-width:0), eases open
+   (= .tool-indicator-label unfurl, but multi-line message allowed). */
 .notification-toast-body {
+  flex: 1 1 auto;
   min-width: 0;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  transition: max-width var(--motion-slow) var(--ease),
+              opacity var(--motion-slow) var(--ease),
+              margin var(--motion-slow) var(--ease);
 }
-
-.notification-toast-title {
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-bright);
-  font-size: 0.7rem;
+.notification-toast-unfurled .notification-toast-body {
+  max-width: 100%;
+  opacity: 1;
+  margin-left: var(--space-2);
+  margin-right: var(--space-1);
 }
 
 .notification-toast-message {
-  color: var(--text);
+  width: 100%;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-size: var(--fs-caption);
+  white-space: nowrap;
   overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  word-break: break-word;
+  text-overflow: ellipsis;
 }
 
 .notification-toast-action {
-  align-self: flex-start;
-  margin-top: var(--space-0-4, 2px);
-  font-size: 0.65rem;
+  flex: 0 0 auto;
+  align-self: center;
+  margin-left: var(--space-2);
+  font-size: var(--fs-caption);
   padding: 2px 8px;
 }
 
+/* Close - knocked out in the toast ink, lives inside the fill, eases in with the unfurl. */
 .notification-toast-close {
-  align-self: flex-start;
+  flex: 0 0 auto;
+  align-self: center;
   background: none;
   border: none;
-  color: var(--text-dim);
+  color: var(--toast-ink);
   font-family: var(--font);
   font-size: 1rem;
   line-height: 1;
-  padding: 0 2px;
+  padding: 0 var(--space-1);
   cursor: pointer;
-  transition: var(--transition-color);
+  opacity: 0.7;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: max-width var(--motion-slow) var(--ease),
+              opacity var(--motion-fast) var(--ease);
 }
-.notification-toast-close:hover { color: var(--error); }
+.notification-toast-unfurled .notification-toast-close { max-width: 2ch; opacity: 0.7; }
+.notification-toast-close:hover { opacity: 1; }
+
+/* State: error - the -failed treatment: restrained shake after appearing (the
+   error fill already comes from --variant-color). */
+.notification-toast-error {
+  animation: toolAppear var(--motion-slow) var(--ease),
+             toolFailShake var(--motion-slow) var(--ease) var(--motion-slow);
+}
+
+/* State: in-progress - ambient pulse (= .tool-indicator-long). */
+.notification-toast-progress {
+  --pulse-min: 0.65;
+  --pulse-max: 1;
+  animation: toolAppear var(--motion-slow) var(--ease),
+             pulse 1.5s ease-in-out infinite var(--motion-slow);
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .notification-toast { transition: opacity 0.1s linear; transform: none; }
-  .notification-toast-visible, .notification-toast-exit { transform: none; }
+  .notification-toast,
+  .notification-toast-icon,
+  .notification-toast-error,
+  .notification-toast-progress { animation: none; }
+  .notification-toast-body,
+  .notification-toast-close { transition: opacity 0.1s linear; }
+  .notification-toast-exit { transform: none; }
 }
+.a11y-reduce-motion .notification-toast,
+.a11y-reduce-motion .notification-toast-icon,
+.a11y-reduce-motion .notification-toast-error,
+.a11y-reduce-motion .notification-toast-progress { animation: none; }
+.a11y-reduce-motion .notification-toast-body,
+.a11y-reduce-motion .notification-toast-close { transition: opacity 0.1s linear; }
+.a11y-reduce-motion .notification-toast-exit { transform: none; }
 
 /* ---- Skeleton loading primitives --------------------------------------------
    Pulsing placeholder shapes for content that hasn't loaded yet.
@@ -1116,8 +1273,8 @@ html.a11y-reduce-motion .loading-skeleton-row { animation: none !important; opac
   text-align: center;
 }
 .hv-media-missing-icon {
-  width: 20px;
-  height: 20px;
+  width: var(--icon-2xl);
+  height: var(--icon-2xl);
   flex-shrink: 0;
   color: var(--text-dim);
 }

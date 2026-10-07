@@ -152,6 +152,24 @@ html.a11y-bw-theme {
   --warning:       #b35900;
   --error:         #cc0000;
   --info:          #0000ff;
+  /* Raised drawer panels (.dir-surface / .page-doc-surface / .utility-surface)
+     read from --bg-raised, which the dark :root sets to a near-black. Without a
+     light-theme override the drawer stays near-black on the light page. Sit it
+     just above the page (#e4e4e4) and cards (#dedede) so it still reads as a
+     distinct raised layer. */
+  --bg-raised:     #f2f2f2;
+  /* Re-tune the drawer elevation for a light surface: soft, low-alpha grey
+     drops instead of the heavy near-opaque black the dark theme uses, and drop
+     the white top-edge highlight (invisible on a light panel). */
+  --shadow-drawer:
+    0 -6px 24px -12px rgba(0, 0, 0, 0.18),
+    -8px 0 20px -16px rgba(0, 0, 0, 0.15),
+    8px 0 20px -16px rgba(0, 0, 0, 0.15);
+  --shadow-drawer-closed:
+    0 -6px 24px -12px rgba(0, 0, 0, 0.18),
+    -8px 0 20px -16px rgba(0, 0, 0, 0.15),
+    8px 0 20px -16px rgba(0, 0, 0, 0.15),
+    0 8px 24px -14px rgba(0, 0, 0, 0.18);
 }
 html.a11y-bw-theme body {
   -webkit-font-smoothing: antialiased;

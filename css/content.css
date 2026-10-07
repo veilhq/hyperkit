@@ -38,8 +38,8 @@
   margin-bottom: var(--space-4);
 }
 .home-title-icon {
-  width: 40px;
-  height: 40px;
+  width: var(--icon-5xl);
+  height: var(--icon-5xl);
   color: var(--accent);
 }
 .markdown-body h2 {
@@ -103,6 +103,60 @@
   transition: color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease);
 }
 .markdown-body a:hover { color: var(--accent); border-bottom-style: solid; border-bottom-color: var(--accent); }
+
+/* ---- Inline citations ---- */
+/* A [N] token in the body renders as <sup class="citation-group"> wrapping one
+   or more <a class="citation"> links that jump to the matching #source-N entry
+   in the ## Sources / ## References list. The <sup> tag is neutralized here —
+   citations sit inline on the text baseline as filled pills rather than raised
+   superscripts, which clipped the pill body. Cross-app: styled in hyperkit so
+   every consumer (Hypervisor, Hyperagent, ...) renders citations identically. */
+.citation-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15em;
+  vertical-align: 0.22em;
+  font-size: var(--fs-detail);
+  line-height: inherit;
+  white-space: nowrap;
+}
+
+.markdown-body a.citation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.3em;
+  padding: 0.05em 0.35em;
+  color: var(--bg);
+  background: var(--comp);
+  border: var(--border-hair) solid var(--comp);
+  border-radius: var(--radius);
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: color var(--motion-fast) var(--ease),
+              background var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease);
+}
+.markdown-body a.citation:hover,
+.markdown-body a.citation:focus-visible {
+  color: var(--comp);
+  background: transparent;
+  border-color: var(--comp);
+}
+
+/* ---- Sources / References list (citation targets) ---- */
+.markdown-body ol.sources-list { counter-reset: none; }
+.markdown-body ol.sources-list .source-item { scroll-margin-top: var(--space-6); }
+/* When a citation link jumps here, flash the target source so the eye lands. */
+.markdown-body ol.sources-list .source-item:target {
+  background: var(--accent-glow);
+  border-left: var(--border-rail) solid var(--accent);
+  padding-left: var(--space-2);
+  margin-left: calc(-1 * var(--space-2));
+  border-radius: var(--radius);
+}
+.markdown-body ol.sources-list .source-item:target::marker { color: var(--accent); }
 
 .markdown-body strong { color: var(--text-bright); font-weight: 700; }
 
@@ -282,7 +336,7 @@
 /* ---- Document header strip (chip-row metadata) ---- */
 .doc-header-strip {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-3) 0;
@@ -294,14 +348,14 @@
   display: none;
 }
 
-/* Narrow screens: the 3-column strip (chips | tags | dates) squeezes; collapse
-   to a single column so each cluster gets its own row. The tag cap (+N) is the
-   primary crowding fix; this is the belt-and-suspenders reflow for very narrow. */
-@media (max-width: 720px) {
+/* Narrow screens: drop the dates below the identity chips so neither cluster
+   is squeezed. Tags no longer live in the strip (they are in the title row),
+   so there are only two clusters to reflow. */
+@media (max-width: 640px) {
   .doc-header-strip {
     grid-template-columns: 1fr;
     align-items: start;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
   .doc-header-dates { flex-wrap: wrap; }
 }
@@ -339,14 +393,42 @@
   color: var(--comp);
 }
 
-/* Middle: topic tag chips */
-.doc-header-tags {
+/* Title row: H1 on the left, topic tags pulled to the top-right corner. The
+   tags live here (not in the meta strip) so the strip's horizontal budget
+   stays small and reflows cleanly. On narrow screens the tag cluster wraps
+   below the title instead of fighting the strip for row space. */
+.doc-title-row {
   display: flex;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
   flex-wrap: wrap;
-  gap: var(--space-0-4);
+  /* The accent underline lives on the row (not the inner H1) so it spans the
+     full width - title AND the right-aligned tag cluster - instead of stopping
+     where the title text ends. */
+  margin: 0 0 var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: var(--border-rail) solid var(--accent);
+}
+.doc-title-row > h1 {
+  margin: 0;
+  padding-bottom: 0;
+  border-bottom: none;  /* underline is on .doc-title-row, not the h1 */
+  flex: 1 1 auto;
   min-width: 0;
 }
-.doc-header-tag {
+.doc-title-tags {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-0-4);
+  /* Inline (wide): margin-left:auto pushes the cluster to the right edge next
+     to the title. The tags do NOT wrap - the overflow module
+     (doc-tag-overflow.js) collapses them title-first to a +N chip, or a
+     'N TAGS' count blurb when nothing fits. */
+  margin-left: auto;
+  align-self: center;
+  min-width: 0;
+}
+.doc-title-tag {
   display: inline-flex;
   align-items: center;
   height: 22px;
@@ -360,18 +442,33 @@
   white-space: nowrap;
   transition: color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease);
 }
-.doc-header-tag:hover {
+.doc-title-tag:hover {
   color: var(--text-bright);
   border-color: var(--border-strong);
 }
-.doc-header-tag-project {}
-/* +N overflow chip — shown when the visible-tag cap hides some; dashed and dim
-   to read as a count indicator, not a real tag. title lists the hidden tags. */
-.doc-header-tag-more {
+/* +N overflow chip - shown by doc-tag-overflow.js when some tags are hidden.
+   Dashed and dim so it reads as a count indicator, not a real tag. The title
+   attribute lists the hidden tags. */
+.doc-title-tag-more {
   color: var(--text-dim);
   border-style: dashed;
   cursor: default;
   font-variant-numeric: tabular-nums;
+}
+/* 'N TAGS' count blurb - shown when no chip fits at all. Uppercase to match
+   the meta-strip label typography (UPDATED / CREATED / TYPE). The title
+   attribute lists every tag. */
+.doc-title-tags-blurb {
+  align-items: center;
+}
+.doc-title-tags-count {
+  font-size: var(--fs-detail);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: default;
 }
 
 /* Right: dates */
@@ -486,8 +583,8 @@
   color: var(--accent);
 }
 .doc-section-summary .section-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
   margin-right: var(--space-4);
   stroke: var(--cool);
   stroke-width: 2.5;
@@ -599,8 +696,8 @@
   border: none !important;
 }
 .backlink-icon {
-  width: 11px;
-  height: 11px;
+  width: var(--icon-2xs);
+  height: var(--icon-2xs);
   vertical-align: -1px;
   margin-right: 0.15rem;
   color: var(--text-dim);
@@ -736,8 +833,8 @@
   border-bottom: var(--border-hair) solid color-mix(in srgb, var(--adm-color) 15%, var(--border));
 }
 .admonition-icon {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-md);
+  height: var(--icon-md);
 }
 .admonition-content {
   padding: var(--space-3) var(--space-4);

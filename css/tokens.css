@@ -82,6 +82,22 @@
   --fs-h3:      0.95rem;   /* markdown H3 */
   --fs-h5-6:    0.8rem;    /* markdown H5 / H6 (compact uppercase) */
 
+  /* Icon size scale — rem-based so glyphs track the root font-size the zoom
+     control adjusts, keeping icons aligned with adjacent text at every zoom
+     level (px icons only aligned at 100%). Steps chosen from the real spread
+     of icon sizes across the ecosystem; near-values snap to the nearest step.
+     Values assume the 16px root: 0.875rem = 14px, etc. */
+  --icon-2xs: 0.6875rem;   /* 11px — nav children, backlinks */
+  --icon-xs:  0.75rem;     /* 12px — stats, indicators, doc-list icons */
+  --icon-sm:  0.8125rem;   /* 13px — toc flag, search trigger, settings toggle */
+  --icon-md:  0.875rem;    /* 14px — default: menu items, nav, dock, sections */
+  --icon-lg:  1rem;        /* 16px — section summary, toast, search input, cards */
+  --icon-xl:  1.125rem;    /* 18px — dir cards, dir/utility titles */
+  --icon-2xl: 1.25rem;     /* 20px — brand, media-missing */
+  --icon-3xl: 1.5rem;      /* 24px — dir/section headers, splash */
+  --icon-4xl: 2rem;        /* 32px — launcher, icon-button container, welcome */
+  --icon-5xl: 3rem;        /* 48px — hero / empty-state display icons */
+
   /* Spacing scale — replaces raw rem padding/margin/gap */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -137,6 +153,26 @@
   --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 1px var(--accent-border);
   --shadow-panel: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 1px var(--accent-border);
   --shadow-glow:  0 0 12px var(--accent-glow);
+  /* Open-bottom drawer surface elevation — the raised .dir-surface /
+     .page-doc-surface / .utility-surface panels. Outward drop on top + sides
+     (no bottom band, so the surface reads as continuing past the open edge)
+     plus a faint top-edge highlight. Tokenized so a light theme can re-tune the
+     whole recipe in one place rather than at each surface. */
+  --shadow-drawer:
+    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
+    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  /* Closed variant of the drawer surface — the standalone .utility-surface
+     (a self-contained tool panel, framed on all four sides). Same top + side
+     drop as the open drawer plus a bottom band, since it does not bleed off
+     the bottom edge. */
+  --shadow-drawer-closed:
+    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
+    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    8px 0 20px -16px rgba(0, 0, 0, 0.6),
+    0 8px 24px -14px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 
   /* Border radius — ecosystem toggle. Set to 0 for pure brutalist. */
   --radius: 4px;
@@ -159,7 +195,6 @@
   --row-padding-y: var(--space-2);
 
   /* Section primitives — bordered content sections */
-  --section-rail-width: var(--border-rail);
   --section-padding:    var(--space-5) var(--space-5) var(--space-2);
   --section-gap:        var(--space-6);
 
@@ -203,19 +238,14 @@
 
   /* ========================================================================
      Alpha tint ramp — named color-mix surfaces
-     Consolidates the ad-hoc color-mix() tint surfaces that recurred across the
-     CSS layer. A tint at percentage N of a role color over transparent, so a
-     hover/glow surface is one token reference instead of an inline mix. The
-     ramp aliases through the semantic roles, so a palette reskin propagates.
+     A tint at percentage N of a role color over transparent, so a hover/glow
+     surface is one token reference instead of an inline mix. Aliases through
+     the semantic role so a palette reskin propagates. Only the error tints are
+     live today (the danger-hover pair below); other role tints are added here
+     when a second consumer appears, not pre-emptively.
      ======================================================================== */
-  --accent-a08:  color-mix(in srgb, var(--accent) 8%,  transparent);
-  --accent-a20:  color-mix(in srgb, var(--accent) 20%, transparent);
   --error-a08:   color-mix(in srgb, var(--error) 8%,   transparent);
   --error-a20:   color-mix(in srgb, var(--error) 20%,  transparent);
-  --warning-a08: color-mix(in srgb, var(--warning) 8%, transparent);
-  --warning-a20: color-mix(in srgb, var(--warning) 20%, transparent);
-  --info-a08:    color-mix(in srgb, var(--info) 8%,    transparent);
-  --info-a20:    color-mix(in srgb, var(--info) 20%,   transparent);
   /* Danger-hover pair — the exact recipe repeated by destructive-action hovers
      (row delete buttons, a11y reset). Reference both together for a consistent
      "about to destroy" affordance. */
@@ -251,18 +281,6 @@
   --focus-ring: 0 0 0 var(--border-hair) var(--accent-border), var(--shadow-glow);
 
   /* ========================================================================
-     Fluid type scale — opt-in clamp() sizes (WI-112 lineage)
-     Net-new, additive. The fixed --fs-* scale above is unchanged and remains
-     the default; these fluid variants are adopted deliberately per element
-     where viewport-responsive sizing is wanted. min/max bracket the existing
-     fixed sizes so adoption stays within the established type rhythm.
-     ======================================================================== */
-  --fs-fluid-sm:      clamp(0.7rem, 0.66rem + 0.2vw,  0.8rem);   /* brackets --fs-sm */
-  --fs-fluid-body:    clamp(0.8rem, 0.75rem + 0.25vw, 0.95rem);  /* brackets --fs-body */
-  --fs-fluid-heading: clamp(0.85rem, 0.8rem + 0.3vw,  1.05rem);  /* brackets --fs-heading */
-  --fs-fluid-hero:    clamp(1rem, 0.9rem + 0.6vw,     1.35rem);  /* brackets --fs-hero */
-
-  /* ========================================================================
      Transition recipes — named multi-property transition bundles
      Consolidates transition property-lists that were retyped verbatim at many
      interactive elements. Shapes are pinned to the most-repeated exact strings
@@ -274,7 +292,6 @@
      cover the dominant cases, not every case.
      ======================================================================== */
   --transition-color:     color var(--motion-fast) var(--ease);
-  --transition-transform: transform var(--motion-base) var(--ease);
   --transition-lift:      transform var(--motion-base) var(--ease),
                           border-color var(--motion-base) var(--ease),
                           box-shadow var(--motion-medium) var(--ease);

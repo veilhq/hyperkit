@@ -99,8 +99,8 @@
   background: var(--comp);
 }
 .dock-icon {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-md);
+  height: var(--icon-md);
   color: var(--text-muted);
   flex-shrink: 0;
   transition: var(--transition-color);
@@ -208,8 +208,8 @@ h1 + .home-dock { margin-top: var(--space-4); }
   gap: var(--space-3);
 }
 .dir-header-icon {
-  width: 26px;
-  height: 26px;
+  width: var(--icon-3xl);
+  height: var(--icon-3xl);
   color: var(--accent);
   flex-shrink: 0;
 }
@@ -244,7 +244,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.dir-stat-icon { width: 12px; height: 12px; color: var(--text-dim); }
+.dir-stat-icon { width: var(--icon-xs); height: var(--icon-xs); color: var(--text-dim); }
 .dir-stat-val { font-weight: 700; color: var(--text-bright); }
 .dir-stat-label { color: var(--text-dim); }
 .dir-header + .home-dock { margin-top: var(--space-3); }
@@ -267,7 +267,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 }
 .dir-headings { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
 .dir-title-row { display: flex; align-items: center; gap: var(--space-3); }
-.dir-title-icon { width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
+.dir-title-icon { width: var(--icon-xl); height: var(--icon-xl); color: var(--accent); flex-shrink: 0; }
 /* Scoped to out-specify .markdown-body h1 (which sets --fs-h1 and an accent
    underline); the directory title is a compact strip heading, not a doc H1. */
 .markdown-body .dir-title,
@@ -307,11 +307,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   /* outward drop shadow (top + sides), no bottom band so the surface still
      reads as continuing past the open bottom edge; a raised panel casts its
      shadow outward, not an inset recess */
-  box-shadow:
-    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
-    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
-    8px 0 20px -16px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--shadow-drawer);
   padding: var(--space-6);
   /* the container slides up fast then eases to a stop, as a beat before its
      contents arrive; a strong decelerate curve sells the upward settle */
@@ -442,7 +438,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   color: var(--text-dim);
   margin-bottom: var(--space-3);
 }
-.dir-zone-label .dir-zone-icon { width: 13px; height: 13px; }
+.dir-zone-label .dir-zone-icon { width: var(--icon-sm); height: var(--icon-sm); }
 .dir-zone-label::after {
   content: '';
   flex: 1;
@@ -643,8 +639,12 @@ h1 + .home-dock { margin-top: var(--space-4); }
   cursor: default;
 }
 .launcher-icon {
-  width: 20px;
-  height: 20px;
+  /* Sized as a fraction of the fixed 44px box rather than the rem icon scale.
+     The box does not track the zoom control (fixed px), so a rem-based icon
+     would drift its box ratio at non-100% zoom. Percentage keeps the icon at a
+     constant 55% of the box (24/44) across every zoom level. */
+  width: 55%;
+  height: 55%;
 }
 
 /* emote-glow keyframe — see keyframes.css */
@@ -701,7 +701,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   padding-left: var(--space-0-6);
   color: var(--accent);
 }
-.about-link-list .doc-icon { width: 14px; height: 14px; color: var(--text-dim); }
+.about-link-list .doc-icon { width: var(--icon-md); height: var(--icon-md); color: var(--text-dim); }
 .about-link-list li a:hover .doc-icon { color: var(--accent); }
 .about-build {
   display: flex;
@@ -973,8 +973,8 @@ h1 + .home-dock { margin-top: var(--space-4); }
   flex-shrink: 0;
 }
 .activity-indicator-icon {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-xs);
+  height: var(--icon-xs);
   color: var(--text-dim);
 }
 .activity-icon-new .activity-indicator-icon {
@@ -1512,8 +1512,8 @@ h2 + .doc-list { border-top: none; }
 }
 
 .skill-row-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
   color: var(--accent);
   flex-shrink: 0;
 }
@@ -1667,7 +1667,7 @@ h2 + .doc-list { border-top: none; }
 .dir-zone .dir-dashboard-card::after { content: none; }  /* no accent rail */
 /* folder icon + name inline; folder icon stays accent to signal "folder" */
 .dir-zone .dir-card-head { flex-direction: row; align-items: center; gap: var(--space-2); flex-shrink: 0; }
-.dir-zone .dir-card-icon { width: 16px; height: 16px; color: var(--accent); }
+.dir-zone .dir-card-icon { width: var(--icon-lg); height: var(--icon-lg); color: var(--accent); }
 .dir-zone .dir-dashboard-card .card-name { margin-bottom: 0; font-size: var(--fs-body); }
 /* hide the doc-preview and description in the compact row — the count carries it */
 .dir-zone .dir-dashboard-card > .card-desc,
@@ -1685,8 +1685,8 @@ h2 + .doc-list { border-top: none; }
 .dir-zone .dir-dashboard-card:hover::before { color: var(--accent); transform: translateX(3px); }
 .dir-zone .dir-dashboard-card:hover .dir-card-icon { color: var(--accent); }
 .dir-card-icon {
-  width: 18px;
-  height: 18px;
+  width: var(--icon-xl);
+  height: var(--icon-xl);
   color: var(--accent);
   flex-shrink: 0;
 }
@@ -1715,8 +1715,8 @@ h2 + .doc-list { border-top: none; }
   white-space: nowrap;
 }
 .dir-card-preview-icon {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-xs);
+  height: var(--icon-xs);
   color: var(--text-dim);
   flex-shrink: 0;
 }
@@ -1996,8 +1996,8 @@ h2 + .doc-list { border-top: none; }
   gap: var(--space-3);
 }
 .utility-title-icon {
-  width: 18px;
-  height: 18px;
+  width: var(--icon-xl);
+  height: var(--icon-xl);
   color: var(--accent);
   flex-shrink: 0;
 }
@@ -2026,12 +2026,7 @@ h2 + .doc-list { border-top: none; }
   background: var(--bg-raised);
   border: var(--border-hair) solid var(--border-strong);
   border-radius: var(--radius-dir-surface);
-  box-shadow:
-    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
-    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
-    8px 0 20px -16px rgba(0, 0, 0, 0.6),
-    0 8px 24px -14px rgba(0, 0, 0, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--shadow-drawer-closed);
   padding: var(--space-6);
 }
 

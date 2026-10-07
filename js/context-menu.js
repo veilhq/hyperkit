@@ -139,9 +139,28 @@
 
           trigger.addEventListener('click', function (e) {
             e.stopPropagation();
+            // Only one submenu open at a time — collapse siblings first.
+            if (!group.classList.contains('context-menu-group-open') && menu) {
+              var openGroups = menu.querySelectorAll('.context-menu-group-open');
+              for (var o = 0; o < openGroups.length; o++) {
+                openGroups[o].classList.remove('context-menu-group-open');
+                var t = openGroups[o].querySelector('.context-menu-item-parent');
+                if (t) t.setAttribute('aria-expanded', 'false');
+              }
+            }
             var expanded = group.classList.toggle('context-menu-group-open');
             trigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
             childWrap.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+            // Flip the flyout to the left when it would overflow the right edge.
+            childWrap.classList.remove('flip-left');
+            if (expanded) {
+              requestAnimationFrame(function () {
+                var rect = childWrap.getBoundingClientRect();
+                if (rect.right > window.innerWidth - 4) {
+                  childWrap.classList.add('flip-left');
+                }
+              });
+            }
           });
 
           group.appendChild(trigger);

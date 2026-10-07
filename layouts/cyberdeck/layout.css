@@ -126,8 +126,8 @@
 }
 
 .site-nav-icon {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-md);
+  height: var(--icon-md);
   flex-shrink: 0;
   color: var(--text-dim);
   transition: color var(--motion-fast) var(--ease);
@@ -187,8 +187,8 @@
   color: var(--accent);
 }
 .site-nav-child-icon {
-  width: 11px;
-  height: 11px;
+  width: var(--icon-2xs);
+  height: var(--icon-2xs);
   flex-shrink: 0;
   color: var(--text-dim);
   transition: color var(--motion-fast) var(--ease);
@@ -300,6 +300,16 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Surface page variants own their entrance via the child surface's dirSurfaceIn
+   (a 120px rise). Running the parent's pageIn (an 8px rise) at the same time
+   layers two transform animations with different durations/easings on
+   parent+child, which visually snaps ("hops") when the shorter parent
+   animation finishes mid-flight of the child. Let the surface animate alone. */
+.page-doc-surface,
+.page-dir-index {
+  animation: none;
+}
+
 /* ---- Condensed reading width ---- */
 .page.condensed {
   max-width: 1480px;
@@ -345,22 +355,34 @@
   flex-direction: column;
 }
 .page-doc-surface .markdown-body {
+  /* Pre-animation resting state: invisible and offset. The router adds
+     .animate-in (with a reflow reset) after swapping content, which triggers
+     dirSurfaceIn. Without this, the swapped content painted in its final state
+     for a frame before the animation reset it -- a visible "already loaded,
+     then animates" flash. Keeping the base state invisible closes that gap. */
+  opacity: 0;
   /* top + side edges frame the surface; the bottom is open and bleeds off */
   border: var(--border-hair) solid var(--border-strong);
   border-bottom: none;
   border-radius: var(--radius-dir-surface) var(--radius-dir-surface) 0 0;
   background: var(--bg-raised);
-  box-shadow:
-    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
-    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
-    8px 0 20px -16px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--shadow-drawer);
   padding: var(--space-6);
   flex: 1;
   /* fill the first viewport for short docs; grow beyond it for long ones */
   min-height: calc(100vh - var(--topbar-height) - var(--doc-top-pad, 50px) - 3rem);
-  animation: dirSurfaceIn var(--surface-dur, 0.55s) cubic-bezier(0.16, 0.84, 0.28, 1) both;
 }
+/* Router toggles .animate-in (reflow-reset) to (re)play the entrance; forwards
+   fill holds the final visible state so the base opacity:0 doesn't reassert. */
+.page-doc-surface .markdown-body.animate-in {
+  animation: dirSurfaceIn var(--surface-dur, 0.55s) cubic-bezier(0.16, 0.84, 0.28, 1) forwards;
+}
+/* Reduced motion: the router skips .animate-in, so make the surface visible at
+   rest rather than stuck at its invisible pre-animation base. */
+@media (prefers-reduced-motion: reduce) {
+  .page-doc-surface .markdown-body { opacity: 1; }
+}
+.a11y-reduce-motion .page-doc-surface .markdown-body { opacity: 1; }
 
 /* ---- Utility pages: the tool body sits inside a full-width raised surface ----
    Same edge-to-edge fill as directory/document pages: the page becomes a flex
@@ -393,11 +415,7 @@
 .page-utility .utility-surface {
   border-bottom: none;
   border-radius: var(--radius-dir-surface) var(--radius-dir-surface) 0 0;
-  box-shadow:
-    0 -6px 24px -12px rgba(0, 0, 0, 0.7),
-    -8px 0 20px -16px rgba(0, 0, 0, 0.6),
-    8px 0 20px -16px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--shadow-drawer);
   flex: 1;
   min-height: calc(100vh - var(--topbar-height) - var(--util-top-pad, 50px) - 5rem);
 }
@@ -428,12 +446,12 @@
 /* ---- Lucide icons ---- */
 /* .brand-icon is sized above (inline brand SVG, not a lucide glyph). */
 .crumb-sep svg { width: 10px; height: 10px; vertical-align: middle; }
-.card-icon { width: 16px; height: 16px; vertical-align: -2px; margin-right: 0.3rem; }
-.doc-icon { width: 12px; height: 12px; min-width: 12px; flex-shrink: 0; vertical-align: -1px; margin-right: 0.25rem; color: var(--text-dim); }
+.card-icon { width: var(--icon-lg); height: var(--icon-lg); vertical-align: -2px; margin-right: 0.3rem; }
+.doc-icon { width: var(--icon-xs); height: var(--icon-xs); min-width: 12px; flex-shrink: 0; vertical-align: -1px; margin-right: 0.25rem; color: var(--text-dim); }
 .scroll-top svg { width: 16px; height: 16px; }
 .section-icon {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-md);
+  height: var(--icon-md);
   vertical-align: -2px;
   margin-right: var(--space-1);
 }
@@ -628,8 +646,8 @@
   transform: rotate(180deg);
 }
 .nav-menu-btn-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
   flex-shrink: 0;
 }
 .nav-panel {
@@ -769,8 +787,8 @@
   color: var(--accent);
 }
 .nav-link-icon {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-md);
+  height: var(--icon-md);
   flex-shrink: 0;
   color: var(--text-dim);
 }
@@ -899,8 +917,8 @@
   border-color: var(--accent);
 }
 .settings-toggle-icon {
-  width: 13px;
-  height: 13px;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
   flex-shrink: 0;
 }
 
@@ -974,8 +992,8 @@
   background: var(--accent-glow);
 }
 .settings-zoom-icon {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-xs);
+  height: var(--icon-xs);
 }
 .settings-zoom-level {
   font-family: var(--font);

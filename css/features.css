@@ -34,8 +34,8 @@
   color: var(--text-muted);
 }
 .search-trigger-icon {
-  width: 13px;
-  height: 13px;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
 }
 .search-trigger-hint {
   font-size: var(--fs-detail);
@@ -88,8 +88,8 @@
   border-bottom: var(--border-hair) solid var(--border);
 }
 .search-input-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
   color: var(--text-dim);
   flex-shrink: 0;
 }
@@ -637,8 +637,8 @@ ul.todo-list li.todo-hidden { display: none; }
   border-radius: var(--radius);
 }
 .pinboard-empty-icon {
-  width: 48px;
-  height: 48px;
+  width: var(--icon-5xl);
+  height: var(--icon-5xl);
   color: var(--text-dim);
   margin-bottom: var(--space-4);
   opacity: 0.5;
@@ -700,8 +700,8 @@ ul.todo-list li.todo-hidden { display: none; }
   align-items: center;
 }
 .pin-card-pin-icon {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-xs);
+  height: var(--icon-xs);
   color: var(--warm);
   fill: var(--warm);
 }
@@ -826,11 +826,6 @@ ul.todo-list li.todo-hidden { display: none; }
 .pin-type-story { color: var(--warm);   border-color: var(--warm); }
 .pin-type-pr    { color: var(--accent); border-color: var(--accent); }
 
-/* ---- Pin button (actions drawer) ---- */
-.pin-btn.pinned .action-icon {
-  fill: var(--warm);
-}
-
 /* ---- Pinboard dock item (homepage) ---- */
 .dock-item-pins .dock-icon {
   color: var(--warm);
@@ -872,92 +867,171 @@ ul.todo-list li.todo-hidden { display: none; }
 
 /* ===== Table of Contents ===== */
 
-/* ===== Floating TOC — a compact, collapsible card pinned top-right =====
-   Modeled on the Hyperagent task panel: always-present bordered card in the
-   corner (not a modal overlay), reserves no layout width, click the header to
-   collapse/expand. Sits below the topbar; capped height with its own scroll. */
-.toc-float {
+/* ===== TOC flag + slide-in drawer =====
+   A flag tab pops out from behind the top-left edge of the doc surface (same
+   flag aesthetic as the topbar clock: solid --comp fill, --bg text, sitting
+   behind its anchor via negative z-index). Clicking the flag slides a drawer
+   in from the left holding the heading list. Dismissed by click-outside or
+   Escape (behavior owned by toc.js, mirroring the actions drawer).
+
+   The whole assembly reserves no layout width and only appears (toc.js adds
+   .visible) when the current doc actually has a TOC. */
+.toc-flag-wrap {
   position: fixed;
-  /* Sit inside the doc surface's top area, not in the negative-space gap above
-     it. The surface starts at topbar + the doc top pad (50px); nudge the card
-     just inside that with space-4 so it reads as resting on the surface. */
-  top: calc(var(--topbar-height) + 50px + var(--space-4));
-  right: var(--space-5);
+  /* Origin sits ON the surface's top border line (topbar + doc top pad). The
+     flag extends UPWARD from here into the empty band, and its lower length
+     runs DOWNWARD past this line behind the surface. */
+  top: calc(var(--topbar-height) + 50px);
+  left: calc(var(--site-nav-width, 0px) + var(--space-5));
+  /* Sit BEHIND the doc surface: .page (with its pageIn transform) forms a
+     stacking context at body z-order 0, so a fixed element at z-index -1 paints
+     behind the opaque .markdown-body surface. The flag's lower length is
+     therefore cropped by the surface edge -- it reads as being pulled up from
+     behind, not floating above. The upper (poking-up) length sits in the empty
+     band where nothing covers it, so it stays visible. */
+  z-index: -1;
+  /* Hidden until toc.js reveals it for a doc that has headings. */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--motion-medium) var(--ease);
+}
+.toc-flag-wrap.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---- Entrance: on each doc load the flag stays fully invisible while the
+   surface plays its own entrance (dirSurfaceIn, ~0.55s), then rises up from
+   behind the surface as it fades in. toc.js adds .entering on navigation to
+   (re)trigger this. Opacity is driven by the animation (both-fill) so the flag
+   is genuinely transparent during the delay -- not merely occluded, which
+   flashed on first paint before the surface had painted over it. */
+@keyframes tocFlagRise {
+  from { transform: translateY(calc(var(--space-6) + var(--space-3))); opacity: 0; }
+  40%  { opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.toc-flag-wrap.entering {
+  /* Delay covers the surface's entrance; both-fill holds the invisible, tucked
+     start state during the delay so the flag stays hidden until it rises. */
+  animation: tocFlagRise var(--motion-slow) var(--ease) 0.55s both;
+}
+
+/* ---- The flag: a long tab pulled up from behind the surface's top edge ----
+   Taller than its label so a good portion of its length tucks behind the
+   surface; the label sits near the top in the visible poking-up region. Only
+   the top corners round -- the bottom runs behind the surface. */
+.toc-flag {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  /* Give the tab real length: enough padding-bottom that its body extends well
+     past the border line. min-height keeps it a proper flag even for the short
+     label. */
+  padding: var(--space-2) var(--space-3) var(--space-6);
+  min-height: 3.2rem;
+  box-sizing: border-box;
+  /* Lift so the LABEL clears the surface edge but a chunk of the lower body
+     stays below the border line (behind the surface). Less than a full height
+     of lift = tucked-behind read rather than fully-clear float. */
+  transform: translateY(-100%) translateY(var(--space-6));
+  background: var(--comp);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius) var(--radius) 0 0;
+  font-family: var(--font);
+  font-size: var(--fs-label);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--motion-base) var(--ease), filter var(--motion-fast) var(--ease);
+}
+.toc-flag:hover,
+.toc-flag:focus-visible,
+.toc-flag.hover {
+  /* Pull further up out from behind the surface to signal it's clickable. */
+  transform: translateY(-100%) translateY(var(--space-3));
+  filter: brightness(1.08);
+  outline: none;
+}
+.toc-flag.active {
+  transform: translateY(-100%) translateY(var(--space-3));
+}
+
+/* ---- Click-catcher: the flag sits behind the surface (z-index -1) so its
+   visible poke-up region is overlapped by the surface's transparent top-pad
+   box, which would otherwise swallow clicks. This transparent hit target sits
+   on top over that same region and forwards clicks to the flag (wired in
+   toc.js). Sized to the empty band above the surface at the flag's column. ---- */
+.toc-flag-hit {
+  position: fixed;
+  top: var(--topbar-height);
+  left: calc(var(--site-nav-width, 0px) + var(--space-5));
+  width: 7.5rem;
+  height: 50px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: var(--z-topbar, 100);
+  opacity: 0;
+  pointer-events: none;
+}
+.toc-flag-hit.visible {
+  pointer-events: auto;
+}
+/* While the flag is still playing its entrance (tucked behind the surface),
+   the catcher must not accept clicks -- otherwise a not-yet-visible flag could
+   be toggled. toc.js clears .entering when the entrance completes. */
+.toc-flag-hit.entering {
+  pointer-events: none;
+}
+.toc-icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: currentColor;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+/* ---- Drawer: slides down from the surface's top-left when the flag is clicked ---- */
+.toc-drawer {
+  position: fixed;
+  /* Open just below the surface's top edge, left-aligned with the flag. */
+  top: calc(var(--topbar-height) + 50px + var(--space-1));
+  left: calc(var(--site-nav-width, 0px) + var(--space-5));
   width: 260px;
   max-height: 60vh;
-  z-index: calc(var(--z-topbar, 100) - 10);
+  z-index: var(--z-topbar, 100);
   background: var(--bg-card);
   border: var(--border-hair) solid var(--border-strong);
-  border-radius: var(--radius);
+  border-top: var(--border-rail) solid var(--comp);
+  border-radius: 0 0 var(--radius) var(--radius);
   box-shadow: var(--shadow-panel, 0 6px 24px rgba(0,0,0,0.4));
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  /* revealed by toc.js when the doc has a TOC */
-  transform: translateX(12px);
+  /* Tucked up behind the surface top edge until opened, then slides down. */
+  transform: translateY(-12px);
   opacity: 0;
   pointer-events: none;
   transition: transform var(--motion-medium) var(--ease), opacity var(--motion-medium) var(--ease);
 }
-.toc-float.visible {
-  transform: translateX(0);
-  /* Idle: dimmed so it recedes and doesn't block content while reading. */
-  opacity: 0.35;
+.toc-drawer.open {
+  transform: translateY(0);
+  opacity: 1;
   pointer-events: auto;
 }
-/* Focused (hover or keyboard focus within): come forward to full opacity. */
-.toc-float.visible:hover,
-.toc-float.visible:focus-within {
-  opacity: 1;
-}
 
-/* Header — click to collapse/expand (chevron rotates) */
-.toc-float-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-2) var(--space-3);
-  border-bottom: var(--border-hair) solid var(--border);
-  cursor: pointer;
-  user-select: none;
-  flex-shrink: 0;
-}
-.toc-float-head .panel-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-.toc-float-head:hover .panel-header { color: var(--accent); }
-.toc-float-head::after {
-  content: '\25B4';
-  font-size: var(--fs-caption);
-  color: var(--text-dim);
-  transition: transform var(--motion-base) var(--ease);
-}
-.toc-float.collapsed .toc-float-head::after { transform: rotate(180deg); }
-.toc-icon {
-  width: 13px;
-  height: 13px;
-  color: var(--text-muted);
-}
-
-/* ---- TOC body (scrollable; collapses with the card) ---- */
+/* ---- TOC body (scrollable) ---- */
 .toc-body {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-2) 0;
   max-height: 50vh;
-  transition: max-height var(--motion-medium) var(--ease), padding var(--motion-medium) var(--ease);
-}
-.toc-float.collapsed .toc-body {
-  max-height: 0;
-  padding: 0;
-  overflow: hidden;
 }
 .toc-body ul {
   list-style: none;
@@ -975,37 +1049,45 @@ ul.todo-list li.todo-hidden { display: none; }
   margin: 1px var(--space-1);
   color: var(--text-dim);
   text-decoration: none;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-sm);
+  line-height: 1.35;
   border: var(--border-hair) solid transparent;
   border-radius: var(--radius);
   transition: color var(--motion-fast) var(--ease),
               background var(--motion-fast) var(--ease),
               border-color var(--motion-fast) var(--ease),
               box-shadow var(--motion-fast) var(--ease);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Long headings wrap rather than truncate; wrapped lines hang-indent under
+     the first so the list stays readable. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-indent: 0;
 }
 .toc-body a:hover {
-  color: var(--accent);
-  background: var(--accent-glow);
-  border-color: var(--accent-border);
-  box-shadow: 0 0 6px var(--accent-glow);
+  color: var(--comp);
+  background: color-mix(in srgb, var(--comp) 12%, transparent);
+  border-color: color-mix(in srgb, var(--comp) 40%, transparent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--comp) 20%, transparent);
 }
 .toc-body a.toc-active {
-  color: var(--accent);
-  background: var(--accent-glow);
-  border-color: var(--accent-border);
+  color: var(--comp);
+  background: color-mix(in srgb, var(--comp) 12%, transparent);
+  border-color: color-mix(in srgb, var(--comp) 40%, transparent);
 }
 
-/* ---- Nested indent ---- */
+/* ---- Nested hierarchy: a left guide line marks each level as belonging under
+   its parent. Nested lists indent past the guide; the line uses --border so it
+   reads as structure, brightening only where the active/hover branch lives. --- */
+.toc-body ul ul {
+  margin-left: var(--space-4);
+  padding-left: var(--space-2);
+  border-left: var(--border-hair) solid var(--border);
+}
 .toc-body ul ul a {
-  padding-left: var(--space-5);
-  font-size: var(--fs-detail);
+  font-size: var(--fs-label);
 }
 .toc-body ul ul ul a {
-  padding-left: 2.25rem;
-  font-size: var(--fs-micro);
+  font-size: var(--fs-caption);
 }
 
 /* ---- Scrollbar ---- */
@@ -1015,10 +1097,13 @@ ul.todo-list li.todo-hidden { display: none; }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .toc-float, .toc-body { transition: none; }
+  .toc-flag, .toc-drawer, .toc-body { transition: none; }
+  .toc-flag-wrap.entering { animation: none; }
 }
-.a11y-reduce-motion .toc-float,
+.a11y-reduce-motion .toc-flag,
+.a11y-reduce-motion .toc-drawer,
 .a11y-reduce-motion .toc-body { transition: none; }
+.a11y-reduce-motion .toc-flag-wrap.entering { animation: none; }
 
 /* ===== Related Docs (inline section, RAG-powered) ===== */
 /* Styling handled by .backlinks-section reuse — no additional rules needed. */
@@ -1314,113 +1399,6 @@ ul.todo-list li.todo-hidden { display: none; }
 
 /* ===== Actions Drawer + Inline Editor ===== */
 
-/* --- Actions Drawer --- */
-
-.actions-trigger {
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-family: var(--font);
-  font-size: inherit;
-  font-weight: inherit;
-  text-transform: uppercase;
-  letter-spacing: inherit;
-  padding: 0;
-  margin-left: auto;
-  cursor: pointer;
-  transition: var(--transition-color);
-}
-
-.actions-trigger:hover,
-.actions-trigger.active {
-  color: var(--text-bright);
-}
-
-.actions-drawer {
-  position: fixed;
-  bottom: 44px;
-  right: var(--space-5);
-  z-index: 500;
-  opacity: 0;
-  transform: translateY(8px);
-  pointer-events: none;
-  transition: opacity var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease);
-}
-
-.actions-drawer.open {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.actions-drawer-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  background: var(--bg-card);
-  border: var(--border-hair) solid var(--border-strong);
-  border-radius: var(--radius);
-  border-bottom: var(--border-rail) solid var(--accent);
-  padding: var(--space-0-4);
-  min-width: 140px;
-}
-
-.action-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: 0.45rem var(--space-0-6);
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-family: var(--font);
-  font-size: var(--fs-label);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  transition: color var(--motion-fast) var(--ease), background var(--motion-fast) var(--ease);
-  text-align: left;
-}
-
-.action-item:hover {
-  color: var(--accent);
-  background: var(--accent-glow);
-}
-
-.action-item.pinned {
-  color: var(--warm);
-}
-
-.action-item.pinned:hover {
-  color: var(--warm);
-  background: rgba(255, 176, 0, 0.06);
-}
-
-.action-item.mark-done-btn:hover {
-  color: var(--accent);
-}
-
-.action-item.mark-done-pending {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.action-item.exporting {
-  color: var(--warm);
-}
-
-.action-icon {
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-}
-
-.action-label {
-  /* label text styling inherited from .action-item */
-}
-
 /* --- Inline Document Editor --- */
 
 /* Editor wrapper — replaces article when active */
@@ -1555,8 +1533,8 @@ ul.todo-list li.todo-hidden { display: none; }
   background: var(--bg);
 }
 .cmd-palette-input-wrap .cmd-palette-icon {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
   color: var(--accent);
   flex-shrink: 0;
 }
@@ -1607,8 +1585,8 @@ ul.todo-list li.todo-hidden { display: none; }
   padding-left: var(--space-4);
 }
 .cmd-palette-item-icon {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-md);
+  height: var(--icon-md);
   flex-shrink: 0;
   color: var(--text-dim);
 }
@@ -2124,8 +2102,8 @@ ul.todo-list li.todo-hidden { display: none; }
   margin-right: auto;
 }
 .utility-title-icon {
-  width: 28px;
-  height: 28px;
+  width: var(--icon-3xl);
+  height: var(--icon-3xl);
   vertical-align: -4px;
   margin-right: var(--space-0-3);
 }
@@ -2186,8 +2164,8 @@ ul.todo-list li.todo-hidden { display: none; }
   color: var(--bg);
 }
 .not-found-icon {
-  width: 14px;
-  height: 14px;
+  width: var(--icon-md);
+  height: var(--icon-md);
 }
 
 /* ---- 09-effects.css ---- */
