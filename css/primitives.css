@@ -126,20 +126,81 @@
   border-color: var(--accent-border);
 }
 
+/* ---- Ref-card primitive — a keyed reference as a discrete card -------------
+   A reusable "list of keyed references" surface: each entry is an enclosed card
+   holding one or more refs, where a ref is an identity key (a code path / token
+   on a raised chip) above a muted description. Depth comes from the charter's
+   sanctioned tools only — a hairline border + card surface for enclosure, the
+   raised surface + space for figure/ground — never a shadow. Multiple refs in
+   one card are grouped by space (no internal divider), so they read as one
+   entry rather than fragmented items.
+
+   Generic by design: the Sources/References list is the first consumer, but any
+   "path/token → what it is" listing (citations, file manifests, glossary rows)
+   can compose it. Consumers add their own list/numbering/anchor concerns on top.
+
+   Markup:
+     <div class="ref-card">
+       <div class="ref-card-ref">
+         <code class="ref-card-key">path/to/thing</code>
+         <span class="ref-card-desc">what it backs / is</span>
+       </div>
+       <div class="ref-card-ref">...another ref, grouped under this card...</div>
+       <div class="ref-card-ref ref-card-ref-prose">free-text ref, no key</div>
+     </div>
+*/
+.ref-card {
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-card);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  line-height: 1.5;
+}
+.ref-card-ref {
+  display: block;
+}
+/* Refs within one card are grouped by space, not a divider line — the card
+   border already encloses them as one unit, so an internal rule would wrongly
+   read as a split between separate entries. */
+.ref-card-ref + .ref-card-ref {
+  margin-top: var(--space-3);
+}
+/* The key: the identity token as a raised chip, lifted off the card surface so
+   it reads as figure against the description (ground). Composes on the <code>
+   color/face already set elsewhere; this adds the raised surface + enclosure. */
+.ref-card-key {
+  display: inline-block;
+  margin-bottom: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-raised);
+  border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
+}
+.ref-card-desc {
+  display: block;
+  color: var(--text-muted);
+}
+/* Prose-led ref (free text, no key) — plain muted description, sits
+   consistently in the card. */
+.ref-card-ref-prose {
+  color: var(--text-muted);
+}
+
 /* ---- Release-card primitive — a shipped PR as a discrete card ---------------
    Used by release changelogs: each story or bug in a release renders as a card
    instead of a table row. Composes on .content-card for the surface, border,
-   radius, and hover lift; adds the internal layout (title, meta, linked chips)
-   and a left accent stripe that distinguishes a story from a bug.
+   radius, and hover lift; adds the internal layout — a meta header strip (type
+   badge + author byline), a promoted title, and a divided links footer. Story
+   vs. bug is carried entirely by the color-coded type badge in the header.
 
    Markup:
      <div class="release-card-grid">
-       <div class="release-card release-card-story">
-         <div class="release-card-title">...title...</div>
+       <div class="release-card content-card release-card-story">
          <div class="release-card-meta">
            <span class="label-badge label-badge-cool">Story</span>
            <span class="release-card-author">Matt Kinmon</span>
          </div>
+         <div class="release-card-title">...title...</div>
          <div class="release-card-chips">
            <a class="label-badge label-badge-accent" href="...">PR 1164</a>
            <a class="label-badge label-badge-muted" href="...">#5554</a>
@@ -149,29 +210,35 @@
 */
 .release-card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
-  margin: var(--space-3) 0;
+  /* Reflow responsively instead of a fixed column count: a hardcoded
+     repeat(3, 1fr) overflows and crams the cards when the content column is
+     narrower than three cards wide. auto-fill + a minmax floor lets the grid
+     drop to 2 or 1 columns as space tightens, matching the card-grid pattern
+     used elsewhere in the ecosystem. */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  /* Size each card to its own content. Without this, grid rows stretch every
+     card to the tallest in the row, and the chips' margin-top:auto then strands
+     them at the bottom of that stretched box - the lopsided "content clustered
+     up top, PR chips floating far below" gap. */
+  align-items: start;
+  gap: var(--space-4);
+  margin: var(--space-4) 0;
 }
 .release-card {
   /* surface, border, radius, hover lift inherited by also applying .content-card */
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-3);
-  border-left-width: var(--space-1);
-  border-left-style: solid;
-  border-left-color: var(--border);
+  padding: var(--space-4);
 }
-/* Story vs. bug — left stripe only; the rest of the card is identical. */
-.release-card-story { border-left-color: var(--cool); }
-.release-card-bug   { border-left-color: var(--comp); }
+/* Story vs. bug is carried by the type badge in the header strip — it states
+   the word ("Story"/"Bug") and is color-coded (cool vs. comp) on its own, so no
+   additional card-level accent is needed. .release-card-story and
+   .release-card-bug remain as semantic hooks for future styling. */
 
-.release-card-title {
-  font-size: var(--fs-heading);
-  color: var(--text-bright);
-  line-height: 1.3;
-}
+/* Header strip: type badge + author byline, tight to the title directly below
+   it. Kept compact (small gap, no stranding) so the badge/author read as a
+   single label line rather than two elements floating at opposite edges. */
 .release-card-meta {
   display: flex;
   align-items: center;
@@ -180,12 +247,32 @@
 .release-card-author {
   font-size: var(--fs-sm);
   color: var(--text-muted);
+  margin-left: auto; /* byline sits at the far right of the header strip */
 }
+
+/* Title is the card's anchor — the largest, brightest element, sitting tight
+   under the label line. Uses the proportional body face (not the mono
+   instrument face) with the optical-size compensation, matching .work-card-title
+   / .pulse-title: the title is reading prose, while the badge, author, and link
+   chips stay mono as instrument labels. This is the charter's sanctioned
+   prose-vs-chrome split, not a font-family-law break. */
+.release-card-title {
+  font-family: var(--font-body);
+  font-size: calc(var(--fs-h3) * var(--font-body-scale));
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  line-height: 1.35;
+}
+
+/* Links footer: a tight inline run of PR / work-item chips, nudged down from
+   the title with a slightly larger gap than the inter-row gap - enough to read
+   as a separate footer without a heavy full-width divider or a lead-in label. */
 .release-card-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1);
-  margin-top: auto; /* push chips to the card's bottom edge */
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: var(--space-2);
   /* Scale the chips up for card context - these are the card's primary
      clickable elements, not dense status markers. Overriding the chip tokens
      here cascades into the .label-badge children without touching the global
@@ -353,7 +440,7 @@ kbd,
   border-radius: var(--radius);
   cursor: pointer;
   font-size: var(--fs-micro);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--indicator-color);
@@ -625,6 +712,33 @@ kbd,
 }
 .form-textarea:focus-visible { outline: none; }
 
+/* ---- Pill toggle — wordless cycle button ------------------------------------
+   A minimal fully-rounded --comp pill with no label. A pure cycle control: each
+   click advances the surface it drives to the next view; the control itself
+   carries no state (the content it reveals shows which view is active). Used
+   for compact, low-ink view switches where a labelled segmented control would
+   be too heavy. Compose: .pill-toggle + a feature class for placement.
+*/
+.pill-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+  width: var(--space-6);
+  height: var(--space-2);
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--comp);
+  cursor: pointer;
+  transition: filter var(--motion-fast) var(--ease),
+              opacity var(--motion-fast) var(--ease);
+}
+.pill-toggle:hover { filter: brightness(1.15); }
+.pill-toggle:focus,
+.pill-toggle:focus-visible { outline: none; }
+.pill-toggle:active { opacity: 0.8; }
+
 /* ---- Checkbox / radio — accent-tinted native control ------------------------
    The per-app pattern was a bare `accent-color: var(--accent)` on native
    checkboxes/radios, repeated at many settings sites. This consolidates that
@@ -651,7 +765,7 @@ kbd,
   color: var(--text-muted);
   font-family: var(--font);
   font-size: var(--fs-label);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;
@@ -778,7 +892,7 @@ html.a11y-reduce-motion .text-button { transition: none !important; }
   width: min(400px, 90vw);
   background: var(--bg-card);
   border-left: var(--border-hair) solid var(--border-strong);
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.6);
+  /* flat by default: left border edge separates the drawer - no drop shadow */
   transform: translateX(100%);
   transition: transform var(--motion-slow) var(--ease);
   overflow-y: auto;
@@ -801,9 +915,10 @@ html.a11y-reduce-motion .text-button { transition: none !important; }
 /* Surface only — position and reveal transition are the consumer's concern. */
 .floating-panel {
   background: var(--bg-elevated);
-  border: var(--border-hair) solid var(--border);
+  border: var(--border-hair) solid var(--border-strong);
   border-radius: var(--radius);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  /* flat by default: the stronger border delineates the floating panel from the
+     content beneath it - no drop shadow. */
   z-index: var(--z-dropdown);
 }
 
@@ -1019,7 +1134,7 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
   font-family: var(--font);
   font-size: var(--fs-sm);
   line-height: 1.4;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.04em;
   color: var(--toast-ink);       /* glyph + message, legible on the variant fill */
   background: var(--variant-color);
@@ -1086,7 +1201,7 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
 
 .notification-toast-message {
   width: 100%;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.02em;
   font-size: var(--fs-caption);
   white-space: nowrap;
@@ -1282,5 +1397,65 @@ html.a11y-reduce-motion .loading-skeleton-row { animation: none !important; opac
   font-family: var(--font);
   font-size: var(--fs-micro);
   letter-spacing: 0.04em;
+}
+
+/* ---- Empty-state card -------------------------------------------------------
+   A standalone, centered "nothing to show here" card for a full content area:
+   a non-previewable file, an empty result set, a view with no data yet. Where
+   .hv-media-missing is an inline placeholder sized to a slot, this is the
+   page-level block — one bordered card holding a centered icon above a short
+   title and an optional description.
+
+   Charter conformance: icon on the empty-state icon step (--icon-xl); the title
+   and description are prose, so they take --font-body with the optical-size
+   compensation (calc * --font-body-scale), matching .work-card-title /
+   .pulse-title. Flat — a hairline border + raised surface enclose it, no shadow.
+
+   Anatomy:
+     <div class="hv-empty-state">
+       <i data-lucide="file-x" class="hv-empty-state-icon"></i>
+       <p class="hv-empty-state-title">No preview available</p>
+       <p class="hv-empty-state-msg">...</p>
+     </div>
+
+   A parent wrapper is expected to center it in the content area (e.g. a flex
+   container filling the viewport); the primitive itself only styles the card.
+   ============================================================================ */
+.hv-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-1);
+  width: min(90%, 24rem);
+  padding: var(--space-5) var(--space-4);
+  border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  box-sizing: border-box;
+}
+.hv-empty-state-icon {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+  flex-shrink: 0;
   color: var(--text-dim);
+  margin-bottom: var(--space-1);
+}
+.hv-empty-state-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: calc(var(--fs-sm) * var(--font-body-scale));
+  color: var(--text);
+}
+.hv-empty-state-msg {
+  margin: 0;
+  max-width: 38ch;
+  font-family: var(--font-body);
+  font-size: calc(var(--fs-micro) * var(--font-body-scale));
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.hv-empty-state-msg code {
+  color: var(--text);
 }

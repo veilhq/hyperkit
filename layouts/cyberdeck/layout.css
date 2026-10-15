@@ -43,7 +43,7 @@
   color: var(--bg);
   font-family: var(--font);
   font-size: var(--fs-heading);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.08em;
   z-index: -1;
 }
@@ -77,7 +77,7 @@
   letter-spacing: 0.1em;
   color: var(--text-dim);
   padding: var(--space-3) var(--space-3) var(--space-0-6);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   border-bottom: var(--border-hair) solid var(--border);
 }
 
@@ -253,7 +253,7 @@
 }
 .brand-text {
   font-size: var(--fs-body);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--text-bright);
@@ -300,6 +300,13 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ---- Calibration-point grid + ambient gradient ----
+   The dot grid and bottom gradient now live in the shared Hyperkit atmosphere
+   layer (globals.css, body::before / body::after), identical across apps.
+   Only the content elevation stays here, since it is layout-specific: the
+   .page column rides above the atmosphere layer. */
+.page { position: relative; z-index: 1; }
+
 /* Surface page variants own their entrance via the child surface's dirSurfaceIn
    (a 120px rise). Running the parent's pageIn (an 8px rise) at the same time
    layers two transform animations with different durations/easings on
@@ -312,8 +319,13 @@
 
 /* ---- Condensed reading width ---- */
 .page.condensed {
-  max-width: 1480px;
+  /* Cap read from --reading-max-width (defined at :root below so the fixed TOC
+     flag, a sibling of .page, can read the same value - custom properties don't
+     cross siblings). The flag's condensed-mode left offset (features.css) uses
+     the same token to track the centered surface. */
+  max-width: var(--reading-max-width);
 }
+:root { --reading-max-width: 1480px; }
 
 /* ---- Directory-index pages: the content area IS the drawer ----
    On directory pages the recessed .dir-surface runs edge-to-edge horizontally
@@ -367,7 +379,7 @@
   border-radius: var(--radius-dir-surface) var(--radius-dir-surface) 0 0;
   background: var(--bg-raised);
   box-shadow: var(--shadow-drawer);
-  padding: var(--space-6);
+  padding: var(--space-7);
   flex: 1;
   /* fill the first viewport for short docs; grow beyond it for long ones */
   min-height: calc(100vh - var(--topbar-height) - var(--doc-top-pad, 50px) - 3rem);
@@ -589,8 +601,9 @@
   transition: transform var(--motion-base) var(--ease), box-shadow var(--motion-medium) var(--ease), border-color var(--motion-base) var(--ease);
 }
 .pin-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-panel);
+  /* flat by default: no lift, no drop shadow. A filled note has no border to
+     shift, so hover reads as a subtle brightness lift. */
+  filter: brightness(var(--state-hover-brightness));
 }
 
 /* ---- Reduced motion: disable all added animations ---- */
@@ -717,7 +730,7 @@
   margin: 0 var(--space-0-2);
   font-family: var(--font);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-dim);
@@ -761,7 +774,7 @@
   letter-spacing: 0.1em;
   color: var(--text-dim);
   margin-bottom: var(--space-0-6);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
 }
 
 /* ---- Nav links (items within navigate/utilities groups) ---- */
@@ -896,7 +909,7 @@
   padding: 0 var(--space-2);
   font-family: var(--font);
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
@@ -909,7 +922,6 @@
   color: var(--accent);
   background: var(--accent-glow);
   border-color: var(--accent-border);
-  box-shadow: 0 0 6px var(--accent-glow);
 }
 .settings-toggle-btn.active {
   color: var(--accent);
@@ -973,7 +985,6 @@
 }
 .settings-zoom:hover {
   border-color: var(--accent-border);
-  box-shadow: 0 0 6px var(--accent-glow);
 }
 .settings-zoom-btn {
   background: transparent;
@@ -1026,7 +1037,6 @@
 }
 .settings-color-input:hover {
   border-color: var(--accent);
-  box-shadow: 0 0 6px var(--accent-glow);
 }
 .settings-color-input::-webkit-color-swatch-wrapper { padding: 3px; }
 .settings-color-input::-webkit-color-swatch { border: none; }
@@ -1044,7 +1054,7 @@
   background-color: transparent;
   border-color: var(--border);
   font-size: 0.68rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.04em;
   color: var(--text-muted);
 }
@@ -1052,7 +1062,6 @@
 .preset-select:focus {
   color: var(--accent);
   border-color: var(--accent-border);
-  box-shadow: 0 0 6px var(--accent-glow);
   outline: none;
 }
 .preset-select option {
@@ -1085,7 +1094,6 @@
 }
 .settings-theme-row .palette-preview:hover {
   border-color: var(--accent-border);
-  box-shadow: 0 0 6px var(--accent-glow);
 }
 .settings-theme-row .palette-preview .swatch {
   width: 100%;
@@ -1099,13 +1107,12 @@
 .settings-theme-row .palette-preview .swatch:nth-child(4) { background: var(--comp); }
 .settings-theme-row .palette-preview .swatch:hover {
   transform: scale(1.15);
-  box-shadow: 0 0 8px currentColor;
   z-index: 1;
 }
 .settings-palette-mode {
   font-family: var(--font);
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.1em;
   color: var(--text-dim);
   background: transparent;
@@ -1124,7 +1131,6 @@
   color: var(--accent);
   background: var(--accent-glow);
   border-color: var(--accent-border);
-  box-shadow: 0 0 6px var(--accent-glow);
 }
 
 /* ---- Width toggle / Fullscreen toggle ---- */

@@ -107,7 +107,7 @@
 }
 .dock-label {
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--text-bright);
@@ -149,7 +149,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   color: var(--bg);
   font-family: var(--font);
   font-size: var(--fs-caption);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,7 +174,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   border: none;
   color: var(--bg);
   font-size: var(--fs-caption);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.03em;
   opacity: 0;
   transform: translateX(-8px);
@@ -215,7 +215,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 }
 .dir-header .dir-header-title {
   font-size: var(--fs-h1);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -245,7 +245,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   letter-spacing: 0.06em;
 }
 .dir-stat-icon { width: var(--icon-xs); height: var(--icon-xs); color: var(--text-dim); }
-.dir-stat-val { font-weight: 700; color: var(--text-bright); }
+.dir-stat-val { font-weight: var(--fw-bold); color: var(--text-bright); }
 .dir-stat-label { color: var(--text-dim); }
 .dir-header + .home-dock { margin-top: var(--space-3); }
 .dir-header + .content-section { margin-top: var(--space-3); }
@@ -273,7 +273,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .markdown-body .dir-title,
 .dir-title {
   font-size: var(--fs-hero);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -349,7 +349,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   background: var(--bg-elevated);
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  /* flat by default: no resting drop shadow */
   /* settle-off (default) is the slower of the asymmetric pair */
   transition:
     transform var(--motion-medium) var(--ease),
@@ -475,7 +475,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: var(--fs-caption);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.03em;
   color: var(--bg);
   background: var(--comp);
@@ -530,7 +530,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 }
 .home-section-header {
   font-size: var(--fs-caption);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-dim);
@@ -726,7 +726,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .pulse-summary {
   color: var(--text-dim);
   font-size: var(--fs-label);
-  font-weight: 400;
+  font-weight: var(--fw-normal);
   letter-spacing: 0.05em;
   text-transform: none;
   margin-left: auto;
@@ -767,8 +767,9 @@ h1 + .home-dock { margin-top: var(--space-4); }
   border-bottom-color: var(--accent-border);
 }
 .pulse-title {
+  font-family: var(--font-body);
   color: var(--text-bright);
-  font-size: var(--fs-body);
+  font-size: calc(var(--fs-body) * var(--font-body-scale));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -799,10 +800,11 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .pulse-row-active .pulse-progress { grid-column: 2 / 4; grid-row: 3; }
 .pulse-row-active .pulse-chip { grid-row: 1 / 4; align-self: stretch; height: auto; margin: 5px 0; }
 .pulse-desc {
+  font-family: var(--font-body);
   grid-column: 2 / 4;
   grid-row: 2;
   color: var(--text-muted);
-  font-size: var(--fs-h5-6);
+  font-size: calc(var(--fs-h5-6) * var(--font-body-scale));
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -827,9 +829,8 @@ h1 + .home-dock { margin-top: var(--space-4); }
   transition: var(--transition-lift);
 }
 .work-card:hover {
-  transform: translateY(-1px);
   border-color: var(--border-strong);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  /* flat by default: hover shifts border only - no lift, no drop shadow */
 }
 .work-card:hover .work-card-title {
   color: var(--accent);
@@ -848,7 +849,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   background: var(--comp);
   color: var(--bg);
   font-size: var(--fs-caption);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.06em;
   padding: 0.1rem 0.4rem;
   border-radius: var(--radius);
@@ -859,16 +860,39 @@ h1 + .home-dock { margin-top: var(--space-4); }
   font-size: var(--fs-caption);
   margin-left: auto;
 }
+
+/* ---- Content-text face (design language: proportional for reading content) --
+   One source assigning the body face to every card/row title, description, and
+   snippet. These are reading content, not instrument chrome, so they take
+   --font-body while chips, IDs, dates, counts, meta, and categories stay mono
+   via var(--font). Per-selector font-size (and body-scale) stay on each rule;
+   this rule only unifies the face so a face swap reaches every card at once. */
+.card-title, .card-desc, .card-name,
+.dashboard-card-title,
+.dir-title, .dir-desc, .dir-header-title, .dir-header-desc,
+.doc-row-snippet,
+.idea-card-title, .idea-card-desc,
+.pin-card-title, .pin-card-desc,
+.pin-row-title, .pin-row-snippet,
+.preview-card-title, .preview-card-desc,
+.pulse-title, .pulse-desc, .pulse-summary,
+.pulse-recent-title, .pulse-work-title,
+.skill-row-name, .skill-row-desc,
+.utility-title, .utility-desc,
+.work-card-title, .work-card-desc {
+  font-family: var(--font-body);
+}
 .work-card-title {
   color: var(--text-bright);
-  font-size: var(--fs-body);
-  font-weight: 700;
+  font-size: calc(var(--fs-body) * var(--font-body-scale));
+  font-weight: var(--fw-bold);
   line-height: 1.4;
   transition: var(--transition-color);
 }
 .work-card-desc {
+  font-family: var(--font-body);
   color: var(--text-muted);
-  font-size: var(--fs-h5-6);
+  font-size: calc(var(--fs-h5-6) * var(--font-body-scale));
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -915,9 +939,8 @@ h1 + .home-dock { margin-top: var(--space-4); }
   transition: var(--transition-lift);
 }
 .idea-card:hover {
-  transform: translateY(-1px);
   border-color: var(--border-strong);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  /* flat by default: hover shifts border only - no lift, no drop shadow */
 }
 .idea-card:hover .idea-card-title {
   color: var(--accent);
@@ -925,7 +948,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .idea-card-title {
   color: var(--text-bright);
   font-size: var(--fs-body);
-  font-weight: 500;
+  font-weight: var(--fw-medium);
   line-height: 1.4;
   transition: var(--transition-color);
 }
@@ -1017,7 +1040,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
   background: transparent;
   border: var(--border-hair) dashed var(--border);
   border-radius: var(--radius);
-  font-weight: 400;
+  font-weight: var(--fw-normal);
 }
 .pulse-row:hover .pulse-chip-missing { filter: none; }
 
@@ -1058,7 +1081,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .pins-home-count {
   color: var(--text-dim);
   font-size: var(--fs-label);
-  font-weight: 400;
+  font-weight: var(--fw-normal);
   letter-spacing: 0.05em;
   text-transform: none;
 }
@@ -1085,7 +1108,6 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .pin-row + .pin-row {
   margin-top: var(--space-2);
 }
-.pin-row:last-child { border-bottom: none; }
 .pin-row:hover {
   background: var(--bg-card-hover);
   border-color: var(--border-strong);
@@ -1099,7 +1121,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .pin-row-title {
   color: var(--text-bright);
   font-size: var(--fs-body);
-  font-weight: 500;
+  font-weight: var(--fw-medium);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1123,7 +1145,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .pin-row-workid {
   color: var(--accent-dim);
   font-size: var(--fs-micro);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.04em;
 }
 .pins-home-empty {
@@ -1153,9 +1175,8 @@ h1 + .home-dock { margin-top: var(--space-4); }
   transition: var(--transition-lift);
 }
 .pin-card:hover {
-  transform: translateY(-1px);
   border-color: var(--border-strong);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  /* flat by default: hover shifts border only - no lift, no drop shadow */
 }
 .pin-card:hover .pin-card-title {
   color: var(--accent);
@@ -1163,7 +1184,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .pin-card-title {
   color: var(--text-bright);
   font-size: var(--fs-body);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   line-height: 1.4;
   transition: var(--transition-color);
 }
@@ -1271,7 +1292,7 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .card:hover .card-name { color: var(--accent); }
 .card-name {
   font-size: var(--fs-hero);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--text-bright);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1393,8 +1414,6 @@ h2 + .doc-list { border-top: none; }
 }
 
 /* Section variants (extend .content-section) */
-.root-docs-section h2 { color: var(--cool); }
-.root-docs-section .doc-list li { grid-template-columns: 1fr auto auto; }
 .documents-section { padding-left: 0; padding-right: var(--space-5); }
 .documents-section > h2 { padding-left: var(--space-5); }
 .documents-section .todo-filters { padding-left: var(--space-5); }
@@ -1426,7 +1445,7 @@ h2 + .doc-list { border-top: none; }
 .doc-list li.group-header:first-child { margin-top: 0; }
 .group-label {
   font-size: var(--fs-label);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--warm);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -1451,7 +1470,7 @@ h2 + .doc-list { border-top: none; }
 }
 .learn-index .card { display: flex; flex-direction: column; gap: var(--space-0-4); }
 .learn-index .card-num { font-family: var(--font-mono, var(--font)); font-size: var(--fs-sm); color: var(--text-dim); letter-spacing: 0.1em; }
-.learn-index .card-title { font-size: var(--fs-hero); font-weight: 700; color: var(--text-bright); text-transform: uppercase; letter-spacing: 0.03em; }
+.learn-index .card-title { font-size: var(--fs-hero); font-weight: var(--fw-bold); color: var(--text-bright); text-transform: uppercase; letter-spacing: 0.03em; }
 .learn-index .card:hover .card-title { color: var(--accent); }
 .learn-index .card-desc { font-size: var(--fs-h5-6, 0.8rem); color: var(--text-muted); line-height: 1.4; }
 
@@ -1519,7 +1538,7 @@ h2 + .doc-list { border-top: none; }
 }
 .skill-row-name {
   font-size: var(--fs-body);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--text-bright);
   flex-shrink: 0;
   transition: var(--transition-color);
@@ -1836,9 +1855,8 @@ h2 + .doc-list { border-top: none; }
 .preview-card:hover .preview-card-frame {
   border-color: var(--accent);
   box-shadow:
-    0 0 0 1px var(--accent-border),
-    0 0 12px -2px var(--accent-glow, var(--accent-border)),
-    inset 0 0 18px -6px var(--accent-glow, var(--accent-border));
+    0 0 0 1px var(--accent-border);
+    /* flat by default: a hairline accent ring on hover - glow terms removed */
   transition: border-color 0.5s var(--ease),
               box-shadow 0.5s var(--ease);
 }
@@ -1899,7 +1917,7 @@ h2 + .doc-list { border-top: none; }
 }
 .preview-card-title {
   font-size: var(--fs-heading);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--text-bright);
   line-height: 1.35;
   letter-spacing: 0.01em;
@@ -2004,7 +2022,7 @@ h2 + .doc-list { border-top: none; }
 .markdown-body .utility-title,
 .utility-title {
   font-size: var(--fs-hero);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.12em;

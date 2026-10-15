@@ -18,6 +18,41 @@
      bg-card L* 2.8, ~2 above the nav rail) so a content surface reads as a
      distinct layer above both the page and the nav rail. */
   --bg-raised:     #101014;
+  /* Nested content resting ON a raised surface. Defined as the surface nudged a
+     few percent toward the ink (--text) rather than a fixed hex, so it is
+     mode-aware without a shadow:
+       dark mode  - ink is light -> nested goes LIGHTER (stacks up, as before);
+       light mode - ink is dark  -> nested goes slightly DARKER (reads as a card
+                    on white, since you cannot lift past white by lightness).
+     Both directions produce a distinct nested layer, and neither hits the
+     white/black ceiling. --text flips with the theme, so this token flips too. */
+  --bg-raised-2:   color-mix(in srgb, var(--bg-raised) 94%, var(--text));
+
+  /* ========================================================================
+     Elevation scale — the single consistent lift model.
+     Elevation is a CONTRAST STEP away from the parent surface, not a fixed
+     direction. The lower levels (0-3) are the fixed near-black dark-mode surface
+     ramp (lighter = more raised); the nested top level (--elev-4) is defined
+     relative to the surface via --bg-raised-2, so it steps the right way in
+     BOTH modes: lighter in dark mode, slightly darker in light mode (you can't
+     lift past white). No shadow needed in either mode. Every nested surface
+     picks the level one above its parent, so content stacks and never reads as
+     accidentally sunken. Levels 0-3 alias the --bg-* fills so existing uses are
+     unchanged; new/repointed surfaces reference the semantic level.
+       --elev-0  page base (darkest in dark mode)  the floor everything sits on
+       --elev-1  a panel resting on base
+       --elev-2  a card on a panel
+       --elev-3  a raised content surface   (the doc / dir / utility drawer)
+       --elev-4  nested content on a raised surface (Connections, Related, etc.)
+     A genuine recessed well (deliberately sunken) uses --elev-inset - reserved
+     for true containers (code blocks, search well, inputs), never the default
+     for nested panels. */
+  --elev-0:        var(--bg);
+  --elev-1:        var(--bg-surface);
+  --elev-2:        var(--bg-card);
+  --elev-3:        var(--bg-raised);
+  --elev-4:        var(--bg-raised-2);
+  --elev-inset:    var(--bg);
   --border:        #1a1a22;
   --border-strong: #282832;
   --text:          #c0c0c0;
@@ -57,7 +92,26 @@
   --highlight:      var(--accent);
   --surface-active: var(--accent-glow);
 
-  --font:          'Departure Mono', 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+  /* ========================================================================
+     Font role layer — swap any face by changing one face token.
+     Two faces, several roles. --font stays the mono instrument default so every
+     existing `var(--font)` site (chips, buttons, inputs, nav, data, labels) is
+     unchanged. Content roles point at the proportional face; code is pinned to
+     mono so it can never drift. To re-skin the system's type, change a face
+     token here - every role that references it follows.
+     ======================================================================== */
+  --font-mono:     'Departure Mono', 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+  --font-sans:     'Host Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --font:          var(--font-mono);   /* instrument default: chips, buttons, inputs, nav, data, labels */
+  --font-body:     var(--font-sans);   /* reading prose: markdown paragraphs, lists, card titles + descriptions */
+  --font-heading:  var(--font-sans);   /* document headings */
+  --font-code:     var(--font-mono);   /* pinned to mono: code + pre never follow a body-face swap */
+  /* Optical size compensation. Departure Mono has a large x-height, so a
+     proportional face at the same font-size reads smaller. Content selectors
+     multiply their font-size by this so the proportional body/heading matches
+     the mono's apparent size. Tune per body face: Inter wants ~1.08. */
+  --font-body-scale: 1.08;
   --ease:          cubic-bezier(0.4, 0, 0.2, 1);
   --ease-bounce:   cubic-bezier(0.34, 1.56, 0.64, 1);
 
@@ -82,6 +136,16 @@
   --fs-h3:      0.95rem;   /* markdown H3 */
   --fs-h5-6:    0.8rem;    /* markdown H5 / H6 (compact uppercase) */
 
+  /* Font-weight scale — the four weights in real use across the ecosystem,
+     named so weight stops being a raw numeric literal. Forward-looking: new
+     code uses these tokens; existing raw 400/500/600/700 are switched in
+     passing, not swept. 600 is the display-prose heading weight (markdown H1),
+     700 the instrument-chrome weight (chips, labels, buttons). */
+  --fw-normal:   400;   /* body copy, resting text */
+  --fw-medium:   500;   /* mild emphasis */
+  --fw-semibold: 600;   /* display-prose headings (markdown H1-H3) */
+  --fw-bold:     700;   /* instrument chrome: chips, labels, buttons, data */
+
   /* Icon size scale — rem-based so glyphs track the root font-size the zoom
      control adjusts, keeping icons aligned with adjacent text at every zoom
      level (px icons only aligned at 100%). Steps chosen from the real spread
@@ -105,15 +169,21 @@
   --space-4: 1rem;
   --space-5: 1.5rem;
   --space-6: 2rem;
-  /* Sub-scale — finer granularity for UI density tuning (WI-112 extension) */
-  --space-0-1:  0.1rem;    /* hairline gap */
-  --space-0-2:  0.2rem;    /* micro padding */
-  --space-0-3:  0.3rem;    /* fine padding */
-  --space-0-4:  0.4rem;    /* chip inline padding (also --chip-padding-x) */
-  --space-0-6:  0.6rem;    /* content inline padding, paragraph margin */
-  --space-0-8:  0.8rem;    /* compact-component inline padding */
-  --space-1-2:  1.2rem;    /* mid-step between --space-4 and --space-5 */
-  --space-1-25: 1.25rem;   /* section-panel default padding */
+  --space-7: 3rem;
+  /* Sub-scale — RETIRED into the core scale (design charter: one
+     geometric spacing scale, no between-rung values). Each former sub-step now
+     aliases the nearest core rung so existing call sites snap to the scale
+     without a mass find-replace. These aliases are transitional: a later pass
+     rewrites call sites to the core token directly and removes the names. Do
+     not introduce new uses of these — reference the core --space-N rung. */
+  --space-0-1:  var(--space-1);   /* was 0.1rem  -> 0.25rem */
+  --space-0-2:  var(--space-1);   /* was 0.2rem  -> 0.25rem */
+  --space-0-3:  var(--space-1);   /* was 0.3rem  -> 0.25rem */
+  --space-0-4:  var(--space-2);   /* was 0.4rem  -> 0.5rem  (also --chip-padding-x) */
+  --space-0-6:  var(--space-3);   /* was 0.6rem  -> 0.75rem */
+  --space-0-8:  var(--space-4);   /* was 0.8rem  -> 1rem   */
+  --space-1-2:  var(--space-5);   /* was 1.2rem  -> 1.5rem */
+  --space-1-25: var(--space-5);   /* was 1.25rem -> 1.5rem */
 
   /* Motion tokens — canonical durations for transitions/animations.
      Pinned to Hypervisor's actual usage distribution (WI-112 audit). */
@@ -149,10 +219,19 @@
   --z-cursor:      550;    /* cursor companion box (persistent floater) */
   --z-splash:      700;    /* boot splash — highest layer */
 
-  /* Shadow / elevation scale — replaces arbitrary rgba shadow strings */
-  --shadow-hover: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 1px var(--accent-border);
-  --shadow-panel: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 1px var(--accent-border);
-  --shadow-glow:  0 0 12px var(--accent-glow);
+  /* Shadow / elevation scale.
+     Design language: flat by default. Depth is noise unless the spatial
+     relationship it encodes is information. Only two cases are sanctioned - the
+     recessed content surface (--shadow-drawer) and the modal-above-everything
+     float (--shadow-panel). Decorative elevation is neutralized to none here, so
+     every site that referenced --shadow-hover / --shadow-glow flattens at once;
+     the token names are kept (not deleted) so call sites keep resolving.
+     Note: --accent-glow (the color) is NOT touched - it is still the functional
+     active-state background wash in ~21 sites; only its use as a glow shadow
+     dies with --shadow-glow. */
+  --shadow-hover: none;   /* was a decorative card-lift drop - flattened */
+  --shadow-glow:  none;   /* was a 12px accent bloom - flattened */
+  --shadow-panel: 0 6px 24px rgba(0, 0, 0, 0.4);   /* sanctioned modal float; glow halo removed */
   /* Open-bottom drawer surface elevation — the raised .dir-surface /
      .page-doc-surface / .utility-surface panels. Outward drop on top + sides
      (no bottom band, so the surface reads as continuing past the open edge)
@@ -181,12 +260,17 @@
      brutalist toggle: --radius 0 collapses this to 0 too. Tune the drawer
      roundness here rather than at the .dir-surface rule. */
   --radius-dir-surface: calc(var(--radius) * 5);
+  /* Pill — fully-rounded for small toggle/badge controls. A large multiple of
+     --radius so it reads as a full capsule at normal sizes, yet still collapses
+     to a square under the brutalist toggle (--radius: 0 -> 0). Earned shape:
+     the wordless .pill-toggle control (see primitives.css). */
+  --radius-pill: calc(var(--radius) * 250);
 
   /* Chip primitives — silhouette for all chip variants */
   --chip-height:         1.4;       /* line-height unit; sizes via padding */
-  --chip-padding-x:      0.4rem;
+  --chip-padding-x:      var(--space-2);   /* on-scale: 0.5rem (was 0.4rem; snapped with the sub-scale retirement) */
   --chip-font-size:      var(--fs-micro);
-  --chip-font-weight:    700;
+  --chip-font-weight:    var(--fw-bold);
   --chip-letter-spacing: 0.06em;
 
   /* Row primitives — 3-column grid for pulse/list rows */
@@ -262,8 +346,8 @@
   --state-hover-border:    var(--accent-border);   /* hover border accent */
   --state-active-bg:       var(--accent-glow);      /* selected/active tinted wash */
   --state-hover-brightness: 1.15;                  /* filter lift for chips/filled */
-  --state-hover-lift:      -1px;                    /* card hover translateY (subtle) */
-  --state-hover-lift-lg:   -2px;                    /* card hover translateY (pronounced) */
+  --state-hover-lift:      0;                       /* flat by default: no card-hover lift (was -1px) */
+  --state-hover-lift-lg:   0;                       /* flat by default: no card-hover lift (was -2px) */
 
   /* ========================================================================
      Focus-ring tokens — unified focus indicator vocabulary
@@ -278,7 +362,10 @@
   --focus-ring-width-lg: 3px;                  /* a11y enhanced-focus width */
   --focus-ring-offset:   2px;                  /* default outline offset */
   --focus-ring-offset-lg: 3px;                 /* a11y enhanced-focus offset */
-  --focus-ring: 0 0 0 var(--border-hair) var(--accent-border), var(--shadow-glow);
+  /* Flat focus ring: a hairline accent ring, no glow (the glow term was dropped
+     with the flat-by-default pass). The ring itself is the informational
+     affordance; it does not need a bloom. */
+  --focus-ring: 0 0 0 var(--border-hair) var(--accent-border);
 
   /* ========================================================================
      Transition recipes — named multi-property transition bundles

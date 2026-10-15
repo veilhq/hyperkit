@@ -109,3 +109,53 @@ textarea, [contenteditable="true"] {
   .hk-tooltip { transition: none; }
 }
 html.a11y-reduce-motion .hk-tooltip { transition: none; }
+
+
+/* ---- Ambient atmosphere (shared, always-on) --------------------------------
+   The ecosystem's resting backdrop, identical across apps for cohesion: a
+   static calibration-dot grid plus a dim gradient rising from the bottom edge,
+   both in the hairline ink (--border). Two fixed full-viewport layers at
+   z-index 0 (body::before = dots, body::after = gradient); app content is
+   elevated above via each app's own content-container z-index. Flat, no
+   animation, pointer-events none - honest atmosphere, encodes no state (the
+   sanctioned-character exception, per the design charter).
+
+   Layout-agnostic: the dot grid anchors to --site-nav-width when an app defines
+   one (Hypervisor's nav rail), and falls back to 0 otherwise (Hyperagent and
+   any app with no rail). Tokens tune both layers without touching the rules. */
+:root {
+  --calib-dot-color: var(--border);   /* dot ink - quiet, same weight as hairlines */
+  --calib-dot-size:  1px;             /* dot radius footprint */
+  --calib-dot-gap:   100px;           /* spacing between dots */
+  --atmosphere-gradient-opacity: 0.95;
+  --atmosphere-gradient-reach:   35%;  /* how far up the haze fades to transparent */
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    var(--calib-dot-color) var(--calib-dot-size),
+    transparent calc(var(--calib-dot-size) + 0.5px)
+  );
+  background-size: var(--calib-dot-gap) var(--calib-dot-gap);
+  /* Anchor to the nav-rail edge where one exists so the points line up with the
+     content column; falls back to 0 for rail-less apps. */
+  background-position: calc(var(--site-nav-width, 0px)) 0;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    var(--calib-dot-color) 0%,
+    transparent var(--atmosphere-gradient-reach)
+  );
+  opacity: var(--atmosphere-gradient-opacity);
+}

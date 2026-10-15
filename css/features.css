@@ -70,22 +70,41 @@
 .search-modal {
   max-width: 960px;
   width: 90%;
-  padding: 0;
+  padding: var(--space-3);
   max-height: 70vh;
   overflow: visible;
   z-index: 1;
   display: flex;
   flex-direction: column;
+  gap: var(--space-3);
 }
 
 /* ---- Input row ---- */
+/* A self-contained bordered field, conforming to the .form-input primitive
+   (bordered --radius rounded rect, --bg fill, flat, accent border + focus-ring
+   only on focus). Previously a bare bottom-hairline row that relied on the
+   modal panel for its enclosure, which left it looking unfinished when stood
+   alone (the zen inline input). Boxing it per the shape vocabulary makes it a
+   complete element in both the overlay and zen contexts, and matches the
+   launcher boxes / work cards it sits beside. */
 .search-input-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   column-gap: var(--row-gap);
-  padding: var(--row-padding-y) var(--space-4);
-  border-bottom: var(--border-hair) solid var(--border);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--motion-base) var(--ease),
+              box-shadow var(--motion-base) var(--ease);
+}
+/* Focus state encoded on the enclosure when the inner field is focused -
+   accent border + focus ring, same recipe as .form-input:focus. The color is
+   state (this is the active input), which the color law permits. */
+.search-input-row:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
 }
 .search-input-icon {
   width: var(--icon-lg);
@@ -94,15 +113,16 @@
   flex-shrink: 0;
 }
 #search {
+  /* Inline field inside the bordered row (the .form-input-inline pattern):
+     transparent and borderless, since the row carries the enclosure. */
   flex: 1;
   background: transparent;
   border: none;
   color: var(--text-bright);
-  font-family: var(--font);
-  font-size: var(--fs-hero);
+  font-family: var(--font-body);
+  font-size: calc(var(--fs-heading) * var(--font-body-scale));
   outline: none;
   padding: 0;
-  cursor: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2300ff41' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17 22h-1a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h1'/><path d='M7 22h1a4 4 0 0 0 4-4V6a4 4 0 0 0-4-4H7'/></svg>") 10 10, text;
   cursor: var(--cursor-text, text);
 }
 #search::placeholder {
@@ -131,10 +151,11 @@
 
 /* ---- Result card ---- */
 .search-results .sr-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-0-4);
-  padding: var(--space-3) var(--space-4);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  column-gap: var(--space-3);
+  padding: var(--space-5) var(--space-5);
   margin: var(--space-2) var(--space-3);
   color: var(--text);
   text-decoration: none;
@@ -157,6 +178,71 @@
   transform: translateY(-1px);
 }
 
+/* Compact variant — utility and directory results are a single line: a leading
+   type glyph, the name/path, and a trailing muted kind hint. They override the
+   two-column doc-card grid with a one-row flex so there is no stacked header
+   and no dead vertical space. Horizontal padding matches the doc cards so the
+   left edge still aligns; vertical padding is tight to the single line. */
+.search-results .sr-card.sr-card-compact {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+.sr-card-compact .sr-card-icon {
+  grid-row: auto;
+  margin-top: 0;
+}
+.sr-card-compact .sr-card-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Trailing kind hint — instrument chrome (mono, uppercase, dim), the same
+   readout the former stacked category label carried, now inline and secondary
+   to the name it describes. */
+.sr-card-kind {
+  flex: 0 0 auto;
+  font-family: var(--font);
+  font-size: var(--fs-micro, 0.55rem);
+  font-weight: var(--fw-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+/* Leading type glyph — the kind readout. Lives in the first grid column and
+   carries the category/type via its icon, replacing the former section
+   headers. Neutral grey at rest (not a mood accent); lifts to accent on hover
+   with the rest of the card. */
+.sr-card-icon {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  width: var(--icon-lg);
+  height: var(--icon-lg);
+  margin-top: var(--space-1);
+  color: var(--text-dim);
+  flex-shrink: 0;
+  transition: var(--transition-color);
+}
+.sr-card:hover .sr-card-icon,
+.sr-card.selected .sr-card-icon {
+  color: var(--accent);
+}
+
+/* Body column — holds the former card children (header, title, snippet,
+   footer, tags) stacked, now beside the leading icon. */
+.sr-card-body {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
 /* Card header (category + work ID) */
 .sr-card-header {
   display: flex;
@@ -166,14 +252,14 @@
 }
 .sr-card-category {
   font-size: var(--fs-detail);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-dim);
 }
 .sr-card-work-id {
   font-size: var(--fs-detail);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.04em;
   color: var(--accent);
   border: var(--border-hair) solid var(--accent-border);
@@ -181,10 +267,13 @@
   padding: 0.05rem var(--space-0-3);
 }
 
-/* Title */
+/* Title — prose carve-out: Host Grotesk with optical-size compensation,
+   matching .work-card-title / .pulse-title (charter instrument-vs-prose split).
+   Chips/category/path stay mono as instrument chrome. */
 .sr-card-title {
-  font-size: var(--fs-body);
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-size: calc(var(--fs-body) * var(--font-body-scale));
+  font-weight: var(--fw-bold);
   color: var(--text-bright);
   line-height: var(--chip-height);
   transition: var(--transition-color);
@@ -194,9 +283,10 @@
   color: var(--accent);
 }
 
-/* Snippet */
+/* Snippet — reading prose, same body-face carve-out. */
 .sr-card-snippet {
-  font-size: var(--fs-h5-6);
+  font-family: var(--font-body);
+  font-size: calc(var(--fs-h5-6) * var(--font-body-scale));
   color: var(--text-muted);
   line-height: 1.6;
   display: -webkit-box;
@@ -243,7 +333,7 @@
 /* ---- Tag chips in results ---- */
 .sr-tag {
   font-size: var(--fs-micro, 0.55rem);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: var(--space-0-1) 0.35rem;
@@ -266,8 +356,8 @@
 /* ---- Semantic partial-match indicator ---- */
 .sr-partial-badge {
   position: absolute;
-  top: var(--space-3);
-  right: var(--space-4);
+  top: var(--space-5);
+  right: var(--space-5);
   font-size: var(--fs-micro, 0.55rem);
   color: var(--cool);
   border-color: var(--cool);
@@ -277,10 +367,20 @@
 .sr-semantic-divider {
   padding: var(--space-2) var(--space-4);
   font-size: var(--fs-micro, 0.55rem);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-dim);
+  border-top: var(--border-hair) solid var(--border);
+}
+
+/* ---- Group divider ---- */
+/* Hairline rule separating the non-file group (directories/utilities) above
+   from the file results below. Inset to match the card side margins so it
+   reads as part of the list rhythm, not a full-bleed cut. */
+.sr-group-divider {
+  height: 0;
+  margin: var(--space-2) var(--space-3);
   border-top: var(--border-hair) solid var(--border);
 }
 
@@ -470,17 +570,20 @@
   border-bottom-color: transparent;
 }
 .app-shelf .doc-list.todo-list {
+  padding: var(--space-2) var(--space-4);
   transition: max-height var(--motion-medium) var(--ease), opacity var(--motion-base) var(--ease);
   overflow: hidden;
 }
 .app-shelf.shelf-collapsed .doc-list.todo-list {
   max-height: 0 !important;
+  padding-top: 0;
+  padding-bottom: 0;
   opacity: 0;
   border-top: none;
 }
 .app-shelf-label {
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--warm);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -494,7 +597,7 @@
 .app-shelf.shelf-hidden { display: none; }
 .app-shelf-recent-count {
   font-size: var(--fs-detail);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--comp);
 }
 
@@ -556,7 +659,7 @@ ul.todo-list li.doc-recent::after {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
 }
 .todo-title a:hover { color: var(--accent); }
 .todo-desc {
@@ -579,7 +682,7 @@ ul.todo-list li.doc-recent::after {
 /* ---- Work item ID (inline with title) ---- */
 .work-id-inline {
   color: var(--accent-dim);
-  font-weight: normal;
+  font-weight: var(--fw-normal);
 }
 ul.todo-list li.todo-hidden { display: none; }
 /* ---- Computed metadata badges ---- */
@@ -680,8 +783,8 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .pin-card:hover {
   border-color: var(--warm);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 1px rgba(255, 176, 0, 0.15);
-  transform: translateY(-1px);
+  box-shadow: none;
+  /* flat by default: border/background hover only - no lift, no drop */
 }
 .pin-card-removing {
   opacity: 0;
@@ -707,14 +810,14 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .pin-card-category {
   font-size: var(--fs-micro);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-dim);
 }
 .pin-card-work-id {
   font-size: var(--fs-micro);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   letter-spacing: 0.04em;
   color: var(--accent);
   border: var(--border-hair) solid var(--accent-border);
@@ -750,7 +853,7 @@ ul.todo-list li.todo-hidden { display: none; }
 /* Pin card title */
 .pin-card-title {
   font-size: var(--fs-hero);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--text-bright);
   text-decoration: none;
   line-height: 1.4;
@@ -807,7 +910,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .pin-card-tag {
   font-size: var(--fs-micro);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: var(--space-0-1) 0.35rem;
@@ -900,6 +1003,27 @@ ul.todo-list li.todo-hidden { display: none; }
   pointer-events: auto;
 }
 
+/* Condensed reading width: .page gains .condensed, which caps it to the
+   reading max-width and centers it (margin: 0 auto in the layout). The TOC
+   flag, its hit target, and its drawer are all fixed-position siblings of
+   .page anchored to the nav rail, so none of them follow that centering - they
+   would stay pinned left, detached from the now-inset surface (the visible flag
+   AND its hit area / dropdown must all move together, or clicks and the panel
+   land in the old place). Track the centered surface's left edge: half the
+   leftover viewport width past the cap, plus the nav-rail offset and inset.
+   max(...,0) collapses the indent on viewports narrower than the cap, where
+   .condensed does not inset and the base anchor is already correct.
+   --reading-max-width mirrors the layout's .page.condensed cap; keep in sync. */
+.page.condensed ~ .toc-flag-wrap,
+.page.condensed ~ .toc-flag-hit,
+.page.condensed ~ .toc-drawer {
+  left: calc(
+    max((100vw - var(--reading-max-width, 1480px)) / 2, 0px)
+    + var(--site-nav-width, 0px)
+    + var(--space-5)
+  );
+}
+
 /* ---- Entrance: on each doc load the flag stays fully invisible while the
    surface plays its own entrance (dirSurfaceIn, ~0.55s), then rises up from
    behind the surface as it fades in. toc.js adds .entering on navigation to
@@ -941,7 +1065,7 @@ ul.todo-list li.todo-hidden { display: none; }
   border-radius: var(--radius) var(--radius) 0 0;
   font-family: var(--font);
   font-size: var(--fs-label);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   cursor: pointer;
@@ -1172,7 +1296,7 @@ ul.todo-list li.todo-hidden { display: none; }
 /* ---- Tab title — Hyperagent title-color state model ---- */
 .tab-title {
   font-size: var(--fs-heading);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--text);
   max-width: 180px;
   overflow: hidden;
@@ -1349,6 +1473,103 @@ ul.todo-list li.todo-hidden { display: none; }
   stroke: var(--error);
 }
 
+/* ─── External Non-MD File Frame ──────────────────────────────────────────── */
+/* Shared viewing frame for non-markdown files in .external/ (txt, sql, images,
+   binaries). Every type renders inside this same frame - only .external-doc-body
+   varies - so a .txt, a .sql, and a .png all look consistent. */
+
+.external-doc {
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised, var(--bg));
+  overflow: hidden;
+}
+
+.external-doc-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-hair) solid var(--border);
+  background: var(--bg);
+  font-family: var(--font);
+}
+
+.external-doc-icon {
+  width: 18px;
+  height: 18px;
+  stroke: var(--text-muted);
+  flex: 0 0 auto;
+}
+
+.external-doc-name {
+  color: var(--text-bright);
+  font-size: var(--fs-body);
+  word-break: break-all;
+}
+
+.external-doc-badge {
+  flex: 0 0 auto;
+  padding: 0 var(--space-2);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  color: var(--cool);
+  font-size: var(--fs-detail);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.external-doc-meta {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: var(--fs-detail);
+}
+
+.external-doc-body {
+  padding: var(--space-4);
+}
+
+/* The code body is pygments' <div class="highlight"><pre>. The .external-doc
+   card renders inside the .markdown-body article, so that <pre> would inherit
+   the markdown fenced-code card (border, --bg-card, radius, padding) and nest a
+   second box inside the frame. Neutralize it - the .external-doc card is the
+   only container; the code sits flat on its body. */
+.external-doc-body .highlight {
+  background: transparent;
+}
+.external-doc-body pre {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* Text + code bodies: readable monospace, wrap long lines, scroll overflow. */
+.external-doc-body .external-text,
+.external-doc-body .highlight {
+  margin: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+
+.external-doc-body .external-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+}
+
+/* Image body: cap width so a large screenshot stays contained in the frame. */
+.external-doc-body .external-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+
 /* ---- 13-ideas-dismiss.css ---- */
 
 /* ─── Ideas Dismiss Button ─────────────────────────────────────────────────── */
@@ -1448,7 +1669,7 @@ ul.todo-list li.todo-hidden { display: none; }
   right: var(--space-3);
   font-family: var(--font);
   font-size: var(--fs-detail);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--accent);
@@ -1474,7 +1695,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .inline-editor-cancel {
   font-family: var(--font);
   font-size: var(--fs-label);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   padding: var(--space-0-4) var(--space-4);
@@ -1518,7 +1739,7 @@ ul.todo-list li.todo-hidden { display: none; }
   max-width: 90vw;
   background: var(--bg-card);
   border: var(--border-hair) solid var(--accent);
-  box-shadow: 0 0 24px rgba(0, 255, 65, 0.08), 0 8px 32px rgba(0, 0, 0, 0.8);
+  box-shadow: none;   /* flat by default: border delineates the palette - no bloom/drop */
   display: flex;
   flex-direction: column;
   max-height: 60vh;
@@ -1644,13 +1865,13 @@ ul.todo-list li.todo-hidden { display: none; }
   bottom: 0;
   width: clamp(320px, 28vw, 400px);
   background: var(--bg);
-  border-left: var(--border-hair) solid var(--border);
+  border-left: var(--border-hair) solid var(--border-strong);
   z-index: 9000;
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
   transition: transform var(--motion-base) var(--ease);
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.6);
+  /* flat by default: the left border edge separates the panel - no drop shadow. */
 }
 .scratch-panel.open {
   transform: translateX(0);
@@ -1683,7 +1904,7 @@ ul.todo-list li.todo-hidden { display: none; }
   color: var(--text-muted);
   font-family: inherit;
   font-size: var(--fs-micro);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: var(--space-1) var(--space-2);
@@ -1745,7 +1966,7 @@ ul.todo-list li.todo-hidden { display: none; }
   min-width: 3rem;
   padding-top: var(--space-0-3);
   flex-shrink: 0;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
 }
 .scratch-input-cursor {
   width: 2px;
@@ -1931,7 +2152,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .scratch-card-time {
   font-size: var(--note-time-size);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--note-ink);
   letter-spacing: 0.03em;
 }
@@ -1941,7 +2162,7 @@ ul.todo-list li.todo-hidden { display: none; }
    low-contrast and clashes with the cycle colors. */
 .scratch-card-moved {
   font-size: var(--note-time-size);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--note-marker);
   letter-spacing: 0.03em;
 }
@@ -2041,7 +2262,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .scratch-history-date {
   font-size: var(--fs-caption);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--text-bright);
 }
 .scratch-history-meta {
@@ -2051,7 +2272,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .scratch-history-badge {
   font-size: var(--fs-micro);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--accent);
@@ -2122,7 +2343,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .not-found-code {
   font-size: 6rem;
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--accent);
   line-height: 1;
   letter-spacing: 0.1em;
@@ -2215,7 +2436,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .shortcuts-title {
   font-size: var(--fs-h5-6);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--accent);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -2301,7 +2522,7 @@ ul.todo-list li.todo-hidden { display: none; }
   transform: translate(-50%, -50%);
   font-family: var(--font);
   font-size: var(--fs-h1);
-  font-weight: 700;
+  font-weight: var(--fw-bold);
   color: var(--bg);
   background: var(--comp);
   padding: 0.35rem var(--space-4);

@@ -15,15 +15,15 @@
   if (window.HvGreeting) return;
 
   var GREETINGS = [
-    'welcome back, operator.',
-    'workspace online.',
-    'good to see you, V.',
-    'hyperspace loaded.',
-    'ready when you are.',
-    'let\'s get to work.',
-    'the vault, as you left it.',
-    'still here. still working.',
-    'awaiting instruction.',
+    'Welcome back, operator.',
+    'Workspace online.',
+    'Good to see you, V.',
+    'Hyperspace loaded.',
+    'Ready when you are.',
+    'Let\'s get to work.',
+    'The vault, as you left it.',
+    'Still here. Still working.',
+    'Awaiting instruction.',
     // Kaomoji — ambient flavor, no state claims
     '[+1]',
     '(-_-)b',
