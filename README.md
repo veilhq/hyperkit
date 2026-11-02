@@ -124,7 +124,7 @@ Hyperkit's CSS cascade is the single source of truth for the visual language acr
 
 ### The Override Pattern
 
-The one deliberate divergence in the whole primitive set is `.hv-tab`: Hypervisor renders it as a bordered box, Hyperagent renders it with a clipped corner. Hyperkit ships only the shared base (position, background, hover transition); each app layers its own shape on top in a small local override file. This is the template for any future divergence — extend the shared base, never fork it.
+Tabs are one shared primitive, `.nav-tab`: a `--radius` rect with a hairline and the `--selected` active state, identical in every app. Apps add only padding and layout. Where an app must diverge, extend the shared base in a small local override file — never fork it.
 
 ### Ecosystem JS Modules
 

@@ -86,12 +86,12 @@ textarea, [contenteditable="true"] {
 .hk-tooltip {
   position: fixed;
   z-index: var(--z-dropdown);
-  white-space: nowrap;
+  white-space: pre;
   font-family: var(--font);
-  font-size: var(--fs-caption);
-  color: var(--accent);
+  font-size: var(--fs-mono);
+  color: var(--text);
   background: var(--bg);
-  border: var(--border-hair) solid var(--accent-border);
+  border: var(--border-hair) solid var(--border-strong);
   border-radius: var(--radius);
   padding: var(--space-1) var(--space-2);
   pointer-events: none;

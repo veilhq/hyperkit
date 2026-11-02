@@ -1,6 +1,6 @@
 /* ===== Hyperkit — Visualization Primitives =====
    Shared, token-driven chart primitives for every hyper ecosystem app.
-   Class vocabulary: hv-viz-*. Rendered/populated by window.HvViz (js/viz.js).
+   Class vocabulary: viz-*. Rendered/populated by window.HvViz (js/viz.js).
 
    Techniques by primitive:
      - Bar / stacked bar / legend / donut  → CSS + SVG (theme via tokens directly)
@@ -12,18 +12,18 @@
    Do not hardcode colors, spacing, radius, or motion — reference tokens. */
 
 /* ---- Horizontal bar chart ------------------------------------------------ */
-.hv-viz-bars {
+.viz-bars {
   display: flex;
   flex-direction: column;
-  gap: var(--space-0-4);
+  gap: var(--space-2);
 }
-.hv-viz-bar-row {
+.viz-bar-row {
   display: grid;
   grid-template-columns: 1fr max-content;
   align-items: center;
   gap: var(--space-2);
 }
-.hv-viz-bar-track {
+.viz-bar-track {
   height: 28px;
   background: var(--bg-surface);
   border: var(--border-hair) solid var(--border);
@@ -31,117 +31,251 @@
   position: relative;
   overflow: hidden;
 }
-.hv-viz-bar-fill {
+.viz-bar-fill {
   height: 100%;
   position: absolute;
   top: 0;
   left: 0;
   opacity: 1;
   border-radius: var(--radius);
-  background: var(--accent);
+  background: var(--magnitude);
   transition: width var(--motion-slow) var(--ease);
 }
 /* Label overlaid inside the track. White text + mix-blend-mode:exclusion
    renders inverted against whatever is beneath it (fill color or the empty
    track), keeping contrast across the whole bar. Exclusion is softer than
    difference on mid-tones, avoiding harsh off-palette color. */
-.hv-viz-bar-label {
+.viz-bar-label {
   position: absolute;
   top: 0;
   left: var(--space-2);
   height: 100%;
   display: flex;
   align-items: center;
-  font-size: var(--fs-body);
-  color: #fff;
+  font-size: var(--fs-mono);
+  color: #fff; /* design-lint: allow - exclusion-blend operand, not a palette color */
   mix-blend-mode: exclusion;
   white-space: nowrap;
   pointer-events: none;
   z-index: 1;
 }
-.hv-viz-bar-val {
-  font-size: var(--fs-body);
+.viz-bar-val {
+  font-size: var(--fs-mono);
   color: var(--text-muted);
 }
 
+/* ---- Cell bar (discrete magnitude on the dot/cell grid) ------------------ */
+/* A flex row of equal cells rendered by HvViz.cellBar. Cells auto-fit the
+   container width (flex: 1) so the count drives density without a hardcoded
+   per-cell width. Filled cells carry --magnitude (set inline by the renderer);
+   empty cells read as the neutral surface with a hairline frame. Flat, no
+   shadow — the charter's first-reach magnitude display. */
+.viz-cell-bar {
+  display: flex;
+  gap: var(--space-1);
+  align-items: stretch;
+  width: 100%;
+  height: var(--space-3);
+}
+.viz-cell {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--bg-surface);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+}
+.viz-cell-filled {
+  border-color: transparent;
+  /* background set inline to --magnitude by HvViz.cellBar */
+}
+
+/* ---- Seven-segment display (numeric readout) ----------------------------- */
+/* Each digit is a fixed box holding 7 absolutely-positioned segment bars.
+   Lit segments get an inline color from HvViz; unlit segments stay as faint
+   ghosts (the "off" segments carry the retro-LCD texture). Segment thickness
+   and digit size are driven by --seg-size so a consumer can scale the whole
+   display by setting one custom property on the container. */
+.viz-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  --seg-size: 2.2rem;
+  --seg-thick: calc(var(--seg-size) * 0.14);
+}
+.viz-seg-digit {
+  position: relative;
+  width: calc(var(--seg-size) * 0.62);
+  height: var(--seg-size);
+  flex: 0 0 auto;
+}
+.viz-seg-s {
+  position: absolute;
+  background: var(--text-dim);
+  opacity: 0.12;              /* ghost: unlit segment */
+  border-radius: var(--radius-pill);   /* rounded pill segments, not square bars */
+}
+.viz-seg-on {
+  opacity: 1;                 /* lit: inline color from HvViz */
+}
+/* Horizontal segments (a top, g middle, d bottom) */
+.viz-seg-a, .viz-seg-g, .viz-seg-d {
+  left: var(--seg-thick);
+  right: var(--seg-thick);
+  height: var(--seg-thick);
+}
+.viz-seg-a { top: 0; }
+.viz-seg-g { top: calc(50% - var(--seg-thick) / 2); }
+.viz-seg-d { bottom: 0; }
+/* Vertical segments (f top-left, b top-right, e bottom-left, c bottom-right) */
+.viz-seg-f, .viz-seg-b, .viz-seg-e, .viz-seg-c {
+  width: var(--seg-thick);
+  height: calc(50% - var(--seg-thick) * 1.5);
+}
+.viz-seg-f { top: var(--seg-thick); left: 0; }
+.viz-seg-b { top: var(--seg-thick); right: 0; }
+.viz-seg-e { bottom: var(--seg-thick); left: 0; }
+.viz-seg-c { bottom: var(--seg-thick); right: 0; }
+.viz-seg-colon {
+  font-family: var(--font);
+  font-size: var(--seg-size);
+  line-height: var(--lh-tight);
+}
+
+/* ---- Flip display (split-flap cards) ------------------------------------- */
+/* One filled card per char, with a horizontal hinge seam across the middle.
+   On a value change HvViz adds .viz-flip-animate to replay a brief flip. The
+   card fill defaults to --comp-less neutral surface; a consumer passes a color
+   or the container sets one. Scale via --flip-size on the container. */
+.viz-flip {
+  display: inline-flex;
+  gap: var(--space-1);
+  --flip-size: 2.6rem;
+}
+.viz-flip-card {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(var(--flip-size) * 0.72);
+  height: var(--flip-size);
+  padding: 0 var(--space-2);
+  background: var(--bg-elevated);
+  color: var(--text-bright);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font);
+  font-size: calc(var(--flip-size) * 0.6);
+  line-height: var(--lh-tight);
+  overflow: hidden;
+}
+/* Hinge seam: a hairline across the vertical middle of the card. */
+.viz-flip-card::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% - 0.5px);
+  height: 1px;
+  background: var(--bg);
+  opacity: 0.6;
+}
+.viz-flip-val {
+  position: relative;
+  z-index: 1;
+}
+/* Flip: the card briefly scales its top half down then back, reading as a
+   flap falling. Kept short and subtle - motion confirms the digit changed. */
+@keyframes vizFlipDrop {
+  0%   { transform: perspective(200px) rotateX(0deg); }
+  50%  { transform: perspective(200px) rotateX(-18deg); }
+  100% { transform: perspective(200px) rotateX(0deg); }
+}
+.viz-flip-animate {
+  animation: vizFlipDrop var(--motion-base) var(--ease);
+  transform-origin: center center;
+}
+.a11y-reduce-motion .viz-flip-animate {
+  animation: none;
+}
+
 /* ---- Stacked bar --------------------------------------------------------- */
-.hv-viz-stacked {
+.viz-stacked {
   height: 28px;
   display: flex;
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
 }
-.hv-viz-stacked-seg {
+.viz-stacked-seg {
   height: 100%;
   opacity: 1;
   transition: width var(--motion-slow) var(--ease);
 }
 
 /* ---- Team bars (labeled multi-row stacked: name + bar + meta) ---------- */
-.hv-viz-team {
+.viz-team {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
-.hv-viz-team-row {
+.viz-team-row {
   display: grid;
   grid-template-columns: 120px 1fr 50px;
   align-items: center;
-  gap: var(--space-0-6);
+  gap: var(--space-3);
 }
-.hv-viz-team-name {
-  font-size: var(--fs-body);
+.viz-team-name {
+  font-size: var(--fs-mono);
   color: var(--text-bright);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.hv-viz-team-bar {
+.viz-team-bar {
   height: 24px;
   display: flex;
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
 }
-.hv-viz-team-seg {
+.viz-team-seg {
   height: 100%;
   opacity: 1;
 }
-.hv-viz-team-meta {
-  font-size: var(--fs-label);
+.viz-team-meta {
+  font-size: var(--fs-mono);
   color: var(--text-muted);
   text-align: right;
 }
 
 /* ---- Legend (shared by donut, stacked bar, line chart) ------------------- */
-.hv-viz-legend {
+.viz-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-1-2);
+  gap: var(--space-2) var(--space-5);
   margin-top: var(--space-2);
 }
-.hv-viz-legend-item {
+.viz-legend-item {
   display: flex;
   align-items: center;
-  gap: var(--space-0-3);
-  font-size: var(--fs-label);
+  gap: var(--space-1);
+  font-size: var(--fs-mono);
   color: var(--text-muted);
 }
-.hv-viz-legend-swatch {
+.viz-legend-swatch {
   width: 10px;
   height: 10px;
-  border-radius: 2px;
+  border-radius: calc(var(--radius) / 2);
   opacity: 0.85;
   flex: none;
 }
 /* Line-series legend marker — a short rule instead of a square swatch */
-.hv-viz-legend-line {
+.viz-legend-line {
   width: 16px;
   height: 2px;
   flex: none;
 }
-.hv-viz-legend-line-dashed {
+.viz-legend-line-dashed {
   width: 16px;
   height: 0;
   border-top: var(--border-rail) dashed var(--text-dim);
@@ -149,37 +283,37 @@
 }
 
 /* ---- Donut / ring (SVG) -------------------------------------------------- */
-.hv-viz-donut-wrap {
+.viz-donut-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-2);
 }
-.hv-viz-donut {
+.viz-donut {
   position: relative;
   width: 100%;
   max-width: 220px;
   aspect-ratio: 1 / 1;
 }
-.hv-viz-donut svg {
+.viz-donut svg {
   display: block;
   width: 100%;
   height: 100%;
   transform: rotate(-90deg); /* start first segment at 12 o'clock */
 }
-.hv-viz-donut-track {
+.viz-donut-track {
   fill: none;
   stroke: var(--bg-surface);
 }
-.hv-viz-donut-seg {
+.viz-donut-seg {
   fill: none;
   opacity: 1;
   transition: stroke-dasharray var(--motion-slow) var(--ease);
 }
-.hv-viz-donut-dot {
+.viz-donut-dot {
   opacity: 1;
 }
-.hv-viz-donut-center {
+.viz-donut-center {
   position: absolute;
   inset: 0;
   display: flex;
@@ -188,27 +322,27 @@
   justify-content: center;
   pointer-events: none;
 }
-.hv-viz-donut-total {
-  font-size: var(--fs-hero);
+.viz-donut-total {
+  font-size: var(--fs-mono);
   color: var(--text-bright);
-  line-height: 1;
+  line-height: var(--lh-tight);
 }
-.hv-viz-donut-total-label {
-  font-size: var(--fs-caption);
+.viz-donut-total-label {
+  font-size: var(--fs-mono);
   color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-top: var(--space-0-2);
+  letter-spacing: var(--track-label);
+  margin-top: var(--space-1);
 }
 
 /* ---- Line chart (canvas — e.g. burndown) --------------------------------- */
-.hv-viz-line {
+.viz-line {
   position: relative;
   width: 100%;
   height: 180px;
   overflow: hidden;
 }
-.hv-viz-line canvas {
+.viz-line canvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -217,28 +351,28 @@
 }
 
 /* ---- Sparkline (canvas) -------------------------------------------------- */
-.hv-viz-sparkline {
+.viz-sparkline {
   position: relative;
   width: 100%;
   height: 120px;
 }
-.hv-viz-sparkline canvas {
+.viz-sparkline canvas {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
 }
-.hv-viz-sparkline-labels {
+.viz-sparkline-labels {
   display: flex;
   justify-content: space-between;
-  font-size: var(--fs-micro);
+  font-size: var(--fs-mono);
   color: var(--text-dim);
-  margin-top: var(--space-0-2);
+  margin-top: var(--space-1);
 }
 
 /* ---- Empty state (shared) ------------------------------------------------ */
-.hv-viz-empty {
+.viz-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -247,7 +381,7 @@
   padding: var(--space-5) var(--space-2);
   text-align: center;
   color: var(--text-dim);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-mono);
 }
 
 /* ---- Responsive ---------------------------------------------------------- */

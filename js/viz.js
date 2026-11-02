@@ -1,5 +1,5 @@
 /* ===== Hyperkit — Visualization Primitives (window.HvViz) =====
-   Vanilla renderers for the hv-viz-* CSS primitives (css/viz.css). No frameworks,
+   Vanilla renderers for the viz-* CSS primitives (css/viz.css). No frameworks,
    no charting library — SVG for donut/bar/stacked/legend, <canvas> for line/spark.
 
    Self-contained IIFE, idempotent, strict mode — same idiom as HvToast/HvUtils.
@@ -8,6 +8,9 @@
    API (all take a container element or its id):
      HvViz.donut(target, { segments:[{label,value,color}], total?, totalLabel?, thickness?, gap? })
      HvViz.bars(target, { rows:[{label,value,color?}], max? })
+     HvViz.cellBar(target, { value, max, color?, cells?, emptyMessage? })
+     HvViz.segmentDisplay(target, { value, color?, emptyMessage? })   // 7-segment numeric
+     HvViz.flip(target, { value, color?, emptyMessage? })             // split-flap cards
      HvViz.stackedBar(target, { segments:[{label,value,color}], legend? })
      HvViz.teamBars(target, { rows:[{name,meta?,segments:[{label,value,color?}]}] })
      HvViz.legend(target, items:[{label,color,style?}])   // style: 'swatch'|'line'|'line-dashed'
@@ -54,7 +57,7 @@
   function emptyState(node, msg) {
     clear(node);
     var d = document.createElement('div');
-    d.className = 'hv-viz-empty';
+    d.className = 'viz-empty';
     d.textContent = msg || 'No data available';
     node.appendChild(d);
   }
@@ -77,19 +80,19 @@
     var node = el(target);
     if (!node) return;
     clear(node);
-    node.className = 'hv-viz-legend';
+    node.className = 'viz-legend';
     (items || []).forEach(function (it) {
       var item = document.createElement('div');
-      item.className = 'hv-viz-legend-item';
+      item.className = 'viz-legend-item';
       var mark = document.createElement('div');
       var style = it.style || 'swatch';
       if (style === 'line') {
-        mark.className = 'hv-viz-legend-line';
+        mark.className = 'viz-legend-line';
         mark.style.background = it.color;
       } else if (style === 'line-dashed') {
-        mark.className = 'hv-viz-legend-line-dashed';
+        mark.className = 'viz-legend-line-dashed';
       } else {
-        mark.className = 'hv-viz-legend-swatch';
+        mark.className = 'viz-legend-swatch';
         mark.style.background = it.color;
       }
       item.appendChild(mark);
@@ -113,7 +116,7 @@
     if (!segs.length || total <= 0) { emptyState(node, opts.emptyMessage); return; }
 
     clear(node);
-    node.className = 'hv-viz-donut-wrap';
+    node.className = 'viz-donut-wrap';
 
     // Geometry: viewBox 100x100, radius chosen so stroke sits inside.
     var thickness = opts.thickness || 10;
@@ -122,12 +125,12 @@
     var circ = 2 * Math.PI * r;
 
     var donutBox = document.createElement('div');
-    donutBox.className = 'hv-viz-donut';
+    donutBox.className = 'viz-donut';
     var svg = svgEl('svg', { viewBox: '0 0 100 100', role: 'img' });
 
     // Track ring
     svg.appendChild(svgEl('circle', {
-      class: 'hv-viz-donut-track', cx: 50, cy: 50, r: r, 'stroke-width': thickness
+      class: 'viz-donut-track', cx: 50, cy: 50, r: r, 'stroke-width': thickness
     }));
 
     // Length normalization so small slices stay visible without dots:
@@ -175,7 +178,7 @@
       // TRUE percentage (not display-adjusted) for the tooltip + accessible name.
       var segLabel = s.label + ': ' + s.value + ' (' + Math.round(m.trueFrac * 100) + '%)';
       var arc = svgEl('circle', {
-        class: 'hv-viz-donut-seg',
+        class: 'viz-donut-seg',
         cx: 50, cy: 50, r: r,
         stroke: color,
         'stroke-width': thickness,
@@ -192,14 +195,14 @@
 
     // Center total
     var center = document.createElement('div');
-    center.className = 'hv-viz-donut-center';
+    center.className = 'viz-donut-center';
     var totalEl = document.createElement('div');
-    totalEl.className = 'hv-viz-donut-total';
+    totalEl.className = 'viz-donut-total';
     totalEl.textContent = total;
     center.appendChild(totalEl);
     if (opts.totalLabel) {
       var lbl = document.createElement('div');
-      lbl.className = 'hv-viz-donut-total-label';
+      lbl.className = 'viz-donut-total-label';
       lbl.textContent = opts.totalLabel;
       center.appendChild(lbl);
     }
@@ -227,16 +230,16 @@
       ? opts.max
       : Math.max.apply(null, rows.map(function (r) { return r.value; }).concat([0]));
     clear(node);
-    node.className = 'hv-viz-bars';
+    node.className = 'viz-bars';
     rows.forEach(function (r, i) {
       var pct = max > 0 ? (r.value / max) * 100 : 0;
       var row = document.createElement('div');
-      row.className = 'hv-viz-bar-row';
+      row.className = 'viz-bar-row';
 
       var track = document.createElement('div');
-      track.className = 'hv-viz-bar-track';
+      track.className = 'viz-bar-track';
       var fill = document.createElement('div');
-      fill.className = 'hv-viz-bar-fill';
+      fill.className = 'viz-bar-fill';
       fill.style.width = pct + '%';
       if (r.color) fill.style.background = r.color;
       track.appendChild(fill);
@@ -245,18 +248,141 @@
       // text auto-contrast against both the filled and empty parts of the bar,
       // so it stays legible regardless of fill color or bar length.
       var label = document.createElement('span');
-      label.className = 'hv-viz-bar-label';
+      label.className = 'viz-bar-label';
       label.textContent = r.label;
       track.appendChild(label);
 
       var val = document.createElement('span');
-      val.className = 'hv-viz-bar-val';
+      val.className = 'viz-bar-val';
       val.textContent = r.value;
 
       row.appendChild(track);
       row.appendChild(val);
       node.appendChild(row);
     });
+  }
+
+  // --- cell bar (discrete filled/empty cells — magnitude on the dot grid) --
+  // A row of `cells` cells; the first `fillCount` read as filled, the rest
+  // empty. fillCount is value/max scaled to the cell count, so a 0-59 second
+  // value can render across 60 cells (1:1) or a 0-1440 minute-of-day value can
+  // render across 24 cells (one per hour). Discrete counterpart to the
+  // continuous .viz-bar-fill — the charter's dot/cell grid for magnitude.
+  function cellBar(target, opts) {
+    var node = el(target);
+    if (!node) return;
+    opts = opts || {};
+    var max = opts.max != null ? opts.max : 1;
+    if (max <= 0) { emptyState(node, opts.emptyMessage); return; }
+    var cells = opts.cells != null ? opts.cells : max;
+    cells = Math.max(1, Math.round(cells));
+    var value = opts.value != null ? opts.value : 0;
+    var frac = Math.max(0, Math.min(1, value / max));
+    var fillCount = Math.round(frac * cells);
+    var color = opts.color || token('--magnitude', token('--accent', '#00ff41'));
+
+    clear(node);
+    node.className = 'viz-cell-bar';
+    for (var i = 0; i < cells; i++) {
+      var cell = document.createElement('span');
+      cell.className = 'viz-cell' + (i < fillCount ? ' viz-cell-filled' : '');
+      if (i < fillCount) cell.style.background = color;
+      node.appendChild(cell);
+    }
+  }
+
+  // --- seven-segment display (numeric readout) ---------------------------
+  // Renders a string of digits (and colons) as seven-segment glyphs. Lit
+  // segments carry `color`; unlit segments stay as faint ghosts (the "off"
+  // segments are the whole retro-LCD look). General numeric readout: clocks,
+  // counters, countdowns. Non-digit, non-colon chars render as a blank slot.
+  // Segment map per digit: [a,b,c,d,e,f,g] (top, top-right, bottom-right,
+  // bottom, bottom-left, top-left, middle).
+  var SEG_MAP = {
+    '0': [1,1,1,1,1,1,0], '1': [0,1,1,0,0,0,0], '2': [1,1,0,1,1,0,1],
+    '3': [1,1,1,1,0,0,1], '4': [0,1,1,0,0,1,1], '5': [1,0,1,1,0,1,1],
+    '6': [1,0,1,1,1,1,1], '7': [1,1,1,0,0,0,0], '8': [1,1,1,1,1,1,1],
+    '9': [1,1,1,1,0,1,1]
+  };
+  var SEG_NAMES = ['a','b','c','d','e','f','g'];
+  function segmentDisplay(target, opts) {
+    var node = el(target);
+    if (!node) return;
+    opts = opts || {};
+    var str = opts.value != null ? String(opts.value) : '';
+    if (!str) { emptyState(node, opts.emptyMessage); return; }
+    var color = opts.color || token('--magnitude', token('--accent', '#00ff41'));
+
+    clear(node);
+    node.className = 'viz-seg';
+    for (var i = 0; i < str.length; i++) {
+      var ch = str.charAt(i);
+      if (ch === ':') {
+        var colon = document.createElement('span');
+        colon.className = 'viz-seg-colon';
+        colon.style.color = color;
+        colon.textContent = ':';
+        node.appendChild(colon);
+        continue;
+      }
+      var digit = document.createElement('span');
+      digit.className = 'viz-seg-digit';
+      var map = SEG_MAP[ch];
+      for (var s = 0; s < 7; s++) {
+        var seg = document.createElement('span');
+        seg.className = 'viz-seg-s viz-seg-' + SEG_NAMES[s] + (map && map[s] ? ' viz-seg-on' : '');
+        if (map && map[s]) seg.style.background = color;
+        digit.appendChild(seg);
+      }
+      node.appendChild(digit);
+    }
+  }
+
+  // --- flip display (split-flap cards) -----------------------------------
+  // Renders a string as split-flap cards (one per char), each a filled card
+  // with a horizontal hinge seam. On a value change the changed cards replay a
+  // brief flip animation. General animated readout: clocks, odometer counters,
+  // metric transitions. Prior value is cached on the node to detect changes.
+  function flip(target, opts) {
+    var node = el(target);
+    if (!node) return;
+    opts = opts || {};
+    var str = opts.value != null ? String(opts.value) : '';
+    if (!str) { emptyState(node, opts.emptyMessage); return; }
+    var color = opts.color;
+    var prev = node.__flipPrev || '';
+
+    // Rebuild only when the length changes; otherwise mutate in place so
+    // unchanged cards keep their state and only changed ones re-animate.
+    if (node.childNodes.length !== str.length || node.className !== 'viz-flip') {
+      clear(node);
+      node.className = 'viz-flip';
+      for (var i = 0; i < str.length; i++) {
+        var card = document.createElement('span');
+        card.className = 'viz-flip-card';
+        if (color) card.style.background = color;
+        var val = document.createElement('span');
+        val.className = 'viz-flip-val';
+        val.textContent = str.charAt(i);
+        card.appendChild(val);
+        node.appendChild(card);
+      }
+    } else {
+      for (var j = 0; j < str.length; j++) {
+        var cardEl = node.childNodes[j];
+        var valEl = cardEl.firstChild;
+        var nextCh = str.charAt(j);
+        if (valEl.textContent !== nextCh) {
+          valEl.textContent = nextCh;
+          // Retrigger the flip animation by toggling the class.
+          cardEl.classList.remove('viz-flip-animate');
+          void cardEl.offsetWidth; // reflow so the animation restarts
+          cardEl.classList.add('viz-flip-animate');
+        }
+        if (color) cardEl.style.background = color;
+      }
+    }
+    node.__flipPrev = str;
   }
 
   // --- stacked bar -------------------------------------------------------
@@ -271,10 +397,10 @@
     node.className = '';
 
     var bar = document.createElement('div');
-    bar.className = 'hv-viz-stacked';
+    bar.className = 'viz-stacked';
     segs.forEach(function (s, i) {
       var seg = document.createElement('div');
-      seg.className = 'hv-viz-stacked-seg';
+      seg.className = 'viz-stacked-seg';
       seg.style.width = ((s.value / total) * 100) + '%';
       seg.style.background = colorAt(i, s.color);
       seg.setAttribute('data-tooltip', s.label + ': ' + s.value);
@@ -302,22 +428,22 @@
     });
     if (!rows.length) { emptyState(node, opts.emptyMessage); return; }
     clear(node);
-    node.className = 'hv-viz-team';
+    node.className = 'viz-team';
     rows.forEach(function (r) {
       var total = (r.segments || []).reduce(function (a, s) { return a + s.value; }, 0) || 1;
       var row = document.createElement('div');
-      row.className = 'hv-viz-team-row';
+      row.className = 'viz-team-row';
 
       var name = document.createElement('span');
-      name.className = 'hv-viz-team-name';
+      name.className = 'viz-team-name';
       name.textContent = r.name;
 
       var bar = document.createElement('div');
-      bar.className = 'hv-viz-team-bar';
+      bar.className = 'viz-team-bar';
       (r.segments || []).forEach(function (s, i) {
         if (s.value <= 0) return;
         var seg = document.createElement('div');
-        seg.className = 'hv-viz-team-seg';
+        seg.className = 'viz-team-seg';
         seg.style.width = ((s.value / total) * 100) + '%';
         seg.style.background = colorAt(i, s.color);
         seg.setAttribute('data-tooltip', s.label + ': ' + s.value);
@@ -325,7 +451,7 @@
       });
 
       var meta = document.createElement('span');
-      meta.className = 'hv-viz-team-meta';
+      meta.className = 'viz-team-meta';
       meta.textContent = r.meta != null ? r.meta : total;
 
       row.appendChild(name);
@@ -345,7 +471,7 @@
     // Ensure a canvas child exists.
     var canvas = node.querySelector('canvas');
     if (!canvas) { clear(node); canvas = document.createElement('canvas'); node.appendChild(canvas); }
-    node.classList.add('hv-viz-line');
+    node.classList.add('viz-line');
 
     function draw() {
       var s = setupCanvas(canvas, 180);
@@ -442,7 +568,7 @@
     }
 
     if (opts.legend) {
-      var legendNode = node.querySelector('.hv-viz-legend');
+      var legendNode = node.querySelector('.viz-legend');
       if (!legendNode) { legendNode = document.createElement('div'); node.appendChild(legendNode); }
       legend(legendNode, opts.legend);
     }
@@ -456,7 +582,7 @@
     var values = opts.values || [];
     var canvas = node.querySelector('canvas');
     if (!canvas) { clear(node); canvas = document.createElement('canvas'); node.appendChild(canvas); }
-    node.classList.add('hv-viz-sparkline');
+    node.classList.add('viz-sparkline');
 
     function draw() {
       var s = setupCanvas(canvas, 120);
@@ -513,6 +639,9 @@
   window.HvViz = {
     donut: donut,
     bars: bars,
+    cellBar: cellBar,
+    segmentDisplay: segmentDisplay,
+    flip: flip,
     stackedBar: stackedBar,
     teamBars: teamBars,
     legend: legend,

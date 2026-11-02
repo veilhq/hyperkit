@@ -16,18 +16,18 @@
   position: relative;
 }
 .cell-copyable:hover {
-  color: var(--accent);
-  background: var(--accent-glow);
+  color: var(--interactive);
+  background: var(--interactive-wash);
 }
 .cell-copyable.cell-copied {
-  color: var(--accent);
+  color: var(--success);
 }
 
 /* ===== Accessibility Panel & Toggle Overrides ===== */
 
 .settings-menu-btn.a11y-active {
-  color: var(--accent);
-  border-color: var(--accent-border);
+  color: var(--selected);
+  border-color: var(--selected-border);
 }
 
 .a11y-panel-body {
@@ -41,12 +41,11 @@
   padding-top: var(--space-2);
 }
 .a11y-group-label {
-  font-size: 0.58rem;
-  font-weight: var(--fw-bold);
-  color: var(--text-dim);
+  font-size: var(--fs-mono);
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 0.35rem;
+  letter-spacing: var(--track-label);
+  margin-bottom: var(--space-1);
 }
 
 .a11y-toggle {
@@ -55,7 +54,7 @@
   grid-template-rows: auto auto;
   gap: 0 var(--space-2);
   padding: var(--space-2) var(--space-3);
-  margin: var(--space-0-2) 0;
+  margin: var(--space-1) 0;
   border: var(--border-hair) solid transparent;
   border-radius: var(--radius);
   cursor: pointer;
@@ -68,21 +67,21 @@
 .a11y-toggle input[type="checkbox"] {
   grid-row: 1 / 3;
   align-self: center;
-  accent-color: var(--accent);
+  accent-color: var(--selected);
   width: 14px;
   height: 14px;
   cursor: pointer;
   margin: 0;
 }
 .a11y-toggle-label {
-  font-size: 0.72rem;
+  font-size: var(--fs-mono);
   color: var(--text);
-  line-height: 1.3;
+  line-height: var(--lh-ui);
 }
 .a11y-toggle-desc {
-  font-size: 0.58rem;
+  font-size: var(--fs-mono);
   color: var(--text-dim);
-  line-height: 1.3;
+  line-height: var(--lh-ui);
 }
 
 .a11y-reset-wrap {
@@ -95,12 +94,11 @@
   background: transparent;
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
-  color: var(--text-dim);
+  color: var(--text-muted);
   font-family: var(--font);
-  font-size: 0.65rem;
-  font-weight: var(--fw-bold);
+  font-size: var(--fs-mono);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-label);
   cursor: pointer;
   transition: color var(--motion-fast) var(--ease),
               background var(--motion-fast) var(--ease),
@@ -111,7 +109,6 @@
   color: var(--comp);
   background: var(--danger-hover-bg);
   border-color: var(--comp);
-  box-shadow: var(--danger-hover-shadow);
 }
 
 /* ============================================================
@@ -174,14 +171,20 @@ html.a11y-bw-theme {
      40%-black and reads as a heavy slab on a light page. Soften to a low-alpha
      grey drop in the same family as the drawer shadows above. */
   --shadow-panel: 0 4px 16px -6px rgba(0, 0, 0, 0.18);
+  /* Light scrims: a translucent grey veil instead of black. */
+  --scrim:        rgba(200, 200, 200, 0.75);
+  --scrim-strong: rgba(200, 200, 200, 0.85);
+  --scrim-soft:   rgba(200, 200, 200, 0.5);
+  /* The theme collapses --comp to blue; --bg ink on blue lacks contrast. */
+  --flag-ink:     #ffffff;
 }
 html.a11y-bw-theme body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 html.a11y-bw-theme ::selection {
-  background: var(--accent);
-  color: #e4e4e4;
+  background: var(--selected);
+  color: var(--bg);
 }
 html.a11y-bw-theme ::-webkit-scrollbar-track { background: var(--bg); }
 html.a11y-bw-theme ::-webkit-scrollbar-thumb { background: var(--border-strong); border-color: var(--bg); }
@@ -211,7 +214,9 @@ html.a11y-bw-theme .scratch-card-delete:hover {
 html.a11y-bw-theme ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
 
 /* ---- Large text ---- */
-html.a11y-large-text { font-size: 18px; }
+/* design-lint: allow - accessibility mode sets its own root size */
+html.a11y-large-text { font-size: 18px; --mono-text-scale: 1.25; }
+/* design-lint: allow - accessibility mode: legibility outranks the line-height scale */
 html.a11y-large-text body { line-height: 1.85; }
 
 /* ---- Font smoothing ---- */
@@ -230,9 +235,9 @@ html.a11y-focus-indicators :focus-visible {
 html.a11y-reduce-motion *,
 html.a11y-reduce-motion *::before,
 html.a11y-reduce-motion *::after {
-  animation-duration: 0.001ms !important;
+  animation-duration: var(--motion-off) !important;
   animation-iteration-count: 1 !important;
-  transition-duration: 0.001ms !important;
+  transition-duration: var(--motion-off) !important;
   scroll-behavior: auto !important;
 }
 
@@ -283,9 +288,9 @@ html.a11y-hide-indicators .dock-item-recent::before { display: none !important; 
 /* ---- Respect prefers-reduced-motion by default ---- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.001ms !important;
+    animation-duration: var(--motion-off) !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+    transition-duration: var(--motion-off) !important;
     scroll-behavior: auto !important;
   }
 }

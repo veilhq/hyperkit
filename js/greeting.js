@@ -15,15 +15,33 @@
   if (window.HvGreeting) return;
 
   var GREETINGS = [
-    'Welcome back, operator.',
+    'Welcome back, {name}.',
     'Workspace online.',
-    'Good to see you, V.',
+    'Good to see you, {name}.',
     'Hyperspace loaded.',
     'Ready when you are.',
     'Let\'s get to work.',
     'The vault, as you left it.',
     'Still here. Still working.',
     'Awaiting instruction.',
+    'Terminal\'s warm.',
+    'The desk is yours.',
+    'Lights are on.',
+    'Back in the vault.',
+    'Everything where you left it.',
+    // Butler register — JARVIS/Alfred: composed, ready, never servile, no fake telemetry
+    'Standing by.',
+    'Full capacity. Awaiting input.',
+    'All channels open.',
+    'Online and listening.',
+    'Systems warm. Standing by.',
+    'Every tool on the rack.',
+    'At your service.',
+    'Good to have you back, {name}.',
+    'Shall we begin?',
+    'Whenever you\'re ready, {name}.',
+    'Powered up and at the ready.',
+    'Everything is running smoothly.',
     // Kaomoji — ambient flavor, no state claims
     '[+1]',
     '(-_-)b',
@@ -36,8 +54,13 @@
     '(._. )'
   ];
 
+  // Address forms treated as names/titles — capitalized wherever they land.
+  var ADDRESS = ['V', 'Operator'];
+
   function pick() {
     var text = GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
+    var name = ADDRESS[Math.floor(Math.random() * ADDRESS.length)];
+    text = text.replace('{name}', name);
     var isEmote = !/^[a-zA-Z]/.test(text);
     return { text: text, isEmote: isEmote };
   }
