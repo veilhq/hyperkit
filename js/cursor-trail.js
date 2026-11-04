@@ -1,26 +1,26 @@
-/* ===== Cursor trail — extractable module (WI-119) =====
+/* ===== Cursor trail - extractable module =====
    WebGL2 ping-pong cursor trail. Stamps the sitewide pointer SVG along the
    motion segment each frame, decaying the previous frame's buffer to produce
    a smooth smear rather than a stuttering sequence of discrete copies.
 
    Reads a CSS variable (default '--cool') at frame time for tint, so accent
    picker changes cascade live. Idle rAF suspend keeps GPU cost at zero when
-   the cursor is parked. Piggybacks the ecosystem a11y toggles — the trail is
+   the cursor is parked. Piggybacks the ecosystem a11y toggles - the trail is
    hard-disabled when 'a11y-reduce-motion' or 'a11y-no-glitch' is set on <html>,
    or when the OS reports `prefers-reduced-motion: reduce`.
 
    Public API exposed on window.HvCursorTrail:
-     start(host, opts?)        — mounts canvas into host; idempotent if running.
-                                 opts.color   — CSS var name (default '--cool')
-                                 opts.decay   — per-frame multiplier (default 0.85)
-                                 opts.stampPx — CSS-px stamp size (default 24)
-                                 opts.variant — 'stroked' | 'filled' (default 'stroked')
-                                 opts.density — smear spacing fraction (default 0.30)
-                                 opts.idleMs  — motion-gate window (default 150)
-                                 opts.offsetX / opts.offsetY — extra CSS-px offset
-     stop(fadeMs)              — tears down; if fadeMs > 0, fades out first.
+     start(host, opts?) - mounts canvas into host; idempotent if running.
+                                 opts.color - CSS var name (default '--cool')
+                                 opts.decay - per-frame multiplier (default 0.85)
+                                 opts.stampPx - CSS-px stamp size (default 24)
+                                 opts.variant - 'stroked' | 'filled' (default 'stroked')
+                                 opts.density - smear spacing fraction (default 0.30)
+                                 opts.idleMs - motion-gate window (default 150)
+                                 opts.offsetX / opts.offsetY - extra CSS-px offset
+     stop(fadeMs) - tears down; if fadeMs > 0, fades out first.
 
-   Relocated to Hyperkit (WI-142 Phase 1). Source of truth — do not copy back
+   Lives in Hyperkit. Source of truth - do not copy back
    into app-local assets/js/. Each app's build pulls this file directly.
    ================================================================= */
 
@@ -210,7 +210,7 @@
   }
 
   function buildStampSvg(variant) {
-    // Lucide mouse-pointer-2 path — same icon as the sitewide cursor CSS.
+    // Lucide mouse-pointer-2 path - same icon as the sitewide cursor CSS.
     // Stroke/fill white so the shader tint (u_color) drives the visible color.
     var fill = variant === 'filled' ? 'white' : 'none';
     // Stroke width tuned to match the sitewide cursor's visible line weight at
@@ -330,7 +330,7 @@
   }
 
   function start(hostEl, opts) {
-    if (_gl) return;                 // idempotent — already running
+    if (_gl) return;                 // idempotent - already running
     if (isDisabled()) return;
     if (!hostEl) return;
 

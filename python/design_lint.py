@@ -6,7 +6,10 @@ charter governs (spacing, type size, weight, tracking, line-height, duration,
 radius, shadow, color) instead of a token. Custom-property definitions are
 tokens and are never flagged; tokens.css is exempt as the token source. A bare
 accent-family reference (--accent, -dim, -glow, -border) is also flagged: an
-accent mark names its meaning through a role token.
+accent mark names its meaning through a role token. Further rules flag a bare
+palette hue (--warm, --comp, --cool) outside a custom-property definition, a
+translate/scale transform in a :hover rule, a raw literal var() fallback for a
+token defined in tokens.css, and a raw z-index other than -1/0/1/2.
 
 Builds run in error mode: any off-scale value fails the build with a one-line
 summary. Run directly for the full report:
@@ -65,6 +68,12 @@ WEIGHT_LITERAL = re.compile(r"\b(?:\d{3}|bold|bolder|lighter|normal)\b")
 STRIP_FUNC = re.compile(r"\b(?:var|url|env)\(")
 # Accent marks must name their meaning through a role token (--interactive, --selected, ...).
 BARE_ACCENT = re.compile(r"var\(\s*--accent(?:-dim|-glow|-border)?\s*[,)]")
+# Palette hues carry meaning only through a local tone property or a role token.
+BARE_HUE = re.compile(r"var\(\s*--(?:warm|comp|cool)\s*[,)]")
+HOVER_LIFT = re.compile(r"\b(?:translate[XYZ3d]*|scale[XYZ3d]*)\(", re.I)
+VAR_FALLBACK = re.compile(r"var\(\s*(--[\w-]+)\s*,\s*([^\s)]{1,4})")
+Z_LITERAL = re.compile(r"-?\d+")
+Z_ALLOWED = {"-1", "0", "1", "2"}
 STRING = re.compile(r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'")
 
 
@@ -101,12 +110,44 @@ def _nonzero(matches) -> bool:
     return any(float(m.group(1)) != 0 for m in matches)
 
 
-def _categories(prop: str, value: str) -> list[str]:
+def _token_names() -> frozenset[str]:
+    """Custom properties defined in tokens.css (the token source)."""
+    try:
+        text = (HYPERKIT_DIR / "css" / "tokens.css").read_text(encoding="utf-8")
+    except OSError:
+        return frozenset()
+    return frozenset(re.findall(r"(--[\w-]+)\s*:", re.sub(r"/\*.*?\*/", " ", text, flags=re.S)))
+
+
+TOKENS = _token_names()
+
+
+def _hovered_self(selector: str) -> bool:
+    """True when the rule targets the hovered element itself (not a child or pseudo-element)."""
+    for part in selector.rsplit("{", 1)[-1].split(","):
+        tail = part.rsplit(":hover", 1)
+        if len(tail) == 2 and not re.search(r"[\s>+~]|::", tail[1].rstrip()):
+            return True
+    return False
+
+
+def _categories(prop: str, value: str, selector: str = "") -> list[str]:
     raw = _strip(value)
     lowered = raw.strip().lower()
+    unquoted = STRING.sub(" ", value)
     found = []
-    if BARE_ACCENT.search(STRING.sub(" ", value)):
+    if BARE_ACCENT.search(unquoted):
         found.append("accent")
+    if BARE_HUE.search(unquoted) and ".highlight" not in selector:
+        found.append("hue")
+    lift = HOVER_LIFT.search(unquoted) if prop == "transform" else lowered not in ("none", "0")
+    if prop in ("transform", "translate", "scale") and _hovered_self(selector) and lift:
+        found.append("hover-lift")
+    if any(name in TOKENS and not fallback.lower().startswith("var(")
+           for name, fallback in VAR_FALLBACK.findall(unquoted)):
+        found.append("fallback")
+    if prop == "z-index" and Z_LITERAL.fullmatch(lowered) and lowered not in Z_ALLOWED:
+        found.append("z-index")
     if prop in SPACING_PROPS and _nonzero(RAW_LENGTH.finditer(raw)):
         found.append("spacing")
     if prop in ("font-size", "font") and _nonzero(RAW_LENGTH.finditer(raw)):
@@ -174,7 +215,8 @@ def lint_css(text: str, path: Path, line_offset: int = 0) -> list[Violation]:
                     start = seg_start + (len(segment) - len(segment.lstrip()))
                     first, last = line_of(start), line_of(i)
                     if not allowed_lines.intersection({first - 1, first, last}):
-                        for category in _categories(prop, value.replace("!important", "")):
+                        selector = " ".join(stack)
+                        for category in _categories(prop, value.replace("!important", ""), selector):
                             violations.append(Violation(
                                 path, first + line_offset, stack[-1][:80], prop,
                                 " ".join(value.split())[:100], category,

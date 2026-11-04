@@ -3,7 +3,7 @@
    rail, right-side settings drawer, comp-colored clock flag, full-width page
    grid with nav offset, glass-blur topbar + footer.
 
-   This is the default layout — active when no layout class is set on <html>.
+   This is the default layout - active when no layout class is set on <html>.
    Combined from the former 01-layout.css + 03-menus.css.
    ====================================================================== */
 
@@ -38,7 +38,7 @@
   right: 5rem;
   transform: translateY(100%);
   padding: var(--space-2) var(--space-4);
-  background: var(--comp);
+  background: var(--comp); /* design-lint: allow - clock flag character color */
   border-radius: 0 0 var(--radius) var(--radius);
   color: var(--flag-ink);
   font-family: var(--font-body);
@@ -59,7 +59,7 @@
   left: 0;
   bottom: 0;
   width: var(--site-nav-width);
-  z-index: 90;
+  z-index: calc(var(--z-topbar) - 10);
   background: var(--bg-card);
   border-right: var(--border-hair) solid var(--border);
   display: flex;
@@ -122,7 +122,7 @@
   right: 0;
   width: 6px;
   height: 6px;
-  background: var(--comp);
+  background: var(--live);
 }
 
 .site-nav-icon {
@@ -205,7 +205,7 @@
   right: 0;
   width: 5px;
   height: 5px;
-  background: var(--comp);
+  background: var(--live);
 }
 
 .topbar-inner {
@@ -241,10 +241,8 @@
   text-decoration: none;
   color: inherit;
   flex-shrink: 0;
-  transition: transform var(--motion-base) var(--ease);
 }
-.brand:hover { transform: translateX(-1px); }
-/* Logo viewBox is 76.72 x 60.87 (~1.26:1) — sizes keep that ratio so the
+/* Logo viewBox is 76.72 x 60.87 (~1.26:1) - sizes keep that ratio so the
    mark fills its box instead of letterboxing inside a square. */
 .brand-icon {
   width: 20px;
@@ -272,7 +270,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* Only the last crumb (current page) should truncate — earlier crumbs stay short */
+/* Only the last crumb (current page) should truncate - earlier crumbs stay short */
 .crumb:last-child {
   flex-shrink: 1;
   min-width: 0;
@@ -449,17 +447,17 @@
   background: var(--chrome-glass);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  z-index: 95;
+  z-index: calc(var(--z-topbar) - 5);
 }
 .footer-sep { color: var(--border-strong); }
 .footer-label { color: var(--text-dim); }
 
 /* ---- Lucide icons ---- */
 /* .brand-icon is sized above (inline brand SVG, not a lucide glyph). */
-.crumb-sep svg { width: 10px; height: 10px; vertical-align: middle; }
+.crumb-sep svg { width: var(--icon-sm); height: var(--icon-sm); vertical-align: middle; }
 .card-icon { width: var(--icon-md); height: var(--icon-md); vertical-align: -2px; margin-right: var(--space-1); }
 .doc-icon { width: var(--icon-sm); height: var(--icon-sm); min-width: 12px; flex-shrink: 0; vertical-align: -1px; margin-right: var(--space-1); color: var(--text-dim); }
-.scroll-top svg { width: 16px; height: 16px; }
+.scroll-top svg { width: var(--icon-md); height: var(--icon-md); }
 .section-icon {
   width: var(--icon-md);
   height: var(--icon-md);
@@ -473,7 +471,7 @@
   bottom: 2.5rem;
   right: var(--space-4);
   z-index: var(--z-topbar);
-  background: var(--bg-elevated);
+  background: var(--bg-raised);
   border: var(--border-hair) solid var(--border-strong);
   border-radius: var(--radius);
   color: var(--text-muted);
@@ -496,7 +494,6 @@
 .scroll-top:hover {
   color: var(--interactive);
   border-color: var(--interactive);
-  transform: translateY(-2px);
 }
 
 
@@ -595,32 +592,18 @@
   100% { box-shadow: inset var(--border-rail) 0 0 transparent; }
 }
 
-/* ---- Pin card hover lift ---- */
-.pin-card {
-  transition: transform var(--motion-base) var(--ease), box-shadow var(--motion-medium) var(--ease), border-color var(--motion-base) var(--ease);
-}
-.pin-card:hover {
-  /* flat by default: no lift, no drop shadow. A filled note has no border to
-     shift, so hover reads as a subtle brightness lift. */
-  filter: brightness(var(--state-hover-brightness));
-}
-
 /* ---- Reduced motion: disable all added animations ---- */
 @media (prefers-reduced-motion: reduce) {
   .scroll-progress { transition: none; }
   .breadcrumbs .crumb,
   .breadcrumbs .crumb-sep { animation: none; opacity: 1; }
   :target { animation: none; }
-  .pin-card { transition: none; }
-  .pin-card:hover { transform: none; }
 }
 
 .a11y-reduce-motion .scroll-progress { transition: none; }
 .a11y-reduce-motion .breadcrumbs .crumb,
 .a11y-reduce-motion .breadcrumbs .crumb-sep { animation: none; opacity: 1; }
 .a11y-reduce-motion :target { animation: none; }
-.a11y-reduce-motion .pin-card { transition: none; }
-.a11y-reduce-motion .pin-card:hover { transform: none; }
 
 /* ---- Menus: Nav Panel Drawer ---- */
 
@@ -631,7 +614,7 @@
   position: fixed;
   top: var(--space-2);
   right: var(--space-3);
-  z-index: 201;
+  z-index: calc(var(--z-dropdown) + 1);
   flex-shrink: 0;
 }
 .nav-menu-btn {
@@ -708,7 +691,7 @@
   padding: 0 var(--space-1);
   transition: color var(--motion-fast) var(--ease);
 }
-.nav-panel-close:hover { color: var(--comp); }
+.nav-panel-close:hover { color: var(--interactive); }
 .nav-panel-body {
   padding: 0;
 }
@@ -838,7 +821,7 @@
 .nav-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 199;
+  z-index: calc(var(--z-dropdown) - 1);
   background: var(--scrim-soft);
   opacity: 0;
   pointer-events: none;
@@ -929,9 +912,9 @@
   gap: var(--space-1);
 }
 .mcp-stop-btn:hover:not(:disabled) {
-  color: var(--comp);
-  background: color-mix(in srgb, var(--comp) 8%, transparent);
-  border-color: var(--comp);
+  color: var(--error);
+  background: var(--danger-hover-bg);
+  border-color: var(--error);
 }
 .mcp-actions .settings-toggle-btn:disabled {
   opacity: 0.3;
@@ -1074,16 +1057,12 @@
   width: 100%;
   height: 100%;
   border-radius: calc(var(--radius) / 2);
-  transition: background var(--motion-slow) var(--ease), transform var(--motion-fast) var(--ease), box-shadow var(--motion-base) var(--ease);
+  transition: background var(--motion-slow) var(--ease);
 }
 .settings-theme-row .palette-preview .swatch:nth-child(1) { background: var(--accent); } /* design-lint: allow - the swatch displays the palette color itself */
-.settings-theme-row .palette-preview .swatch:nth-child(2) { background: var(--warm); }
-.settings-theme-row .palette-preview .swatch:nth-child(3) { background: var(--cool); }
-.settings-theme-row .palette-preview .swatch:nth-child(4) { background: var(--comp); }
-.settings-theme-row .palette-preview .swatch:hover {
-  transform: scale(1.15);
-  z-index: 1;
-}
+.settings-theme-row .palette-preview .swatch:nth-child(2) { background: var(--warm); } /* design-lint: allow - the swatch displays the palette color itself */
+.settings-theme-row .palette-preview .swatch:nth-child(3) { background: var(--cool); } /* design-lint: allow - the swatch displays the palette color itself */
+.settings-theme-row .palette-preview .swatch:nth-child(4) { background: var(--comp); } /* design-lint: allow - the swatch displays the palette color itself */
 .settings-palette-mode {
   font-family: var(--font);
   font-size: var(--fs-mono);
@@ -1108,7 +1087,7 @@
 }
 
 /* ---- Width toggle / Fullscreen toggle ---- */
-.width-toggle { /* extends .text-button via HTML class */ }
-.fullscreen-toggle { /* extends .text-button via HTML class */ }
+.width-toggle { /* composes .settings-toggle-btn via HTML class */ }
+.fullscreen-toggle { /* composes .settings-toggle-btn via HTML class */ }
 .width-toggle-icon,
 .fullscreen-toggle-icon { /* extends .icon-button-glyph via HTML class */ }

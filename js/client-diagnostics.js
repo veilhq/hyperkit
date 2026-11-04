@@ -1,4 +1,4 @@
-/* ===== HvClientDiag — renderer error capture -> server log (HyperKit) =====
+/* ===== HvClientDiag - renderer error capture -> server log (HyperKit) =====
    Pipes renderer-side failures to hypervisor.log via the PyWebView bridge
    (window.pywebview.api.log_client_error), so errors that precede a WebView2
    renderer crash are captured server-side. The renderer's own console is lost
@@ -13,7 +13,7 @@
    Best-effort and defensive: if the bridge isn't ready, it queues and flushes
    once available. Never throws (a crash-logger that crashes is worthless).
 
-   Idempotent, strict-mode IIFE — matches the other HvX modules.
+   Idempotent, strict-mode IIFE - matches the other HvX modules.
 */
 (function initClientDiag() {
   "use strict";
@@ -64,7 +64,7 @@
     });
   });
 
-  // Memory high-water mark — non-standard (Chromium only), guarded. Logs only
+  // Memory high-water mark - non-standard (Chromium only), guarded. Logs only
   // when usage crosses a new 100MB band, so it flags a climb toward an OOM
   // renderer crash without spamming.
   var lastBand = 0;

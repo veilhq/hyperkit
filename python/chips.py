@@ -1,15 +1,15 @@
 """
-Chip rendering helper — Hyperkit shared Python module.
+Chip rendering helper - Hyperkit shared Python module.
 
 Composes the ecosystem primitive class `.status-chip` with a semantic variant and
 optional specific class names for JS hooks or unique overrides. Replaces
 scattered inline `<span class="...">` construction across emit-side Python
 modules in any consuming app.
 
-Semantic vocabulary (from WI-111 Phase 4):
-- filled           → live/current (WI IDs on active rows, In Progress status)
-- outlined-accent  → structured/notable (Project, "NEW" activity marker)
-- outlined-muted   → historical/quiet (idle status, "UPD" marker, tags, missing)
+Semantic vocabulary:
+- filled           -> live/current (work item IDs on active rows, In Progress status)
+- outlined-accent  -> structured/notable (Project, "NEW" activity marker)
+- outlined-muted   -> historical/quiet (idle status, "UPD" marker, tags, missing)
 """
 from __future__ import annotations
 

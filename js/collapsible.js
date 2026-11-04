@@ -9,7 +9,7 @@
 
    Distinct from HvDisclosure: a disclosure is a DISMISSABLE overlay (dropdown)
    that closes on outside-click and Escape. A collapsible is a PERSISTENT panel
-   that stays put — clicking the header only folds/unfolds it; clicking away or
+   that stays put - clicking the header only folds/unfolds it; clicking away or
    pressing Escape does NOT collapse it. Do not conflate the two.
 
    Usage:
@@ -23,7 +23,7 @@
      });
      // c.expand() / c.collapse() / c.toggle() / c.isCollapsed()
 
-   Idempotent, strict-mode IIFE — matches the other HvX modules.
+   Idempotent, strict-mode IIFE - matches the other HvX modules.
 */
 (function initCollapsible() {
   "use strict";

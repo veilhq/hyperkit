@@ -1,15 +1,15 @@
-/* ===== Hyperkit — Visualization Primitives =====
+/* ===== Hyperkit - Visualization Primitives =====
    Shared, token-driven chart primitives for every hyper ecosystem app.
    Class vocabulary: viz-*. Rendered/populated by window.HvViz (js/viz.js).
 
    Techniques by primitive:
-     - Bar / stacked bar / legend / donut  → CSS + SVG (theme via tokens directly)
-     - Line chart / sparkline              → <canvas> (HvViz draws, reads token
+     - Bar / stacked bar / legend / donut  -> CSS + SVG (theme via tokens directly)
+     - Line chart / sparkline              -> <canvas> (HvViz draws, reads token
                                               colors via getComputedStyle)
 
    Extracted from the inline chart CSS/JS that previously lived only in
    Hypervisor's ado-dashboard.html, generalized so any app can consume them.
-   Do not hardcode colors, spacing, radius, or motion — reference tokens. */
+   Do not hardcode colors, spacing, radius, or motion - reference tokens. */
 
 /* ---- Horizontal bar chart ------------------------------------------------ */
 .viz-bars {
@@ -69,7 +69,7 @@
    container width (flex: 1) so the count drives density without a hardcoded
    per-cell width. Filled cells carry --magnitude (set inline by the renderer);
    empty cells read as the neutral surface with a hairline frame. Flat, no
-   shadow — the charter's first-reach magnitude display. */
+   shadow - the charter's first-reach magnitude display. */
 .viz-cell-bar {
   display: flex;
   gap: var(--space-1);
@@ -159,7 +159,7 @@
   min-width: calc(var(--flip-size) * 0.72);
   height: var(--flip-size);
   padding: 0 var(--space-2);
-  background: var(--bg-elevated);
+  background: var(--bg-raised);
   color: var(--text-bright);
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
@@ -269,7 +269,7 @@
   opacity: 0.85;
   flex: none;
 }
-/* Line-series legend marker — a short rule instead of a square swatch */
+/* Line-series legend marker - a short rule instead of a square swatch */
 .viz-legend-line {
   width: 16px;
   height: 2px;
@@ -335,7 +335,7 @@
   margin-top: var(--space-1);
 }
 
-/* ---- Line chart (canvas — e.g. burndown) --------------------------------- */
+/* ---- Line chart (canvas - e.g. burndown) --------------------------------- */
 .viz-line {
   position: relative;
   width: 100%;
@@ -385,4 +385,4 @@
 }
 
 /* ---- Responsive ---------------------------------------------------------- */
-/* Responsive — bar rows are label-in-track now, no column adjustment needed. */
+/* Responsive - bar rows are label-in-track now, no column adjustment needed. */

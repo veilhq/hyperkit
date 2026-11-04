@@ -1,13 +1,13 @@
-/* ===== Kaomoji greeting picker — extractable module (WI-112 Phase 6) =====
+/* ===== Kaomoji greeting picker - extractable module =====
    Rotating greetings for the homepage / Hyperagent welcome screen.
    Kaomoji entries (any greeting that doesn't start with an ASCII letter) get
    the `emote` CSS class applied for glow treatment.
 
    Public API exposed on window.HvGreeting:
-     pick()                  — returns { text, isEmote }
-     applyTo(element)        — picks and applies to element (sets textContent + emote class)
+     pick() - returns { text, isEmote }
+     applyTo(element) - picks and applies to element (sets textContent + emote class)
 
-   Relocated to Hyperkit (WI-142 Phase 1). Source of truth — do not copy back
+   Lives in Hyperkit. Source of truth - do not copy back
    into app-local assets/js/. Each app's build pulls this file directly.
    ================================================================= */
 
@@ -29,7 +29,7 @@
     'Lights are on.',
     'Back in the vault.',
     'Everything where you left it.',
-    // Butler register — JARVIS/Alfred: composed, ready, never servile, no fake telemetry
+    // Butler register - JARVIS/Alfred: composed, ready, never servile, no fake telemetry
     'Standing by.',
     'Full capacity. Awaiting input.',
     'All channels open.',
@@ -42,7 +42,7 @@
     'Whenever you\'re ready, {name}.',
     'Powered up and at the ready.',
     'Everything is running smoothly.',
-    // Kaomoji — ambient flavor, no state claims
+    // Kaomoji - ambient flavor, no state claims
     '[+1]',
     '(-_-)b',
     '[\u2713]',
@@ -54,7 +54,7 @@
     '(._. )'
   ];
 
-  // Address forms treated as names/titles — capitalized wherever they land.
+  // Address forms treated as names/titles - capitalized wherever they land.
   var ADDRESS = ['V', 'Operator'];
 
   function pick() {

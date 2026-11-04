@@ -1,8 +1,8 @@
-/* ===== Hyperkit — Visualization Primitives (window.HvViz) =====
+/* ===== Hyperkit - Visualization Primitives (window.HvViz) =====
    Vanilla renderers for the viz-* CSS primitives (css/viz.css). No frameworks,
-   no charting library — SVG for donut/bar/stacked/legend, <canvas> for line/spark.
+   no charting library - SVG for donut/bar/stacked/legend, <canvas> for line/spark.
 
-   Self-contained IIFE, idempotent, strict mode — same idiom as HvToast/HvUtils.
+   Self-contained IIFE, idempotent, strict mode - same idiom as HvToast/HvUtils.
    Load once, ahead of app scripts that call it.
 
    API (all take a container element or its id):
@@ -32,7 +32,7 @@
     var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     return v || fallback;
   }
-  // Default categorical palette — token-resolved, cycles for extra segments.
+  // Default categorical palette - token-resolved, cycles for extra segments.
   function palette() {
     return [
       token('--accent', '#00ff41'),
@@ -61,7 +61,7 @@
     d.textContent = msg || 'No data available';
     node.appendChild(d);
   }
-  // Canvas hi-DPI setup — returns {ctx, w, h} or null if no element.
+  // Canvas hi-DPI setup - returns {ctx, w, h} or null if no element.
   function setupCanvas(canvas, fallbackH) {
     if (!canvas) return null;
     var container = canvas.parentElement;
@@ -135,15 +135,15 @@
 
     // Length normalization so small slices stay visible without dots:
     //   1. Any slice whose TRUE share is below the minimum visible fraction
-    //      (minArc/circ ≈ 7.78%) is floored to that minimum — bumped up so it
+    //      (minArc/circ ~ 7.78%) is floored to that minimum - bumped up so it
     //      can render as an arc.
     //   2. The slices above the floor split the REMAINING fraction
-    //      (1 − sum of floored fractions), proportioned among their own values.
+    //      (1 - sum of floored fractions), proportioned among their own values.
     // Original segment order is preserved (no sorting). The tooltip still
     // reports each slice's true percentage; only the drawn length is adjusted.
-    var minFrac = (gap + thickness) / circ;  // ≈ 7.78% floor for a visible arc
+    var minFrac = (gap + thickness) / circ;  // ~ 7.78% floor for a visible arc
 
-    // Pass 1 — decide floored vs free, in the caller's original order.
+    // Pass 1 - decide floored vs free, in the caller's original order.
     var flooredSum = 0;     // sum of floored display fractions
     var freeValue = 0;      // sum of values for non-floored slices
     var meta = segs.map(function (s) {
@@ -158,7 +158,7 @@
     var remaining = 1 - flooredSum;
     if (remaining < 0) { remaining = 0; }
 
-    // Pass 2 — assign each slice its display fraction.
+    // Pass 2 - assign each slice its display fraction.
     meta.forEach(function (m) {
       if (m.floored) {
         m.dispFrac = minFrac;
@@ -167,7 +167,7 @@
       }
     });
 
-    // Render — every slice is a full-thickness round-capped arc.
+    // Render - every slice is a full-thickness round-capped arc.
     var offset = 0;
     meta.forEach(function (m, i) {
       var s = m.s, color = colorAt(i, s.color);
@@ -262,12 +262,12 @@
     });
   }
 
-  // --- cell bar (discrete filled/empty cells — magnitude on the dot grid) --
+  // --- cell bar (discrete filled/empty cells - magnitude on the dot grid) --
   // A row of `cells` cells; the first `fillCount` read as filled, the rest
   // empty. fillCount is value/max scaled to the cell count, so a 0-59 second
   // value can render across 60 cells (1:1) or a 0-1440 minute-of-day value can
   // render across 24 cells (one per hour). Discrete counterpart to the
-  // continuous .viz-bar-fill — the charter's dot/cell grid for magnitude.
+  // continuous .viz-bar-fill - the charter's dot/cell grid for magnitude.
   function cellBar(target, opts) {
     var node = el(target);
     if (!node) return;
@@ -461,7 +461,7 @@
     });
   }
 
-  // --- line chart (canvas — burndown-style ideal/actual) -----------------
+  // --- line chart (canvas - burndown-style ideal/actual) -----------------
   function lineChart(target, opts) {
     var node = el(target);
     if (!node) return;
@@ -549,7 +549,7 @@
           }
         }
       });
-      // today marker (optional) — vertical dashed line + label at a data index
+      // today marker (optional) - vertical dashed line + label at a data index
       if (opts.todayIndex != null && opts.todayIndex >= 0) {
         var accent = token('--accent', '#00ff41');
         var tx = padL + (cw / Math.max(1, maxLen - 1)) * opts.todayIndex;

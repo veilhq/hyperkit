@@ -1,19 +1,19 @@
 """
-Hyper Ecosystem — Shared Logging Configuration
+Hyper Ecosystem - Shared Logging Configuration
 
 Provides a unified logging setup for all hyper ecosystem apps
 (Hypervisor, Hyperagent, ACP Bridge). Each app calls setup_logger()
 once at startup to get a configured logger with:
 
 - Structured line format: ISO timestamp, level, source, message
-- RotatingFileHandler (2 MB × 3 backups)
-- All logs written to .hyperspace/.logs/
+- RotatingFileHandler (2 MB x 3 backups)
+- All logs written to the content root's .logs/ directory
 - A flight recorder that keeps verbose records (TRACE/DEBUG) in memory and
   writes them out only when an ERROR fires, so failure context is always
   captured without paying disk cost or burning rotation in normal operation
 
-Relocated to .hyperkit/python/ (WI-142 Phase 1). A back-compat shim remains
-at the old .hyperspace/hyper_logging.py location so existing `sys.path`
+Lives in .hyperkit/python/. A back-compat shim remains at the old
+content-root hyper_logging.py location so existing `sys.path`
 inserts pointing at the hyperspace root keep working during the transition.
 
 Usage:
@@ -47,7 +47,7 @@ def _trace(self, message, *args, **kwargs):
 
 logging.Logger.trace = _trace
 
-# This file lives at .hyperspace/.hyperkit/python/hyper_logging.py — logs
+# This file lives at .hyperspace/.hyperkit/python/hyper_logging.py - logs
 # still write to .hyperspace/.logs/, so we go up two levels (python/ ->
 # .hyperkit/ -> .hyperspace/) rather than using this file's immediate parent.
 LOG_DIR = Path(__file__).parent.parent.parent / ".logs"
@@ -107,7 +107,7 @@ class FlightRecorderHandler(logging.Handler):
         try:
             if record.levelno >= self.trigger_level:
                 self.replay()
-                # The triggering record is not written here — it reaches the file
+                # The triggering record is not written here - it reaches the file
                 # through its own handler, which would otherwise double-log it.
                 return
             if record.levelno < self.target.level:
@@ -137,7 +137,7 @@ class FlightRecorderHandler(logging.Handler):
 
     def flush(self):
         # Intentionally a no-op. logging.shutdown() flushes every handler, so
-        # writing here would dump the buffer on every clean exit — the opposite
+        # writing here would dump the buffer on every clean exit - the opposite
         # of only-on-error.
         pass
 

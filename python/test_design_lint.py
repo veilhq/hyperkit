@@ -68,6 +68,36 @@ class RawValuesAreFlagged(unittest.TestCase):
         self.assertEqual([(v.line, v.selector, v.prop) for v in found], [(5, ".b", "gap")])
 
 
+class SemanticRules(unittest.TestCase):
+    def test_bare_hue_flagged_outside_tone_definitions(self):
+        self.assertEqual(categories(".a { color: var(--warm); border-color: var(--cool); }"), ["hue", "hue"])
+        self.assertEqual(categories(".a { --badge-tone: var(--comp); color: var(--badge-tone); }"), [])
+        self.assertEqual(categories(".highlight .k { color: var(--warm); }"), [])
+        self.assertEqual(categories(".a { color: var(--warm); /* design-lint: allow - clock */ }"), [])
+        self.assertEqual(categories(".a { color: var(--warm-ish); }"), [])
+
+    def test_hover_lift_on_hovered_element(self):
+        self.assertEqual(categories(".a:hover { transform: translateY(-2px); }"), ["hover-lift"])
+        self.assertEqual(categories(".a, .b:hover:not(.c) { transform: scale(1.02); }"), ["hover-lift"])
+        self.assertEqual(categories(".a:hover { translate: 0 -1px; }"), ["hover-lift"])
+
+    def test_hover_reveal_and_non_hover_transforms_pass(self):
+        self.assertEqual(categories(".a:hover::after { transform: scaleX(1); }"), [])
+        self.assertEqual(categories(".a:hover .b { transform: rotate(90deg) scaleX(1); }"), [])
+        self.assertEqual(categories(".a:hover { transform: rotate(90deg); }"), [])
+        self.assertEqual(categories(".a.open { transform: translateY(0); }"), [])
+
+    def test_raw_fallback_for_defined_token(self):
+        name = next(iter(design_lint.TOKENS))
+        self.assertEqual(categories(f".a {{ padding: var({name}, 0.35rem); }}"), ["fallback"])
+        self.assertEqual(categories(f".a {{ color: var({name}, var(--text)); }}"), [])
+        self.assertEqual(categories(".a { opacity: var(--i, 0); }"), [])
+
+    def test_raw_z_index(self):
+        self.assertEqual(categories(".a { z-index: 9000; } .b { z-index: 10; }"), ["z-index", "z-index"])
+        self.assertEqual(categories(".a { z-index: -1; } .b { z-index: 2; } .c { z-index: var(--z-modal); }"), [])
+
+
 class Exemptions(unittest.TestCase):
     def test_allow_marker_same_line_and_line_above(self):
         css = ".a {\n  color: #fff; /* design-lint: allow - blend operand */\n" \

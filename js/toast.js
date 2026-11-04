@@ -1,18 +1,16 @@
-/* ===== Toast notifications (WI-115 variant-aware primitive) =====
-   Relocated to Hyperkit (WI-142 Phase 1). Previously byte-mirrored between
-   `.hypervisor/assets/js/core/00-core.js` and `.hyperagent/assets/js/00-core.js`
-   — see `.hyperspace/work/done/hyper-ecosystem-toast-rework.md` for the
-   original consolidation history. Source of truth now lives here; do not
+/* ===== Toast notifications (variant-aware primitive) =====
+   Lives in Hyperkit; previously byte-mirrored between Hypervisor's and
+   Hyperagent's 00-core.js. Source of truth now lives here; do not
    copy this back into either app's local assets/js/.
 
-     HvToast.show("plain message")                    → info variant, 3s
+     HvToast.show("plain message")                    -> info variant, 3s
      HvToast.show({ variant, title, message,
-                    duration, action, dedupeKey })    → full options
+                    duration, action, dedupeKey })    -> full options
 
      variant:   'success' | 'info' | 'warn' | 'error'   (default: 'info')
      duration:  ms number | 'sticky'                    (variant defaults apply)
      action:    { label: string, onClick: () => void }  (adds inline button)
-     dedupeKey: string — replaces prior toast with same key (rebuild spam guard)
+     dedupeKey: string - replaces prior toast with same key (rebuild spam guard)
 
    State is expressed the way a tool-indicator expresses it: the whole box is
    filled in the variant color with the glyph + message knocked out in --bg,
@@ -61,8 +59,8 @@
   // settle as a square first, THEN grow the width open. Keeps the two entrance
   // beats sequential rather than overlapping.
   var UNFURL_MS = 320;
-  var visible = [];       // ordered oldest → newest
-  var dedupeMap = {};     // key → toast element
+  var visible = [];       // ordered oldest -> newest
+  var dedupeMap = {};     // key -> toast element
 
   function normalize(input) {
     if (typeof input === 'string') return { variant: 'info', message: input };
@@ -179,5 +177,5 @@
   } catch (e) {}
 
   window.HvToast = { show: show, dismiss: dismiss };
-  window.__hypervisorToast = show;  // legacy alias — accepts string or options
+  window.__hypervisorToast = show;  // legacy alias - accepts string or options
 })();

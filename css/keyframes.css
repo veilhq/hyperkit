@@ -1,7 +1,7 @@
-/* ===== Hyperkit — Shared Keyframes =====
+/* ===== Hyperkit - Shared Keyframes =====
    Reusable animation keyframes consumed by all hyper ecosystem apps.
    App-specific bespoke animations (dither patterns, shake sequences, etc.)
-   stay in their local CSS — only universally-shared patterns live here.
+   stay in their local CSS - only universally-shared patterns live here.
 
    Cascade position: loaded after globals.css, before primitives.css.
    ====================================================================== */
@@ -21,14 +21,14 @@
 /* ---- Palette-cycling glow (kaomoji greetings, emote text) ---- */
 @keyframes emote-glow {
   0%, 100% { color: var(--accent); text-shadow: 0 0 6px var(--accent), 0 0 12px var(--accent-glow); }
-  25%      { color: var(--warm);   text-shadow: 0 0 6px var(--warm),   0 0 12px var(--warm); }
-  50%      { color: var(--cool);   text-shadow: 0 0 6px var(--cool),   0 0 12px var(--cool); }
-  75%      { color: var(--comp);   text-shadow: 0 0 6px var(--comp),   0 0 12px var(--comp); }
+  25%      { color: var(--warm);   text-shadow: 0 0 6px var(--warm),   0 0 12px var(--warm); } /* design-lint: allow - emote-glow palette cycle */
+  50%      { color: var(--cool);   text-shadow: 0 0 6px var(--cool),   0 0 12px var(--cool); } /* design-lint: allow - emote-glow palette cycle */
+  75%      { color: var(--comp);   text-shadow: 0 0 6px var(--comp),   0 0 12px var(--comp); } /* design-lint: allow - emote-glow palette cycle */
 }
 
 /* ---- Pulse (loading/running state feedback) ----
    Callers set --pulse-min and --pulse-max locally to control opacity range.
-   Defaults: full range (0.4 → 1). */
+   Defaults: full range (0.4 -> 1). */
 @keyframes pulse {
   0%, 100% { opacity: var(--pulse-max, 1); }
   50%      { opacity: var(--pulse-min, 0.4); }

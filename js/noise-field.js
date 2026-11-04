@@ -1,19 +1,19 @@
-/* ===== Bayer-dither noise field — extractable module (WI-112 Phase 6) =====
+/* ===== Bayer-dither noise field - extractable module =====
    Reusable WebGL2 noise-field renderer. Used by:
    - Hypervisor: home-anchor.js (mounts into .home-anchor on the homepage)
    - Hyperagent: welcome screen (via .hyperagent/assets/js/06-welcome.js shim)
 
    Public API exposed on window.HvNoiseField:
-     start(hostElement, opts?) — mounts a canvas into hostElement and begins rendering
+     start(hostElement, opts?) - mounts a canvas into hostElement and begins rendering
                                  opts.cellDivisor: dither cell density divisor (default 200).
                                    Higher = smaller/finer cells. Hyperagent passes 400 for
                                    a finer look inside the chat window.
-     stop(fadeMs)              — tears down; if fadeMs > 0, fades canvas out before removal
+     stop(fadeMs) - tears down; if fadeMs > 0, fades canvas out before removal
 
    Reads --accent CSS variable for tint (heavily dimmed to 0.15 luminance).
-   No external dependencies — pure vanilla WebGL2 + requestAnimationFrame.
+   No external dependencies - pure vanilla WebGL2 + requestAnimationFrame.
 
-   Relocated to Hyperkit (WI-142 Phase 1). Source of truth — do not copy back
+   Lives in Hyperkit. Source of truth - do not copy back
    into app-local assets/js/. Each app's build pulls this file directly.
    ================================================================= */
 
@@ -30,7 +30,7 @@
   var _t = 0;
   var _host = null;
   var _cellDivisor = 200;  // Default; caller may override via start(host, {cellDivisor: N}).
-  var _fpsCap = 30;        // Ambient texture — 30fps is visually indistinguishable from 60
+  var _fpsCap = 30;        // Ambient texture - 30fps is visually indistinguishable from 60
                            // for this slow-moving gradient and halves GPU/CPU cost.
   var _lastMs = 0;
   var _visHandler = null;
@@ -83,7 +83,7 @@
     '    // Squared falloff for dither density',
     '    val = val * val;',
     '',
-    '    // Bayer 8x8 dither — clean on/off, gradient via pixel density',
+    '    // Bayer 8x8 dither - clean on/off, gradient via pixel density',
     '    float threshold = bayer8(gl_FragCoord.xy / cellSize);',
     '    if (val < threshold) { fragColor = vec4(u_bg, 1.0); return; }',
     '',

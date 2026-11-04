@@ -1,7 +1,7 @@
 """
-Palette math and gradient map presets — shared across the hyper ecosystem.
+Palette math and gradient map presets - shared across the hyper ecosystem.
 
-Pure color-space conversions (hex ↔ OKLCh, hex ↔ HSL) and static preset data.
+Pure color-space conversions (hex <-> OKLCh, hex <-> HSL) and static preset data.
 No app state, no logging, no UI concerns.
 
 Consumers: .hyperfield/hyperfield.py, .hyperagent/bridge_api.py
@@ -11,7 +11,7 @@ import math
 
 
 # ---------------------------------------------------------------------------
-# Palette math (OKLCH color space — perceptually uniform)
+# Palette math (OKLCH color space - perceptually uniform)
 # ---------------------------------------------------------------------------
 
 def build_palette_oklch(hex_color, mode):
@@ -139,7 +139,7 @@ def build_palette_oklch(hex_color, mode):
 
 
 # ---------------------------------------------------------------------------
-# Palette math (HSL color space — mirrors hypervisor theme.js)
+# Palette math (HSL color space - mirrors hypervisor theme.js)
 # ---------------------------------------------------------------------------
 
 def build_palette_hsl(hex_color, mode):

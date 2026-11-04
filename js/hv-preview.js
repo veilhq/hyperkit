@@ -1,4 +1,4 @@
-/* ===== HvPreview — hover-loaded preview thumbnails (HyperKit) =====
+/* ===== HvPreview - hover-loaded preview thumbnails (HyperKit) =====
    Loads each preview card's <iframe> only while the card is hovered, and
    unloads it shortly after the pointer leaves. The prototypes gallery contains
    many standalone WebGL apps; booting all of them at once exhausts the browser
@@ -13,10 +13,10 @@
 
    The grace period avoids thrashing when the pointer skims across cards.
 
-   Boundary: owns neither the card markup nor the iframe styling — only the src
+   Boundary: owns neither the card markup nor the iframe styling - only the src
    lifecycle. Containment is entirely CSS (the frame's overflow:hidden).
 
-   Idempotent, strict-mode IIFE — matches the other HvX modules.
+   Idempotent, strict-mode IIFE - matches the other HvX modules.
 */
 (function initPreview() {
   "use strict";
@@ -66,7 +66,7 @@
     card._previewBound = true;
     card.addEventListener("mouseenter", function () { boot(card); });
     card.addEventListener("mouseleave", function () { teardown(card); });
-    // Keyboard/focus parity — booting on focus so keyboard users see the preview.
+    // Keyboard/focus parity - booting on focus so keyboard users see the preview.
     card.addEventListener("focusin", function () { boot(card); });
     card.addEventListener("focusout", function () { teardown(card); });
   }

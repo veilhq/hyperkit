@@ -1,4 +1,4 @@
-﻿/* ===== Hyperkit - Shared Feature Modules =====
+/* ===== Hyperkit - Shared Feature Modules =====
    Search overlay, pinboard, table of contents, tabs, drop-import,
    ideas-dismiss, editor, command palette, scratch buffer, utilities,
    effects (shortcuts/screensaver), and splash screen.
@@ -47,31 +47,30 @@
 }
 
 /* ---- Search overlay (composes .modal-overlay) ---- */
+/* Mirrors the zen stage: just the search bar centered in the viewport, with
+   results floating beneath it as a dropdown. No modal panel chrome. */
 .search-overlay {
   z-index: calc(var(--z-modal) + 10);
-  align-items: flex-start;
-  padding-top: 15vh;
+  align-items: center;
+  padding: var(--space-6);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  background: var(--scrim-strong);
+  background: var(--bg);
 }
 
-/* Noise field canvas inside the overlay */
-.search-overlay .noise-field-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* ---- Search modal panel (composes .modal-panel) ---- */
+/* ---- Search modal (composes .modal-panel, stripped to a bare column) ----
+   Same stage width as .zen-stage. Surface, border, and shadow are dropped
+   (the input row carries its own enclosure); .search-modal is the positioning
+   context for the floating results. */
 .search-modal {
-  max-width: 960px;
-  width: 90%;
-  padding: var(--space-3);
-  max-height: 70vh;
+  position: relative;
+  width: min(52rem, calc(100vw - 2 * var(--space-6)));
+  max-width: 52rem;
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  max-height: none;
   overflow: visible;
   z-index: 1;
   display: flex;
@@ -148,6 +147,20 @@
 .search-results:empty {
   display: none;
 }
+/* Overlay results float under the input like the zen dropdown, so a long list
+   scrolls inside the panel instead of moving the input off center. */
+.search-modal .search-results {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  right: 0;
+  flex: none;
+  max-height: 38vh;
+  z-index: var(--z-dropdown);
+  background: var(--bg-raised);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+}
 
 /* ---- Result card ---- */
 .search-results .sr-card {
@@ -164,9 +177,7 @@
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   cursor: pointer;
-  transition: border-color var(--motion-base) var(--ease),
-              box-shadow var(--motion-medium) var(--ease),
-              transform var(--motion-base) var(--ease);
+  transition: border-color var(--motion-base) var(--ease);
 }
 .search-results .sr-card:last-child {
   margin-bottom: var(--space-3);
@@ -174,8 +185,6 @@
 .search-results .sr-card:hover,
 .search-results .sr-card.selected {
   border-color: var(--selected-border);
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-1px);
 }
 
 /* Compact variant - utility and directory results are a single line: a leading
@@ -270,7 +279,7 @@
 .sr-card-title {
   font-family: var(--font-body);
   font-size: var(--fs-prose-ui);
-  font-weight: var(--fw-bold);
+  font-weight: var(--fw-semibold);
   color: var(--text-bright);
   line-height: var(--chip-height);
   transition: var(--transition-color);
@@ -339,18 +348,35 @@
   border-color: var(--border-strong);
 }
 .sr-tag:hover {
-  color: var(--warm);
-  border-color: var(--warm);
+  color: var(--interactive);
+  border-color: var(--interactive-border);
 }
 
-/* ---- Semantic partial-match indicator ---- */
-.sr-partial-badge {
-  position: absolute;
-  top: var(--space-5);
-  right: var(--space-5);
-  font-size: var(--fs-mono);
-  color: var(--cool);
-  border-color: var(--cool);
+/* ---- Semantic result: confidence and matched terms ---- */
+/* A result below the confidence floor drops one ink step; the "weak" badge
+   carries the same fact in words. */
+.sr-card-low .sr-card-title,
+.sr-card-low .sr-card-snippet {
+  color: var(--text-dim);
+}
+/* Confidence readout: a check for strong, a dashed circle for weak. Color
+   reinforces the shape, which already carries the state on its own. */
+.sr-card-confidence {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto; /* right edge of the card header */
+}
+.sr-card-confidence svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+.sr-conf-strong { --sr-conf-tone: var(--cool); color: var(--sr-conf-tone); }
+.sr-conf-weak { color: var(--text-dim); }
+/* Matched query term in a snippet: the "matched" role ink. */
+.sr-hit {
+  background: transparent;
+  color: var(--selected);
 }
 
 /* ---- Semantic section divider ---- */
@@ -396,7 +422,8 @@
   letter-spacing: var(--track-label);
 }
 .search-tag-filter-value {
-  color: var(--warm);
+  --tag-filter-tone: var(--warm);
+  color: var(--tag-filter-tone);
 }
 .search-tag-filter-clear {
   background: none;
@@ -410,7 +437,7 @@
   transition: var(--transition-color);
 }
 .search-tag-filter-clear:hover {
-  color: var(--comp);
+  color: var(--interactive);
 }
 
 /* ---- Stagger animation for result cards ---- */
@@ -510,7 +537,7 @@
 }
 .app-shelf-label {
   font-size: var(--fs-mono);
-  color: var(--warm);
+  color: var(--text-bright);
   text-transform: uppercase;
   letter-spacing: var(--track-label);
 }
@@ -523,7 +550,7 @@
 .app-shelf.shelf-hidden { display: none; }
 .app-shelf-recent-count {
   font-size: var(--fs-mono);
-  color: var(--comp);
+  color: var(--live);
 }
 
 ul.todo-list li {
@@ -536,9 +563,7 @@ ul.todo-list li {
   border-radius: var(--radius);
   border-left: 3px solid var(--border-strong);
   font-size: var(--fs-mono);
-  transition: border-color var(--motion-fast) var(--ease),
-              box-shadow var(--motion-base) var(--ease),
-              transform var(--motion-fast) var(--ease);
+  transition: border-color var(--motion-fast) var(--ease);
 }
 ul.todo-list li + li {
   margin-top: var(--space-2);
@@ -546,8 +571,6 @@ ul.todo-list li + li {
 ul.todo-list li:hover {
   border-color: var(--border-strong);
   border-left-color: var(--interactive);
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-1px);
 }
 /* Status-colored left rail */
 ul.todo-list li[data-status="in progress"] { border-left-color: var(--live); }
@@ -565,7 +588,7 @@ ul.todo-list li.doc-recent::after {
   right: 0;
   width: 6px;
   height: 6px;
-  background: var(--comp);
+  background: var(--live);
 }
 .todo-title {
   display: flex;
@@ -601,8 +624,9 @@ ul.todo-list li.doc-recent::after {
   border-color: var(--badge-tone);
 }
 .type-badge-professional {
-  color: var(--warm);
-  border-color: var(--warm);
+  --badge-tone: var(--warm);
+  color: var(--badge-tone);
+  border-color: var(--badge-tone);
 }
 /* ---- Work item ID (inline with title) ---- */
 .work-id-inline {
@@ -626,7 +650,7 @@ ul.todo-list li.todo-hidden { display: none; }
   min-width: 5.5rem;
 }
 .badge-tasks-done   { color: var(--success); border-color: var(--success); }
-.badge-tasks-partial { color: var(--warm); border-color: var(--warm); }
+.badge-tasks-partial { color: var(--warning); border-color: var(--warning); }
 .badge-tasks-none   { color: var(--text-dim); border-color: var(--border); }
 .badge-stale-warn   { color: var(--warning); border-color: var(--warning); }
 .badge-stale-crit   { color: var(--error); border-color: var(--error); }
@@ -641,8 +665,8 @@ ul.todo-list li.todo-hidden { display: none; }
 
 /* ---- Responsive: search modal ---- */
 @media (max-width: 600px) {
-  .search-overlay { padding-top: 8vh; }
-  .search-modal { width: 95%; }
+  .search-overlay { padding: var(--space-3); }
+  .search-modal { width: calc(100vw - 2 * var(--space-3)); }
 }
 
 /* ---- 06-pinboard.css ---- */
@@ -691,27 +715,7 @@ ul.todo-list li.todo-hidden { display: none; }
   gap: var(--space-4);
 }
 
-/* ---- Individual pin card ---- */
-.pin-card {
-  background: var(--bg-card);
-  border: var(--border-hair) solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-5) var(--space-5) var(--space-4);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  cursor: pointer;
-  transition: border-color var(--motion-base) var(--ease), box-shadow var(--motion-medium) var(--ease),
-              transform var(--motion-base) var(--ease), opacity var(--motion-base) var(--ease);
-  opacity: 0;
-  animation: cardIn var(--motion-slow) var(--ease) both;
-}
-.pin-card:hover {
-  border-color: var(--warm);
-  box-shadow: none;
-  /* flat by default: border/background hover only - no lift, no drop */
-}
+/* ---- Individual pin card (base rules live in cards.css) ---- */
 .pin-card-removing {
   opacity: 0;
   transform: scale(0.95) translateY(4px);
@@ -729,16 +733,11 @@ ul.todo-list li.todo-hidden { display: none; }
   align-items: center;
 }
 .pin-card-pin-icon {
+  --pin-icon-tone: var(--warm);
   width: var(--icon-sm);
   height: var(--icon-sm);
-  color: var(--warm);
-  fill: var(--warm);
-}
-.pin-card-category {
-  font-size: var(--fs-mono);
-  text-transform: uppercase;
-  letter-spacing: var(--track-label);
-  color: var(--text-muted);
+  color: var(--pin-icon-tone);
+  fill: var(--pin-icon-tone);
 }
 .pin-card-work-id {
   font-size: var(--fs-mono);
@@ -766,27 +765,13 @@ ul.todo-list li.todo-hidden { display: none; }
   opacity: 1;
 }
 .pin-card-remove:hover {
-  color: var(--comp);
-  border-color: var(--comp);
+  color: var(--error);
+  border-color: var(--error);
+  background: var(--danger-hover-bg);
 }
 .pin-card-remove i {
-  width: 12px;
-  height: 12px;
-}
-
-/* Pin card title */
-.pin-card-title {
-  font-size: var(--fs-prose-body);
-  font-weight: var(--fw-bold);
-  color: var(--text-bright);
-  text-decoration: none;
-  line-height: var(--lh-ui);
-  transition: var(--transition-color);
-  border: none !important;
-}
-.pin-card-title:hover {
-  color: var(--warm);
-  border: none !important;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
 }
 
 /* Pin card snippet */
@@ -843,23 +828,23 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 
 /* Pin type badges (in card header) */
-.pin-type-idea  { color: var(--cool);   border-color: var(--cool); }
-.pin-type-story { color: var(--warm);   border-color: var(--warm); }
+.pin-type-idea  { --badge-tone: var(--cool);   color: var(--badge-tone); border-color: var(--badge-tone); }
+.pin-type-story { --badge-tone: var(--warm);   color: var(--badge-tone); border-color: var(--badge-tone); }
 .pin-type-pr    { --badge-tone: var(--accent); color: var(--badge-tone); border-color: var(--badge-tone); }
 
 /* ---- Pinboard dock item (homepage) ---- */
 .dock-item-pins .dock-icon {
-  color: var(--warm);
+  --dock-pins-tone: var(--warm);
+  color: var(--dock-pins-tone);
 }
 .dock-item-pins:hover .dock-icon {
-  color: var(--warm);
-  filter: brightness(1.2);
+  color: var(--interactive);
 }
 .dock-item-pins:hover .dock-label {
-  color: var(--warm);
+  color: var(--interactive);
 }
 .dock-item-pins:hover {
-  border-bottom-color: var(--warm);
+  border-bottom-color: var(--interactive-border);
 }
 
 /* ---- Pin remove button (pinboard list) ---- */
@@ -876,12 +861,13 @@ ul.todo-list li.todo-hidden { display: none; }
   transition: color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease);
 }
 .pin-remove-btn:hover {
-  color: var(--comp);
-  border-color: var(--comp);
+  color: var(--error);
+  background: var(--danger-hover-bg);
+  border-color: var(--error);
 }
 .pin-remove-btn i {
-  width: 12px;
-  height: 12px;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
 }
 
 /* ---- 07-toc.css ---- */
@@ -977,7 +963,7 @@ ul.todo-list li.todo-hidden { display: none; }
      stays below the border line (behind the surface). Less than a full height
      of lift = tucked-behind read rather than fully-clear float. */
   transform: translateY(-100%) translateY(var(--space-6));
-  background: var(--comp);
+  background: var(--comp); /* design-lint: allow - toc flag character color */
   color: var(--bg);
   border: none;
   border-radius: var(--radius) var(--radius) 0 0;
@@ -993,7 +979,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .toc-flag:focus-visible,
 .toc-flag.hover {
   /* Pull further up out from behind the surface to signal it's clickable. */
-  transform: translateY(-100%) translateY(var(--space-3));
+  transform: translateY(-100%) translateY(var(--space-3)); /* design-lint: allow - toc flag drawer reveal */
   filter: brightness(1.08);
   outline: none;
 }
@@ -1017,7 +1003,7 @@ ul.todo-list li.todo-hidden { display: none; }
   border: none;
   background: transparent;
   cursor: pointer;
-  z-index: var(--z-topbar, 100);
+  z-index: var(--z-topbar);
   opacity: 0;
   pointer-events: none;
 }
@@ -1046,12 +1032,12 @@ ul.todo-list li.todo-hidden { display: none; }
   left: calc(var(--site-nav-width, 0px) + var(--space-5));
   width: 260px;
   max-height: 60vh;
-  z-index: var(--z-topbar, 100);
+  z-index: var(--z-topbar);
   background: var(--bg-card);
   border: var(--border-hair) solid var(--border-strong);
-  border-top: var(--border-rail) solid var(--comp);
+  border-top: var(--border-rail) solid var(--comp); /* design-lint: allow - toc drawer matches the flag */
   border-radius: 0 0 var(--radius) var(--radius);
-  box-shadow: var(--shadow-panel, 0 6px 24px rgba(0,0,0,0.4));
+  box-shadow: var(--shadow-panel);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1105,14 +1091,13 @@ ul.todo-list li.todo-hidden { display: none; }
   text-indent: 0;
 }
 .toc-body a:hover {
-  color: var(--comp);
-  background: color-mix(in srgb, var(--comp) 12%, transparent);
-  border-color: color-mix(in srgb, var(--comp) 40%, transparent);
+  color: var(--interactive);
+  border-color: var(--interactive-border);
 }
 .toc-body a.toc-active {
-  color: var(--comp);
-  background: color-mix(in srgb, var(--comp) 12%, transparent);
-  border-color: color-mix(in srgb, var(--comp) 40%, transparent);
+  color: var(--selected);
+  background: var(--selected-wash);
+  border-color: var(--selected-border);
 }
 
 /* ---- Nested hierarchy: a left guide line marks each level as belonging under
@@ -1156,7 +1141,7 @@ ul.todo-list li.todo-hidden { display: none; }
   display: none;
   position: sticky;
   top: var(--topbar-height); /* dock flush under the topbar; aligns to clock flag edges */
-  z-index: 95;
+  z-index: calc(var(--z-topbar) - 5);
   background: var(--bg-surface);
   border-bottom: var(--border-hair) solid var(--border);
   padding: 0;
@@ -1168,7 +1153,7 @@ ul.todo-list li.todo-hidden { display: none; }
   overflow-y: hidden;
   white-space: nowrap;
   gap: var(--space-1);
-  height: calc(0.8rem + 0.9rem * 1.7); /* match clock flag: padding + font × line-height */
+  height: calc(0.8rem + 0.9rem * 1.7); /* match clock flag: padding + font x line-height */
   align-items: center;
 }
 
@@ -1238,10 +1223,10 @@ ul.todo-list li.todo-hidden { display: none; }
 .tab-item:hover .tab-close { opacity: 1; }
 
 .tab-close:hover {
-  color: var(--comp);
+  color: var(--interactive);
 }
 
-/* ---- Stale indicator (comp-color square, top-right) ---- */
+/* ---- Stale indicator (warning square, top-right) ---- */
 .tab-item.tab-stale::after {
   content: '';
   position: absolute;
@@ -1249,7 +1234,7 @@ ul.todo-list li.todo-hidden { display: none; }
   right: var(--space-1);
   width: 6px;
   height: 6px;
-  background: var(--comp);
+  background: var(--warning);
 }
 
 /* ---- Accessibility: hide indicators ---- */
@@ -1259,13 +1244,13 @@ ul.todo-list li.todo-hidden { display: none; }
 
 /* ---- 12-drop-import.css ---- */
 
-/* ─── Drop Import Zone ─────────────────────────────────────────────────────── */
+/* --- Drop Import Zone ------------------------------------------------------- */
 /* Visible only on the .external/ directory index page (desktop app only). */
 
 .drop-zone {
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 2;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1328,7 +1313,7 @@ ul.todo-list li.todo-hidden { display: none; }
   border-radius: var(--radius);
 }
 
-/* ─── Row Delete Buttons (external + universal) ───────────────────────────── */
+/* --- Row Delete Buttons (external + universal) ----------------------------- */
 
 .external-delete-btn,
 .doc-delete-btn {
@@ -1384,7 +1369,7 @@ ul.todo-list li.todo-hidden { display: none; }
   stroke: var(--error);
 }
 
-/* ─── External Non-MD File Frame ──────────────────────────────────────────── */
+/* --- External Non-MD File Frame -------------------------------------------- */
 /* Shared viewing frame for non-markdown files in .external/ (txt, sql, images,
    binaries). Every type renders inside this same frame - only .external-doc-body
    varies - so a .txt, a .sql, and a .png all look consistent. */
@@ -1392,7 +1377,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .external-doc {
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
-  background: var(--bg-raised, var(--bg));
+  background: var(--bg-raised);
   overflow: hidden;
 }
 
@@ -1424,7 +1409,8 @@ ul.todo-list li.todo-hidden { display: none; }
   padding: 0 var(--space-2);
   border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
-  color: var(--cool);
+  --external-doc-tone: var(--cool);
+  color: var(--external-doc-tone);
   font-size: var(--fs-mono);
   text-transform: uppercase;
   letter-spacing: var(--track-label);
@@ -1483,7 +1469,7 @@ ul.todo-list li.todo-hidden { display: none; }
 
 /* ---- 13-ideas-dismiss.css ---- */
 
-/* ─── Ideas Dismiss Button ─────────────────────────────────────────────────── */
+/* --- Ideas Dismiss Button --------------------------------------------------- */
 /* Shows a check-circle button on idea list items to mark them as implemented. */
 
 .todo-list li {
@@ -1586,7 +1572,7 @@ ul.todo-list li.todo-hidden { display: none; }
   opacity: 0;
   transition: opacity var(--motion-base) var(--ease);
   pointer-events: none;
-  z-index: 10;
+  z-index: 2;
 }
 
 .inline-editor-indicator.visible {
@@ -1622,8 +1608,8 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 
 .inline-editor-cancel:hover {
-  color: var(--comp);
-  border-color: var(--comp);
+  color: var(--interactive);
+  border-color: var(--interactive);
 }
 
 /* ---- 15-command-palette.css ---- */
@@ -1633,7 +1619,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .cmd-palette-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9000;
+  z-index: var(--z-overlay);
   display: none;
   align-items: center;
   justify-content: center;
@@ -1740,9 +1726,9 @@ ul.todo-list li.todo-hidden { display: none; }
 
 /* Category-specific hint colors */
 .cmd-palette-item[data-category="action"] .cmd-palette-item-hint { --category-tone-dim: var(--accent-dim); color: var(--category-tone-dim); }
-.cmd-palette-item[data-category="tag"] .cmd-palette-item-hint { color: var(--warm); }
-.cmd-palette-item[data-category="utility"] .cmd-palette-item-hint { color: var(--cool); }
-.cmd-palette-item[data-category="nav"] .cmd-palette-item-hint { color: var(--comp); }
+.cmd-palette-item[data-category="tag"] .cmd-palette-item-hint { --cmd-category-tone: var(--warm); color: var(--cmd-category-tone); }
+.cmd-palette-item[data-category="utility"] .cmd-palette-item-hint { --cmd-category-tone: var(--cool); color: var(--cmd-category-tone); }
+.cmd-palette-item[data-category="nav"] .cmd-palette-item-hint { --cmd-category-tone: var(--comp); color: var(--cmd-category-tone); }
 
 /* Keyboard hint in footer */
 .cmd-palette-footer {
@@ -1775,7 +1761,7 @@ ul.todo-list li.todo-hidden { display: none; }
   width: clamp(320px, 28vw, 400px);
   background: var(--bg);
   border-left: var(--border-hair) solid var(--border-strong);
-  z-index: 9000;
+  z-index: var(--z-overlay);
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
@@ -1845,7 +1831,7 @@ ul.todo-list li.todo-hidden { display: none; }
   padding: var(--space-1) var(--space-2);
 }
 .scratch-btn-close:hover {
-  color: var(--comp);
+  color: var(--interactive);
 }
 
 /* --- Journal body (log-line entries) --- */
@@ -1878,7 +1864,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .scratch-input-cursor {
   width: 2px;
   height: 0.9rem;
-  background: var(--comp);
+  background: var(--focus);
   animation: scratchBlink var(--period-blink) step-end infinite;
   flex-shrink: 0;
   margin-top: var(--space-1);
@@ -1903,7 +1889,7 @@ ul.todo-list li.todo-hidden { display: none; }
   min-height: 2.5rem;
   max-height: 8rem;
   padding: var(--space-1) 0;
-  caret-color: var(--comp);
+  caret-color: var(--focus);
 }
 .scratch-textarea::placeholder {
   color: var(--text-dim);
@@ -1945,13 +1931,10 @@ ul.todo-list li.todo-hidden { display: none; }
   background: var(--note-card-color, var(--note-color-1));
   color: var(--note-ink);
   cursor: grab;
-  transition: box-shadow var(--motion-fast) var(--ease),
-              transform var(--motion-fast) var(--ease),
-              background var(--motion-fast) var(--ease);
+  transition: background var(--motion-fast) var(--ease);
 }
 .scratch-card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-hover);
+  filter: brightness(var(--state-hover-brightness));
 }
 
 /* --- Card motion ---------------------------------------------------------
@@ -2162,7 +2145,7 @@ ul.todo-list li.todo-hidden { display: none; }
 }
 .scratch-history-item.active {
   border-left-color: var(--selected);
-  background: var(--bg-elevated);
+  background: var(--bg-raised);
 }
 .scratch-history-date {
   font-size: var(--fs-mono);
@@ -2199,7 +2182,7 @@ ul.todo-list li.todo-hidden { display: none; }
   opacity: 1;
 }
 .scratch-history-delete:hover {
-  color: var(--comp);
+  color: var(--error);
 }
 
 /* --- Empty state --- */
@@ -2304,7 +2287,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .shortcuts-overlay {
   position: fixed;
   inset: 0;
-  z-index: 500;
+  z-index: var(--z-modal);
   background: var(--scrim);
   backdrop-filter: blur(4px);
   display: flex;
@@ -2354,7 +2337,7 @@ ul.todo-list li.todo-hidden { display: none; }
   transition: var(--transition-color);
 }
 .shortcuts-close:hover {
-  color: var(--comp);
+  color: var(--interactive);
 }
 .shortcuts-body {
   padding: var(--space-3) var(--space-4);
@@ -2385,7 +2368,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .screensaver-overlay {
   position: fixed;
   inset: 0;
-  z-index: 600;
+  z-index: var(--z-screensaver);
   background: var(--bg);
   opacity: 0;
   pointer-events: none;
@@ -2439,8 +2422,8 @@ ul.todo-list li.todo-hidden { display: none; }
    micrographics value chips alike. */
 .screensaver-clock .status-chip-filled,
 .screensaver-clock.status-chip-filled {
-  background: var(--comp);
-  border-color: var(--comp);
+  background: var(--comp); /* design-lint: allow - screensaver clock face */
+  border-color: var(--comp); /* design-lint: allow - screensaver clock face */
 }
 
 /* ---- Clock face: digital (composes the filled chip primitive) ---- */
@@ -2499,8 +2482,8 @@ ul.todo-list li.todo-hidden { display: none; }
   --flip-size: 3.4rem;
 }
 .clock-face-flip .viz-flip-card {
-  background: var(--comp);
-  border-color: var(--comp);
+  background: var(--comp); /* design-lint: allow - screensaver clock face */
+  border-color: var(--comp); /* design-lint: allow - screensaver clock face */
   color: var(--bg);
 }
 
@@ -2566,7 +2549,7 @@ html.splash-screen-active body {
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: var(--comp, #ff3333);
+  background: var(--comp); /* design-lint: allow - boot splash flag character color */
   border-radius: var(--radius);
   opacity: 0;
   animation: splash-fade-in var(--motion-slow) ease var(--motion-tick) forwards;
@@ -2575,7 +2558,7 @@ html.splash-screen-active body {
 .splash-screen-eye {
   width: 30px;
   height: 24px;
-  color: var(--bg, #000000);
+  color: var(--bg);
 }
 
 @keyframes splash-fade-in {

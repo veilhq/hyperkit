@@ -1,11 +1,11 @@
 /* ===== Context Menu (reusable right-click menu primitive) =====
-   Hyperkit shared module — available to all hyper-ecosystem apps.
+   Hyperkit shared module - available to all hyper-ecosystem apps.
 
    Usage:
      HvContextMenu.register(selector, itemsFn)
 
    selector:  CSS selector for elements that trigger the context menu.
-   itemsFn:   Function(targetEl, event) → Array of menu item objects:
+   itemsFn:   Function(targetEl, event) -> Array of menu item objects:
               { label, icon?, action, disabled?, separator? }
 
    Special item: { separator: true } renders a divider line.
@@ -20,7 +20,7 @@
        ];
      });
 
-   Multiple registrations can match the same element — items are merged in
+   Multiple registrations can match the same element - items are merged in
    registration order. The menu positions itself near the cursor and stays
    within viewport bounds.
 */
@@ -86,7 +86,7 @@
         continue;
       }
 
-      // Submenu item — expandable group with children
+      // Submenu item - expandable group with children
       if (item.children && item.children.length) {
         (function (parentItem) {
           var group = document.createElement('div');
@@ -139,7 +139,7 @@
 
           trigger.addEventListener('click', function (e) {
             e.stopPropagation();
-            // Only one submenu open at a time — collapse siblings first.
+            // Only one submenu open at a time - collapse siblings first.
             if (!group.classList.contains('context-menu-group-open') && menu) {
               var openGroups = menu.querySelectorAll('.context-menu-group-open');
               for (var o = 0; o < openGroups.length; o++) {
@@ -207,11 +207,11 @@
         var items = reg.itemsFn(target, e);
         if (items && items.length) {
           allItems = items;
-          break; // First match with results wins — no merging
+          break; // First match with results wins - no merging
         }
       }
     }
-    if (!allItems.length) return; // no matches — let default context menu through
+    if (!allItems.length) return; // no matches - let default context menu through
 
     e.preventDefault();
     e.stopPropagation();

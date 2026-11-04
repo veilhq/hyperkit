@@ -1,4 +1,4 @@
-/* ===== Hyperkit — Shared Accessibility Overrides =====
+/* ===== Hyperkit - Shared Accessibility Overrides =====
    Accessibility panel UI, toggle styles, and html-class-driven overrides
    for high contrast, large text, reduced motion, system cursors, etc.
 
@@ -106,13 +106,13 @@
               box-shadow var(--motion-fast) var(--ease);
 }
 .a11y-reset:hover {
-  color: var(--comp);
+  color: var(--error);
   background: var(--danger-hover-bg);
-  border-color: var(--comp);
+  border-color: var(--error);
 }
 
 /* ============================================================
-   Accessibility override classes — applied to <html>
+   Accessibility override classes - applied to <html>
    ============================================================ */
 
 /* ---- High contrast ---- */
@@ -131,7 +131,6 @@ html.a11y-bw-theme {
   --bg-surface:    #d9d9d9;
   --bg-card:       #dedede;
   --bg-card-hover: #d0d0d0;
-  --bg-elevated:   #dcdcdc;
   --border:        #b0b0b0;
   --border-strong: #999999;
   --text:          #111111;
@@ -167,13 +166,12 @@ html.a11y-bw-theme {
     -8px 0 20px -16px rgba(0, 0, 0, 0.15),
     8px 0 20px -16px rgba(0, 0, 0, 0.15),
     0 8px 24px -14px rgba(0, 0, 0, 0.18);
-  /* Modal/toast float (.notification-toast, modals) — the dark-theme recipe is
+  /* Modal float - the dark-theme recipe is
      40%-black and reads as a heavy slab on a light page. Soften to a low-alpha
      grey drop in the same family as the drawer shadows above. */
   --shadow-panel: 0 4px 16px -6px rgba(0, 0, 0, 0.18);
   /* Light scrims: a translucent grey veil instead of black. */
   --scrim:        rgba(200, 200, 200, 0.75);
-  --scrim-strong: rgba(200, 200, 200, 0.85);
   --scrim-soft:   rgba(200, 200, 200, 0.5);
   /* The theme collapses --comp to blue; --bg ink on blue lacks contrast. */
   --flag-ink:     #ffffff;
@@ -195,7 +193,7 @@ html.a11y-bw-theme ::-webkit-scrollbar-thumb { background: var(--border-strong);
    read as low-vibrance slabs. Bump each toast's --variant-color to a brighter,
    more saturated hue. --variant-color drives both the fill AND the auto-ink
    derivation, so the knocked-out glyph/message re-pick their contrast extreme
-   automatically — no separate ink override needed. */
+   automatically - no separate ink override needed. */
 html.a11y-bw-theme .notification-toast-success { --variant-color: #16a34a; }
 html.a11y-bw-theme .notification-toast-info    { --variant-color: #2563eb; }
 html.a11y-bw-theme .notification-toast-warn    { --variant-color: #ea8a00; }
