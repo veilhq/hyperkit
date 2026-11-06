@@ -98,6 +98,46 @@ class SemanticRules(unittest.TestCase):
         self.assertEqual(categories(".a { z-index: -1; } .b { z-index: 2; } .c { z-index: var(--z-modal); }"), [])
 
 
+class InlineAndScriptStyles(unittest.TestCase):
+    def lint_html(self, html):
+        fixture = Path(__file__).with_name("_lint_fixture.html")
+        try:
+            fixture.write_text(html, encoding="utf-8")
+            return sorted((v.category, v.line) for v in design_lint.lint_file(fixture))
+        finally:
+            fixture.unlink()
+
+    def test_inline_style_attribute_flagged_with_line(self):
+        html = '<p>\n<div style="padding:0.5rem;color:#ccc;width:11px">x</div>'
+        self.assertEqual(self.lint_html(html), [("color", 2), ("spacing", 2)])
+
+    def test_tokenized_inline_style_and_data_style_pass(self):
+        html = '<div style="gap:var(--space-2);display:none" data-style="padding:4px"></div>'
+        self.assertEqual(self.lint_html(html), [])
+
+    def test_css_text_concatenation_is_scanned(self):
+        html = "<script>\nel.style.cssText = 'gap:0.5rem;border-left:2px solid ' + c +\n  ';color:#fff';\n</script>"
+        self.assertEqual(self.lint_html(html), [("color", 3), ("spacing", 2)])
+
+    def test_style_attribute_inside_js_template(self):
+        html = "<script>\nvar h = `<i style=\"margin-top:3px\"></i>`;\nvar j = '<b style=\"width:' + w + '%\">';\n</script>"
+        self.assertEqual(self.lint_html(html), [("spacing", 2)])
+
+    def test_style_property_assignment_and_export_rules(self):
+        html = "<script>\nel.style.letterSpacing = '0.1em';\nel.style.display = 'none';\n" \
+               "var css = 'body { color: #000; padding: 2rem; }\\n';\n</script>"
+        self.assertEqual(self.lint_html(html), [("color", 4), ("spacing", 4), ("tracking", 2)])
+
+    def test_comments_in_script_do_not_open_strings(self):
+        html = "<script>\n// don't pad: 4px\nvar a = 1; el.style.cssText = 'gap:var(--space-1)';\n</script>"
+        self.assertEqual(self.lint_html(html), [])
+
+    def test_allow_marker_covers_inline_and_script_styles(self):
+        html = '<!-- design-lint: allow - fixed swatch -->\n<i style="color:#fff"></i>\n' \
+               "<script>\nel.style.cssText = 'color:#000'; // design-lint: allow - export\n</script>"
+        self.assertEqual(self.lint_html(html), [])
+
+
 class Exemptions(unittest.TestCase):
     def test_allow_marker_same_line_and_line_above(self):
         css = ".a {\n  color: #fff; /* design-lint: allow - blend operand */\n" \
@@ -109,7 +149,7 @@ class Exemptions(unittest.TestCase):
               ".emote { animation: emote-glow 8s infinite; }"
         self.assertEqual(categories(css), [])
 
-    def test_html_style_blocks_scanned_but_script_markup_ignored(self):
+    def test_html_style_blocks_and_script_style_templates_scanned(self):
         html = "<style>\n.a { gap: 4px; }\n</style>\n<script>var s = '<style>.b { color: #000; }</style>';</script>"
         fixture = Path(__file__).with_name("_lint_fixture.html")
         try:
@@ -117,7 +157,7 @@ class Exemptions(unittest.TestCase):
             found = design_lint.lint_file(fixture)
         finally:
             fixture.unlink()
-        self.assertEqual([(v.category, v.line) for v in found], [("spacing", 2)])
+        self.assertEqual([(v.category, v.line) for v in found], [("spacing", 2), ("color", 4)])
 
     def test_report_exits_nonzero_on_violations_and_zero_when_clean(self):
         app = Path(__file__).with_name("_lint_app")

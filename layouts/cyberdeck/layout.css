@@ -335,7 +335,7 @@
   /* Generous negative space above the header. Tunable via --dir-top-pad; the
      surface min-height below subtracts the same value so short-content drawers
      still land near the bottom rather than overshooting by this amount. */
-  --dir-top-pad: 50px;
+  --dir-top-pad: 80px;
   padding: var(--dir-top-pad) 0 0;
   padding-left: var(--site-nav-width, 0px);
   /* Fill from just below the sticky topbar to the window bottom. Using
@@ -402,7 +402,7 @@
    so it reads like the rest of the site. Applied by the router (page-utility)
    for pageType "utility". */
 .page-utility {
-  --util-top-pad: 50px;
+  --util-top-pad: 80px;
   padding: var(--util-top-pad) 0 0;
   padding-left: var(--site-nav-width, 0px);
   min-height: calc(100vh - var(--topbar-height));
@@ -417,7 +417,7 @@
 }
 /* Header strip keeps a normal inset; the surface goes full width. */
 .page-utility .utility-head {
-  margin: 0 var(--space-5) var(--space-4);
+  margin: 0 var(--space-5) var(--space-3);
   flex-shrink: 0;
 }
 /* Surface spans edge-to-edge, opens at the bottom, and fills the column. */
@@ -426,7 +426,7 @@
   border-radius: var(--radius-dir-surface) var(--radius-dir-surface) 0 0;
   box-shadow: var(--shadow-drawer);
   flex: 1;
-  min-height: calc(100vh - var(--topbar-height) - var(--util-top-pad, 50px) - 5rem);
+  min-height: calc(100vh - var(--topbar-height) - var(--util-top-pad, 80px) - 5rem);
 }
 
 /* ---- Footer ---- */

@@ -214,11 +214,9 @@
      drop to 2 or 1 columns as space tightens, matching the card-grid pattern
      used elsewhere in the ecosystem. */
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  /* Size each card to its own content. Without this, grid rows stretch every
-     card to the tallest in the row, and the chips' margin-top:auto then strands
-     them at the bottom of that stretched box - the lopsided "content clustered
-     up top, PR chips floating far below" gap. */
-  align-items: start;
+  /* Cards in a row stretch to the tallest, so row edges align; the chips pin
+     to the card bottom (margin-top:auto) so every footer sits on one line. */
+  align-items: stretch;
   gap: var(--space-4);
   margin: var(--space-4) 0;
 }
@@ -270,7 +268,8 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   align-items: center;
-  margin-top: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-2);
   /* Scale the chips up for card context - these are the card's primary
      clickable elements, not dense status markers. Overriding the chip tokens
      here cascades into the .label-badge children without touching the global
@@ -390,14 +389,20 @@
 */
 kbd,
 .kbd {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   font-family: var(--font);
   font-size: var(--fs-mono);
+  line-height: var(--lh-ui);
   color: var(--text-bright);
   background: var(--bg-raised);
   border: var(--border-hair) solid var(--border-strong);
   border-radius: var(--radius);
-  padding: var(--border-rail) var(--space-2);
+  /* Rounded square: min-width equals the key height; longer labels widen. */
+  padding: var(--space-1);
+  min-width: calc(1lh + 2 * (var(--space-1) + var(--border-hair)));
   text-align: center;
   letter-spacing: var(--track-body);
 }

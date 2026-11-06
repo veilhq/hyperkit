@@ -14,6 +14,11 @@
      * @param {string} str - raw string to escape
      * @returns {string} - HTML-safe string
      */
+    /** Zero-pad a count readout to two digits: 1 -> "01". */
+    pad2: function (n) {
+      return n < 10 ? "0" + n : String(n);
+    },
+
     escapeHtml: function (str) {
       return (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     }

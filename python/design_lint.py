@@ -11,6 +11,10 @@ palette hue (--warm, --comp, --cool) outside a custom-property definition, a
 translate/scale transform in a :hover rule, a raw literal var() fallback for a
 token defined in tokens.css, and a raw z-index other than -1/0/1/2.
 
+Utility pages are linted in three places: <style> blocks, inline style="..."
+attributes, and style text built in <script> (cssText, el.style.prop strings,
+style attributes in JS templates, and CSS rules in export templates).
+
 Builds run in error mode: any off-scale value fails the build with a one-line
 summary. Run directly for the full report:
     python .hyperspace/.hyperkit/python/design_lint.py [-v] [--strict]
@@ -228,17 +232,89 @@ def lint_css(text: str, path: Path, line_offset: int = 0) -> list[Violation]:
     return violations
 
 
+STYLE_ATTR = re.compile(r"(?<![\w-])style\s*=\s*(?:\"([^\"]*)(?:\"|$)|'([^']*)(?:'|$))", re.I)
+CSS_TEXT_ASSIGN = re.compile(r"\.style\.cssText\s*\+?=|setAttribute\(\s*['\"]style['\"]\s*,")
+STYLE_PROP_ASSIGN = re.compile(r"\.style\.([a-z]+(?:[A-Z][a-z]*)*)\s*=(?!=)\s*(['\"`])((?:\\.|(?!\2).)*)\2")
+CSS_RULE = re.compile(r"[^{};]+\{[^{}]*:[^{}]*\}")
+TEMPLATE_EXPR = re.compile(r"\$\{[^}]*\}")
+
+
+def _literals(code: str):
+    """Yield (start, end, content_start) for each string literal in JS, skipping comments."""
+    i, size = 0, len(code)
+    while i < size:
+        pair = code[i:i + 2]
+        if pair == "//":
+            i = code.find("\n", i)
+            i = size if i < 0 else i
+        elif pair == "/*":
+            i = code.find("*/", i + 2)
+            i = size if i < 0 else i + 2
+        elif code[i] in "\"'`":
+            quote, j = code[i], i + 1
+            while j < size and code[j] != quote and not (quote != "`" and code[j] == "\n"):
+                j += 2 if code[j] == "\\" else 1
+            yield i, j, i + 1
+            i = j + 1
+        else:
+            i += 1
+
+
+def _script_fragments(body: str):
+    """Yield (index, css, kind) pieces of style text found in one script body."""
+    for start, end, content_start in _literals(body):
+        content = TEMPLATE_EXPR.sub(_blank, body[content_start:end])
+        for attr in STYLE_ATTR.finditer(content):
+            group = 1 if attr.group(1) is not None else 2
+            yield content_start + attr.start(group), attr.group(group), "decl"
+        if CSS_RULE.search(content):
+            yield content_start, content, "rule"
+    for assign in CSS_TEXT_ASSIGN.finditer(body):
+        base = prev_end = assign.end()
+        for start, stop, content_start in _literals(body[base:]):
+            gap = body[prev_end:base + start]
+            if ";" in gap or ("\n" in gap and "+" not in gap):
+                break
+            yield base + content_start, body[base + content_start:base + stop], "decl"
+            prev_end = base + stop + 1
+    for assign in STYLE_PROP_ASSIGN.finditer(body):
+        if assign.group(1) == "cssText":
+            continue
+        prop = re.sub(r"[A-Z]", lambda m: "-" + m.group(0).lower(), assign.group(1))
+        yield assign.start(3), f"{prop}:{assign.group(3)}", "decl"
+
+
+def _fragment_violations(css: str, kind: str, text: str, index: int, path: Path) -> list[Violation]:
+    """Lint a style fragment found at text[index], reporting absolute file lines."""
+    source = css if kind == "rule" else "x{" + css + "}"
+    return lint_css(source, path, text.count("\n", 0, index))
+
+
 def lint_file(path: Path) -> list[Violation]:
     if path in EXEMPT_FILES:
         return []
     text = path.read_text(encoding="utf-8")
     if path.suffix != ".html":
         return lint_css(text, path)
-    # Utility pages: lint <style> blocks only, ignoring markup built inside <script>.
-    text = re.sub(r"<script\b.*?</script>", _blank, text, flags=re.S | re.I)
+    # Utility pages: <style> blocks, inline style attributes, and style text built in <script>.
+    lines = text.split("\n")
+    markup = re.sub(r"<script\b.*?</script>", _blank, text, flags=re.S | re.I)
     found = []
-    for match in re.finditer(r"<style\b[^>]*>(.*?)</style>", text, flags=re.S | re.I):
-        found += lint_css(match.group(1), path, text.count("\n", 0, match.start(1)))
+    for match in re.finditer(r"<style\b[^>]*>(.*?)</style>", markup, flags=re.S | re.I):
+        found += lint_css(match.group(1), path, markup.count("\n", 0, match.start(1)))
+    markup = re.sub(r"<style\b.*?</style>", _blank, markup, flags=re.S | re.I)
+    inline = []
+    for attr in STYLE_ATTR.finditer(markup):
+        group = 1 if attr.group(1) is not None else 2
+        inline.append((attr.start(group), attr.group(group), "decl"))
+    for script in re.finditer(r"<script\b[^>]*>(.*?)</script>", text, flags=re.S | re.I):
+        for index, css, kind in _script_fragments(script.group(1)):
+            inline.append((script.start(1) + index, css, kind))
+    for index, css, kind in inline:
+        for violation in _fragment_violations(css, kind, text, index, path):
+            near = lines[violation.line - 2:violation.line]
+            if not any(ALLOW_MARKER in line for line in near):
+                found.append(violation)
     return found
 
 

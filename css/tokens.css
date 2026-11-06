@@ -44,17 +44,14 @@
   --comp:           #ff3333;
   --cool:          #00cccc;
 
-  /* Tool-type colors - one saturated, bright hue per kind of tool call, fixed
-     (not palette-derived) so each stays stark on a dark bg whatever the accent.
-     Hues are spaced around the wheel and avoid red, which means failed. */
-  --tool-read:      #00e5ff;
-  --tool-write:     #ffc400;
-  --tool-shell:     #ff7a1a;
-  --tool-web:       #2f9bff;
-  --tool-devops:    #8c7bff;
-  --tool-subagent:  #d156ff;
-  --tool-tasks:     #ff4fb8;
-  --tool-knowledge: #c8ff2e;
+  /* Tool-type colors - cyan, yellow, magenta, blue, fixed (not
+     palette-derived) so each stays stark on a dark bg whatever the accent.
+     in = reads local data, change = writes state, exec = runs or delegates
+     work, ext = calls a system outside the machine. No red, which means failed. */
+  --tool-in:        #00e5ff;
+  --tool-change:    #ffc400;
+  --tool-exec:      #ff2bd6;
+  --tool-ext:       #2f9bff;
   --tool-hyper:     var(--accent);
 
   /* Token vocabulary convention:
@@ -114,6 +111,7 @@
   --font:          var(--font-mono);   /* instrument default: chips, buttons, inputs, nav, data, labels */
   --font-body:     var(--font-sans);   /* reading prose: markdown paragraphs, lists, card titles + descriptions */
   --font-heading:  var(--font-sans);   /* document headings */
+  --font-display:  var(--font-sans);   /* display tier: page titles and hero numerals, at --fw-extrabold */
   --font-code:     var(--font-mono);   /* pinned to mono: code + pre never follow a body-face swap */
   /* Optical size compensation. Departure Mono has a large x-height, so a
      proportional face at the same font-size reads smaller. Content selectors
@@ -137,6 +135,11 @@
   --fs-prose-lg:    calc(1rem * var(--prose-ratio) * var(--font-body-scale));                         /* doc H2, section summaries */
   --fs-prose-xl:    calc(1rem * var(--prose-ratio) * var(--prose-ratio) * var(--font-body-scale));    /* doc H1, greetings */
 
+  /* Display tier (Host Grotesk, --fw-extrabold, mixed case) - two steps seven
+     and nine ratio steps above 1rem. Page titles and hero numerals only. */
+  --fs-display:     calc(1rem * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--font-body-scale));                                                                   /* page titles */
+  --fs-display-num: calc(1rem * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--prose-ratio) * var(--font-body-scale));                   /* hero numerals */
+
   /* Mono instrument scale - Departure Mono is a pixel font, crisp only at
      multiples of 11 device px, so mono sizes are px multiples of 11 rather
      than rem: one token is one pixel size in every app. --mono-step is a
@@ -146,7 +149,6 @@
      design: legibility outranks the grid). 1 everywhere else. */
   --mono-text-scale: 1;
   --fs-mono:         calc(11px * var(--mono-step) * var(--mono-text-scale));   /* all instrument chrome */
-  --fs-mono-display: calc(22px * var(--mono-step) * var(--mono-text-scale));   /* display titles and the screensaver clock */
 
   /* Font-weight scale - prose only. Mono text carries no weight (the
      pixel face ships one weight and synthesis is off). 600 is card titles and
@@ -164,6 +166,7 @@
   --track-body:  0.04em;   /* mixed-case mono: names, meta, buttons */
   --track-label: 0.06em;   /* uppercase labels, chips, section headers */
   --track-caps:  0.1em;    /* heavy uppercase display: brand, wordmarks, hero legends */
+  --track-display: -0.02em; /* the display tier only: heavy grotesk at --fs-display and --fs-display-num */
 
   /* Line-height scale - unitless so it follows the element's font size. */
   --lh-tight: 1;     /* single-line chrome: chips, badges, values, icons */

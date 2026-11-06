@@ -211,10 +211,12 @@ h1 + .home-dock { margin-top: var(--space-4); }
   flex-shrink: 0;
 }
 .dir-header .dir-header-title {
-  font-size: var(--fs-mono-display);
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-extrabold);
+  line-height: var(--lh-tight);
   color: var(--text-bright);
-  text-transform: uppercase;
-  letter-spacing: var(--track-body);
+  letter-spacing: var(--track-display);
   margin: 0;
   padding: 0;
   border: none;
@@ -253,41 +255,74 @@ h1 + .home-dock { margin-top: var(--space-4); }
    it bleeds off-screen rather than closing into a box. Files rest inside as
    raised objects (.dir-item). The header sits above this surface, outside it. */
 
-/* Header strip above the drawer: title-over-subtitle stack on the left,
-   directory stats aligned to the right, on one line. */
+/* Header strip above the drawer: display title over a subtitle row that
+   carries the description and the directory stats. */
 .dir-head {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  align-items: flex-end;
   animation: fadeSlideIn var(--motion-slow) var(--ease) both;
 }
-.dir-headings { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
-.dir-title-row { display: flex; align-items: center; gap: var(--space-3); }
-.dir-title-icon { width: var(--icon-lg); height: var(--icon-lg); color: var(--text-muted); flex-shrink: 0; }
+.dir-headings { display: flex; flex-direction: column; gap: var(--space-3); flex: 1; min-width: 0; }
 /* Scoped to out-specify .markdown-body h1 (which sets --fs-h1 and an accent
    underline); the directory title is a compact strip heading, not a doc H1. */
 .markdown-body .dir-title,
 .dir-title {
-  font-size: var(--fs-prose-body);
-  font-weight: var(--fw-semibold);
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-extrabold);
+  line-height: var(--lh-tight);
   color: var(--text-bright);
-  text-transform: uppercase;
-  letter-spacing: var(--track-caps);
+  letter-spacing: var(--track-display);
   margin: 0;
   padding: 0;
   padding-bottom: 0;
   border: none;
   border-bottom: none;
 }
+/* Directory titles read as paths: a dim slash ahead of the name. */
+.dir-title.is-dir::before {
+  content: "/";
+  color: var(--text-dim);
+  margin-right: var(--space-1);
+}
 .dir-desc {
   color: var(--text-muted);
-  font-size: var(--fs-prose-sm);
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-ui);
+  line-height: var(--lh-ui);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.dir-head .dir-stats { display: flex; gap: var(--space-5); margin-left: auto; flex-shrink: 0; align-self: flex-end; }
+/* A directory with no description shows its path, in the instrument face. */
+.dir-desc.dir-desc-path {
+  font-family: var(--font);
+  font-size: var(--fs-mono);
+  letter-spacing: var(--track-body);
+  color: var(--text-dim);
+}
+/* Subtitle row: description left, stats as one inline instrument line right.
+   Value in bright grotesk, legend in dim mono. */
+.dir-subrow { display: flex; align-items: baseline; gap: var(--space-5); min-width: 0; }
+.dir-subrow .dir-desc { flex: 1; }
+.dir-head .dir-stats { display: flex; align-items: baseline; gap: var(--space-4); margin-left: auto; flex-shrink: 0; }
+.dir-head .dir-stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+}
+.dir-head .dir-stat-icon { display: none; }
+.dir-head .dir-stat-val {
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-ui);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-transform: none;
+}
 
 .dir-surface {
   /* top + side edges frame the drawer; the bottom is open and bleeds off */
@@ -319,9 +354,9 @@ h1 + .home-dock { margin-top: var(--space-4); }
 .page-dir-index .dir-surface {
   flex: 1;
   /* subtract the topbar, the top negative-space padding (--dir-top-pad, set on
-     .page-dir-index), and a ~5rem allowance for the header block, so a short
+     .page-dir-index), and a ~6rem allowance for the header block, so a short
      drawer still lands near the window bottom */
-  min-height: calc(100vh - var(--topbar-height) - var(--dir-top-pad, 200px) - 5rem);
+  min-height: calc(100vh - var(--topbar-height) - var(--dir-top-pad, 200px) - 6rem);
 }
 
 @keyframes dirSurfaceIn {
@@ -1422,9 +1457,11 @@ h2 + .doc-list { border-top: none; }
 /* ---- Learn section ---- */
 .learn-index h1 {
   color: var(--text-bright);
-  text-transform: uppercase;
-  font-size: var(--fs-mono-display);
-  letter-spacing: var(--track-label);
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-extrabold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-display);
   margin-bottom: var(--space-2);
 }
 .learn-intro {
@@ -1964,38 +2001,30 @@ h2 + .doc-list { border-top: none; }
   --fs-sm:      0.82rem;
 }
 
-/* Header strip above the surface - title-over-description, icon-led. */
+/* Header strip above the surface - display title over a description, the same
+   idiom as .dir-head (no icon). */
 .utility-head {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
   margin-bottom: var(--space-4);
-}
-.utility-title-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-.utility-title-icon {
-  width: var(--icon-lg);
-  height: var(--icon-lg);
-  color: var(--text-muted);
-  flex-shrink: 0;
 }
 .markdown-body .utility-title,
 .utility-title {
-  font-size: var(--fs-prose-body);
-  font-weight: var(--fw-semibold);
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-extrabold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--track-display);
   color: var(--text-bright);
-  text-transform: uppercase;
-  letter-spacing: var(--track-caps);
   margin: 0;
   padding: 0;
   border: none;
 }
 .utility-desc {
   color: var(--text-muted);
-  font-size: var(--fs-prose-sm);
+  font-size: var(--fs-prose-ui);
+  line-height: var(--lh-ui);
   margin: 0;
 }
 
@@ -2087,6 +2116,14 @@ html.a11y-reduce-motion .utility-page { animation: none !important; }
 .kpi-tile-sub {
   font-size: var(--fs-mono);
   color: var(--text-muted);
+}
+/* Display variant - the value reads as a hero numeral in the display face. */
+.kpi-tile-display .kpi-tile-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-display-num);
+  font-weight: var(--fw-extrabold);
+  letter-spacing: var(--track-display);
+  font-variant-numeric: tabular-nums;
 }
 /* Warn variant - warning border + value for a threshold/attention state. */
 .kpi-tile-warn {

@@ -27,10 +27,10 @@
 /* Work item ID label inline before title text */
 .doc-header-wi-label {
   color: var(--identifier);
-  font-size: var(--fs-mono-display);
+  font-family: var(--font-body);
+  font-size: inherit;
   font-weight: var(--fw-normal);
   font-style: italic;
-  letter-spacing: var(--track-body);
 }
 /* Doc description - the paragraph between the title and the metadata chip
    strip. In work-item docs a `.doc-title-tags` div sits between the H1 and this
@@ -424,7 +424,13 @@
   border-bottom: var(--border-hair) solid var(--border);
   animation: fadeSlideIn var(--motion-slow) var(--ease) var(--motion-tick) both;
 }
-.doc-header-strip + hr {
+.doc-header-strip + hr,
+.doc-meta-source + hr {
+  display: none;
+}
+/* Non-work-item metadata lives in the Info drawer; the source block is only a
+   carrier for the renderer. */
+.doc-meta-source {
   display: none;
 }
 
@@ -911,13 +917,12 @@
 
 /* ---- Admonition callout cards ---- */
 .admonition {
-  --adm-color: var(--accent);
+  --adm-color: var(--info);
   margin: var(--space-5) 0;
   padding: 0;
   border: var(--border-hair) solid color-mix(in srgb, var(--adm-color) 20%, var(--border));
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--adm-color) 4%, var(--elev-4));
-  animation: fadeSlideIn var(--motion-slow) var(--ease) both;
 }
 .admonition-title {
   display: flex;
@@ -944,8 +949,8 @@
 .admonition-content p:last-child {
   margin-bottom: 0;
 }
-.admonition-note    { --adm-color: var(--cool); }
-.admonition-tip     { --adm-color: var(--accent); }
+.admonition-note    { --adm-color: var(--info); }
+.admonition-tip     { --adm-color: var(--success); }
 .admonition-warning { --adm-color: var(--warning); }
 .admonition-caution { --adm-color: var(--error); }
 /* Fifth category hue: cool-to-comp the long way round the hue wheel (violet). */

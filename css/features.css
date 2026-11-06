@@ -889,7 +889,7 @@ ul.todo-list li.todo-hidden { display: none; }
      flag extends UPWARD from here into the empty band, and its lower length
      runs DOWNWARD past this line behind the surface. */
   top: calc(var(--topbar-height) + 50px);
-  left: calc(var(--site-nav-width, 0px) + var(--space-5));
+  left: calc(var(--site-nav-width, 0px) + var(--space-5) + var(--flag-slot-offset, 0px));
   /* Sit BEHIND the doc surface: .page (with its pageIn transform) forms a
      stacking context at body z-order 0, so a fixed element at z-index -1 paints
      behind the opaque .markdown-body surface. The flag's lower length is
@@ -925,6 +925,7 @@ ul.todo-list li.todo-hidden { display: none; }
     max((100vw - var(--reading-max-width, 1480px)) / 2, 0px)
     + var(--site-nav-width, 0px)
     + var(--space-5)
+    + var(--flag-slot-offset, 0px)
   );
 }
 
@@ -995,7 +996,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .toc-flag-hit {
   position: fixed;
   top: var(--topbar-height);
-  left: calc(var(--site-nav-width, 0px) + var(--space-5));
+  left: calc(var(--site-nav-width, 0px) + var(--space-5) + var(--flag-slot-offset, 0px));
   width: 7.5rem;
   height: 50px;
   padding: 0;
@@ -1029,7 +1030,7 @@ ul.todo-list li.todo-hidden { display: none; }
   position: fixed;
   /* Open just below the surface's top edge, left-aligned with the flag. */
   top: calc(var(--topbar-height) + 50px + var(--space-1));
-  left: calc(var(--site-nav-width, 0px) + var(--space-5));
+  left: calc(var(--site-nav-width, 0px) + var(--space-5) + var(--flag-slot-offset, 0px));
   width: 260px;
   max-height: 60vh;
   z-index: var(--z-topbar);
@@ -1057,7 +1058,7 @@ ul.todo-list li.todo-hidden { display: none; }
 .toc-body {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-2) 0;
+  padding: var(--space-3) var(--space-2);
   max-height: 50vh;
 }
 .toc-body ul {
@@ -1119,6 +1120,67 @@ ul.todo-list li.todo-hidden { display: none; }
 .toc-body::-webkit-scrollbar { width: 3px; }
 .toc-body::-webkit-scrollbar-track { background: transparent; }
 .toc-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius); }
+
+/* ---- Info flag (file metadata): second flag beside Contents. Reuses the flag,
+   hit-catcher and drawer rules above; toc-meta.js sets --flag-slot-offset so it
+   sits flush against the Contents flag. The drawer body lays the doc's tags,
+   dates and extra fields out as a stacked list. ---- */
+.meta-flag-wrap .toc-flag {
+  background: var(--cool); /* design-lint: allow - info flag takes the cool tone to set it apart from Contents */
+}
+.toc-drawer.meta-drawer {
+  border-top-color: var(--cool); /* design-lint: allow - drawer matches the info flag */
+}
+.meta-body {
+  padding: var(--space-4);
+}
+.meta-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: var(--border-hair) solid var(--border);
+}
+.meta-row:first-child { padding-top: 0; }
+.meta-row:last-child { padding-bottom: 0; border-bottom: none; }
+.meta-row-stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.meta-row dt {
+  flex-shrink: 0;
+  font-size: var(--fs-mono);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.meta-row dd {
+  margin: 0;
+  min-width: 0;
+  font-size: var(--fs-mono);
+  color: var(--text-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.meta-row-stack dd { text-align: left; }
+.meta-row dd a {
+  color: var(--interactive);
+  text-decoration: none;
+}
+.meta-row dd a:hover { text-decoration: underline; }
+.meta-body .doc-meta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -1743,7 +1805,6 @@ ul.todo-list li.todo-hidden { display: none; }
 .cmd-palette-footer kbd {
   /* Denser footer: smaller size, dimmer/lighter frame than the base kbd. */
   font-size: var(--fs-mono);
-  padding: var(--space-1) var(--space-1);
   border-color: var(--border);
   color: var(--text-muted);
 }
@@ -2229,10 +2290,12 @@ ul.todo-list li.todo-hidden { display: none; }
   padding: 0 var(--space-4);
 }
 .not-found-code {
-  font-size: calc(var(--fs-mono-display) * 4);
+  font-family: var(--font-display);
+  font-size: calc(var(--fs-display-num) * 2);
+  font-weight: var(--fw-extrabold);
   color: var(--text-dim);
   line-height: var(--lh-tight);
-  letter-spacing: var(--track-caps);
+  letter-spacing: var(--track-display);
   opacity: 0.25;
 }
 .not-found-label {
@@ -2357,7 +2420,6 @@ ul.todo-list li.todo-hidden { display: none; }
 .shortcut-row kbd {
   /* Aligned hint column: fixed min width so keys line up. Rest inherits the
      shared kbd primitive. */
-  min-width: 1.4rem;
 }
 .shortcut-row span {
   color: var(--text-muted);
@@ -2431,10 +2493,13 @@ ul.todo-list li.todo-hidden { display: none; }
    scales the chip up from the default mono size to a clock display readout and
    relaxes the uppercase tracking (digits need no letter-spacing). */
 .screensaver-clock.clock-face-digital {
-  font-size: var(--fs-mono-display);
-  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: var(--fw-extrabold);
+  font-variant-numeric: tabular-nums;
+  padding: var(--space-2) var(--space-6);
   line-height: var(--lh-ui);
-  letter-spacing: var(--track-label);
+  letter-spacing: var(--track-display);
 }
 
 /* ---- Clock face: word clock ---- */
