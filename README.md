@@ -15,7 +15,7 @@ Hyperkit is not an app - it has no entry point, no window, nothing to launch. It
 - **Ecosystem JS modules** - self-contained IIFEs (`HvUtils`, `HvToast`, `HvViz`, `HvTabs`, ...) that ship byte-identical to every consumer
 - **Build helpers** - the `hyperkit_css()` stylesheet loader, embedded font faces, palette derivation, the design lint, and shared structured logging
 
-Consumers: Hypervisor, Hyperagent, Hyperline, HyperEye, HyperField, Hypernote, and Hypercycle.
+Consumers: Hypervisor, Hyperagent, Hyperline, HyperEye, HyperField, Hypernote, Hypercycle, and Hyperbridge.
 
 ## Design Philosophy
 

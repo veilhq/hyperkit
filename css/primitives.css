@@ -1212,6 +1212,7 @@ html.a11y-reduce-motion .menu-item { transition: none !important; }
   .content-section-quiet { animation: none !important; }
   .modal-overlay,
   .modal-panel,
+  .modal-sheet,
   .side-drawer { transition: none !important; animation: none !important; }
   .action-button { transition: none !important; }
   .cursor-box { transition: none !important; }
@@ -1239,11 +1240,26 @@ html.a11y-reduce-motion .content-section,
 html.a11y-reduce-motion .content-section-quiet { animation: none !important; }
 html.a11y-reduce-motion .modal-overlay,
 html.a11y-reduce-motion .modal-panel,
+html.a11y-reduce-motion .modal-sheet,
 html.a11y-reduce-motion .side-drawer { transition: none !important; animation: none !important; }
 html.a11y-reduce-motion .action-button { transition: none !important; }
 html.a11y-reduce-motion .cursor-box { transition: none !important; }
 html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
 
+
+/* ---- Modal sheet -----------------------------------------------------------
+   A floating modal surface with the drawer's large corner radius on all four
+   corners: raised fill, hairline border, the sanctioned modal float shadow.
+   Compose with app-local positioning and size; clips its children to the radius. */
+.modal-sheet {
+  background: var(--bg-raised);
+  border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius-dir-surface);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+.modal-sheet[open],
+.modal-sheet.visible { animation: fadeSlideIn var(--motion-base) var(--ease) both; }
 
 /* ---- Toast notifications (HvToast) ------------------------------------------
    Tool-indicator form. The toast IS an oversized .tool-indicator: born as a
