@@ -1767,18 +1767,18 @@ h2 + .doc-list { border-top: none; }
    Masonry uses the same zero-JS multicol pattern as .skill-list: columns +
    break-inside:avoid. Native grid masonry isn't shippable yet - multicol is
    the zero-dependency path.
+
+   Modifiers:
+     .preview-masonry-static   no entrance animation (large or re-rendered sets)
+     .preview-card-media-fit   media takes the image's natural height
    ======================================================================= */
 
+/* Width-driven columns: as many ~18rem columns as the container fits, so the
+   count follows the container (a sidebar included), not the viewport. */
 .preview-masonry {
-  column-count: 3;
+  columns: 18rem;
   column-gap: var(--space-3);
   margin: var(--space-4) 0 var(--space-6);
-}
-@media (max-width: 1100px) {
-  .preview-masonry { column-count: 2; }
-}
-@media (max-width: 720px) {
-  .preview-masonry { column-count: 1; }
 }
 
 .preview-card {
@@ -1821,6 +1821,16 @@ h2 + .doc-list { border-top: none; }
 }
 .preview-card:hover .preview-card-title { color: var(--interactive); }
 
+/* Static set: cards render in place with no entrance animation. */
+.preview-masonry-static .preview-card {
+  opacity: 1;
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .preview-card { opacity: 1; animation: none; transition: none; }
+}
+html.a11y-reduce-motion .preview-card { opacity: 1; animation: none; transition: none; }
+
 /* ---- Media frame (the live thumbnail) ---- */
 .preview-card-media {
   display: block;                  /* span defaults to inline - must be block
@@ -1835,6 +1845,15 @@ h2 + .doc-list { border-top: none; }
     var(--bg-card);
   padding: var(--space-3);
   overflow: hidden;
+}
+/* Fit variant: drops the fixed height so the frame wraps its content, such as
+   an <img>, at its natural aspect ratio. */
+.preview-card-media-fit,
+.preview-card-media-fit .preview-card-frame { height: auto; }
+.preview-card-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 /* Bordered inner frame - the "screen". In-flow block filling the padded media
    box, so it always has the media's inner size and can never collapse. */
