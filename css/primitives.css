@@ -919,6 +919,118 @@ html.a11y-reduce-motion .link-button { transition: none !important; }
   animation: fadeSlideIn var(--motion-base) var(--ease) both;
 }
 
+/* ---- Modal anatomy - opt-in structure for form / picker modals ---------------
+   Compose on .modal-panel via .modal-panel-stack. Mirrors the confirm dialog's
+   hierarchy: prose title > prose hint (one step down) > mono data and controls.
+   Sections are separated by --space-5; head and body group tightly. Left-aligned
+   so title, hint, rows and the action row share one edge. */
+.modal-panel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.modal-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.modal-title {
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-body);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  line-height: var(--lh-ui);
+}
+.modal-hint {
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-ui);
+  color: var(--text-muted);
+  line-height: var(--lh-body);
+}
+.modal-hint code {
+  font-family: var(--font);
+  font-size: var(--fs-mono);
+  color: var(--text);
+}
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+/* ---- Option row - selectable choice for pickers ---------------------------------
+   A bordered, single-select row: a leading dot (hollow at rest, filled when
+   selected), a prose title with an optional one-line description beneath, and
+   optional mono meta at the right. Selection is the --selected role (wash and
+   hairline); hover takes --interactive. Toggle .selected or aria-selected="true". */
+.option-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-card);
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--motion-fast) var(--ease),
+              background var(--motion-fast) var(--ease);
+}
+.option-row:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--interactive-border);
+}
+.option-row.selected,
+.option-row[aria-selected="true"] {
+  background: var(--selected-wash);
+  border-color: var(--selected-border);
+}
+.option-row-mark {
+  box-sizing: border-box;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  transition: background var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease);
+}
+.option-row:hover .option-row-mark { border-color: var(--interactive); }
+.option-row.selected .option-row-mark,
+.option-row[aria-selected="true"] .option-row-mark {
+  background: var(--selected);
+  border-color: var(--selected);
+}
+.option-row-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.option-row-title {
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-ui);
+  font-weight: var(--fw-semibold);
+  color: var(--text-bright);
+  line-height: var(--lh-ui);
+}
+.option-row-desc {
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-sm);
+  color: var(--text-muted);
+  line-height: var(--lh-body);
+}
+.option-row-meta {
+  font-family: var(--font);
+  font-size: var(--fs-mono);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
 /* ---- Drawer panel - side-anchored slide-in ---------------------------------- */
 .side-drawer {
   position: absolute;
