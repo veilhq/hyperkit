@@ -776,6 +776,23 @@ kbd,
 .pill-toggle:focus-visible { outline: none; }
 .pill-toggle:active { opacity: 0.8; }
 
+/* ---- Pill card - fully rounded floating bar --------------------------------
+   The dock's bar surface with capsule ends: card fill, strong hairline, a row
+   of centered content. Compose with a feature class for placement and content.
+   Collapses to a square under the brutalist --radius: 0 toggle.
+*/
+.pill-card {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: var(--space-2);
+  background: var(--bg-card);
+  border: var(--border-hair) solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  transition: border-color var(--motion-base) var(--ease);
+}
+.pill-card:hover { border-color: var(--border); }
+
 /* ---- Checkbox / radio - accent-tinted native control ------------------------
    The per-app pattern was a bare `accent-color: var(--accent)` on native
    checkboxes/radios, repeated at many settings sites. This consolidates that
@@ -1197,6 +1214,7 @@ html.a11y-reduce-motion .menu-item { transition: none !important; }
   .status-chip-filled:hover,
   .status-chip-outlined-accent:hover,
   .status-chip-outlined-muted:hover { filter: none !important; }
+  .pill-card { transition: none !important; }
   .list-row { transition: none !important; }
   .content-card { transition: none !important; }
   .content-card:hover { transform: none !important; box-shadow: none !important; }
@@ -1225,6 +1243,7 @@ html.a11y-reduce-motion .status-chip-outlined-muted { transition: none !importan
 html.a11y-reduce-motion .status-chip-filled:hover,
 html.a11y-reduce-motion .status-chip-outlined-accent:hover,
 html.a11y-reduce-motion .status-chip-outlined-muted:hover { filter: none !important; }
+html.a11y-reduce-motion .pill-card { transition: none !important; }
 html.a11y-reduce-motion .list-row { transition: none !important; }
 html.a11y-reduce-motion .content-card { transition: none !important; }
 html.a11y-reduce-motion .content-card:hover { transform: none !important; box-shadow: none !important; }
