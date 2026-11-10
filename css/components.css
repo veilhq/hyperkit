@@ -299,6 +299,7 @@
 .context-menu {
   position: fixed;
   min-width: 200px;
+  max-height: calc(100vh - var(--space-4));
   padding: var(--space-3);
   opacity: 0;
   /* Unfurl from the cursor: origin at the top-left corner (where the cursor
@@ -315,6 +316,14 @@
   opacity: 1;
   transform: translateY(0) scaleY(1);
   pointer-events: auto;
+}
+/* A long flat menu scrolls; menus with flyouts stay unclipped. */
+.context-menu:not(:has(.context-menu-group)) {
+  overflow-y: auto;
+}
+/* Flipped above its anchor: unfurl upward from the bottom edge. */
+.context-menu.flip-up {
+  transform-origin: bottom left;
 }
 /* Submenu extras - not part of the shared .menu-item row. */
 .context-menu-group {

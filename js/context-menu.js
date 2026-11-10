@@ -60,16 +60,26 @@
     // Place at cursor, then adjust to stay in viewport
     menu.style.left = x + 'px';
     menu.style.top = y + 'px';
+    menu.classList.remove('flip-up');
     menu.classList.add('visible');
     menu.setAttribute('aria-hidden', 'false');
 
     // Adjust after render so dimensions are known
     requestAnimationFrame(function () {
-      var rect = menu.getBoundingClientRect();
+      // offset sizes ignore the reveal transform, which shrinks getBoundingClientRect while it unfurls.
+      var width = menu.offsetWidth;
+      var height = menu.offsetHeight;
       var vw = window.innerWidth;
       var vh = window.innerHeight;
-      if (rect.right > vw) menu.style.left = Math.max(4, x - rect.width) + 'px';
-      if (rect.bottom > vh) menu.style.top = Math.max(4, y - rect.height) + 'px';
+      if (x + width > vw - 4) menu.style.left = Math.max(4, x - width) + 'px';
+      if (y + height > vh - 4) {
+        if (y - height >= 4) {
+          menu.style.top = (y - height) + 'px';
+          menu.classList.add('flip-up');
+        } else {
+          menu.style.top = '4px';
+        }
+      }
     });
   }
 
