@@ -55,6 +55,14 @@
     hub.tabIndex = -1;
     hub.addEventListener('click', function (e) { e.stopPropagation(); back(); });
     document.body.appendChild(root);
+    var svgNs = 'http://www.w3.org/2000/svg';
+    var filterSvg = document.createElementNS(svgNs, 'svg');
+    filterSvg.setAttribute('class', 'radial-menu-filter');
+    filterSvg.setAttribute('aria-hidden', 'true');
+    filterSvg.innerHTML = '<filter id="radial-menu-goo" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">'
+      + '<feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>'
+      + '<feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"/></filter>';
+    document.body.appendChild(filterSvg);
   }
 
   function ensure() {
@@ -131,14 +139,35 @@
     return button;
   }
 
+  // One goo layer: a hub blob plus a blob per tile, fused by the SVG filter into a single metaball shape.
+  function makeGoo(layer) {
+    var goo = document.createElement('div');
+    goo.className = 'radial-menu-goo';
+    goo.setAttribute('data-layer', layer);
+    var hubBlob = document.createElement('span');
+    hubBlob.className = 'radial-menu-blob radial-menu-blob-hub';
+    goo.appendChild(hubBlob);
+    buttons.forEach(function (button) {
+      var blob = document.createElement('span');
+      blob.className = 'radial-menu-blob';
+      ['--radial-x', '--radial-y', '--radial-index'].forEach(function (name) {
+        blob.style.setProperty(name, button.style.getPropertyValue(name));
+      });
+      goo.appendChild(blob);
+    });
+    return goo;
+  }
+
   // Draws one ring of items; the tiles fly out from the middle each time, including when a sub-ring replaces it.
   function render(list) {
     root.classList.remove('open');
     root.innerHTML = '';
     root.setAttribute('data-depth', String(trail.length));
     hub.tabIndex = trail.length ? 0 : -1;
-    root.appendChild(hub);
     buttons = list.map(function (item, index) { return makeButton(item, index, list); });
+    root.appendChild(makeGoo('edge'));
+    root.appendChild(makeGoo('fill'));
+    root.appendChild(hub);
     buttons.forEach(function (button) { root.appendChild(button); });
     if (window.lucide) window.lucide.createIcons({ nodes: [root], attrs: { 'stroke-width': 2 } });
     show(null);

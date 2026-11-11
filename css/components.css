@@ -407,9 +407,10 @@
   letter-spacing: var(--track-tight);
 }
 
-/* ---- Radial Menu (ring of actions around the cursor) ----
-   Tiles sit on a ring at unit offsets (--radial-x/-y) set by radial-menu.js;
-   the hovered tile's name shows in the middle. Flat: hairline border, no shadow. */
+/* ---- Radial Menu (metaball ring of actions around the cursor) ----
+   A round hub with round tiles on a ring at unit offsets (--radial-x/-y) set by radial-menu.js.
+   Two goo layers (a hairline-colored edge and a card-colored fill) fuse hub and tiles into one
+   blob; the interactive hub and tiles sit above, transparent. Flat: no shadow. */
 .radial-menu-scrim {
   position: fixed; inset: 0; z-index: var(--z-overlay);
   background: transparent;
@@ -417,7 +418,8 @@
 .radial-menu-scrim[hidden] { display: none; }
 .radial-menu {
   --radial-item: calc(var(--space-6) * 1.5);
-  --radial-radius: calc(var(--space-6) * 2.5);
+  --radial-hub: calc(var(--space-6) * 2.5);
+  --radial-radius: calc(var(--space-6) * 2.25);
   position: fixed; z-index: calc(var(--z-overlay) + 1);
   width: calc(var(--radial-radius) * 2 + var(--radial-item));
   height: calc(var(--radial-radius) * 2 + var(--radial-item));
@@ -425,14 +427,37 @@
   pointer-events: none;
 }
 .radial-menu.open { pointer-events: auto; }
-.radial-menu-hub {
-  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  max-width: calc(var(--radial-radius) * 1.2); padding: var(--space-1) var(--space-2); text-align: center;
-  font-family: var(--font); font-size: var(--fs-mono); letter-spacing: var(--track-label);
-  color: var(--text-bright); background: var(--bg-card); border: var(--border-hair) solid var(--border); border-radius: var(--radius);
-  pointer-events: none;
+.radial-menu-filter { position: absolute; width: 0; height: 0; }
+.radial-menu-goo { position: absolute; inset: 0; pointer-events: none; filter: url(#radial-menu-goo); }
+.radial-menu-blob {
+  position: absolute; left: 50%; top: 50%;
+  width: var(--radial-item); height: var(--radial-item);
+  margin: calc(var(--radial-item) / -2) 0 0 calc(var(--radial-item) / -2);
+  border-radius: var(--radius-pill);
+  opacity: 0; transform: translate(0, 0) scale(0.4);
 }
-.radial-menu-hub:empty { display: none; }
+.radial-menu-goo[data-layer="edge"] .radial-menu-blob { background: var(--border); outline: var(--border-hair) solid var(--border); }
+.radial-menu-goo[data-layer="fill"] .radial-menu-blob { background: var(--bg-card); }
+.radial-menu-blob-hub {
+  width: var(--radial-hub); height: var(--radial-hub);
+  margin: calc(var(--radial-hub) / -2) 0 0 calc(var(--radial-hub) / -2);
+  opacity: 1;
+}
+.radial-menu-hub {
+  position: absolute; left: 50%; top: 50%;
+  display: flex; align-items: center; justify-content: center;
+  width: var(--radial-hub); height: var(--radial-hub); padding: var(--space-1);
+  margin: calc(var(--radial-hub) / -2) 0 0 calc(var(--radial-hub) / -2);
+  font-family: var(--font); font-size: var(--fs-mono); line-height: var(--lh-tight); letter-spacing: var(--track-tight);
+  text-align: center; overflow-wrap: anywhere;
+  color: var(--text-bright); background: transparent; border: var(--border-hair) solid transparent; border-radius: var(--radius-pill);
+  pointer-events: none; transform: scale(0.4);
+}
+.radial-menu.open .radial-menu-hub { transform: scale(1); }
+.radial-menu-hub, .radial-menu-blob-hub {
+  transition: transform var(--motion-enter) var(--ease), border-color var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease);
+}
+.radial-menu.open .radial-menu-blob-hub { transform: scale(1); }
 /* Inside a sub-ring the middle becomes the way back. */
 .radial-menu[data-depth]:not([data-depth="0"]) .radial-menu-hub { pointer-events: auto; cursor: pointer; }
 .radial-menu[data-depth]:not([data-depth="0"]) .radial-menu-hub:hover,
@@ -442,15 +467,17 @@
   display: flex; align-items: center; justify-content: center;
   width: var(--radial-item); height: var(--radial-item); padding: 0;
   margin: calc(var(--radial-item) / -2) 0 0 calc(var(--radial-item) / -2);
-  background: var(--bg-card); color: var(--text);
-  border: var(--border-hair) solid var(--border); border-radius: var(--radius);
+  background: transparent; color: var(--text);
+  border: var(--border-hair) solid transparent; border-radius: var(--radius-pill);
   cursor: pointer; opacity: 0;
   transform: translate(0, 0) scale(0.4);
+}
+.radial-menu-item, .radial-menu-blob:not(.radial-menu-blob-hub) {
   transition: transform var(--motion-enter) var(--ease) calc(var(--radial-index) * var(--motion-stagger)),
               opacity var(--motion-base) var(--ease) calc(var(--radial-index) * var(--motion-stagger)),
               border-color var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease);
 }
-.radial-menu.open .radial-menu-item {
+.radial-menu.open .radial-menu-item, .radial-menu.open .radial-menu-blob:not(.radial-menu-blob-hub) {
   opacity: 1;
   transform: translate(calc(var(--radial-x) * var(--radial-radius)), calc(var(--radial-y) * var(--radial-radius))) scale(1);
 }
@@ -458,8 +485,8 @@
 .radial-menu-item:hover, .radial-menu-item.is-active { color: var(--interactive); border-color: var(--interactive); }
 /* A dot marks a tile that opens a second ring. */
 .radial-menu-item[aria-haspopup]::after {
-  content: ""; position: absolute; right: var(--space-1); bottom: var(--space-1);
-  width: var(--space-1); height: var(--space-1); background: currentColor;
+  content: ""; position: absolute; left: 50%; bottom: var(--space-1); transform: translateX(-50%);
+  width: var(--space-1); height: var(--space-1); background: currentColor; border-radius: var(--radius-pill);
 }
 .radial-menu-text { font-family: var(--font); font-size: var(--fs-mono); letter-spacing: var(--track-tight); }
 .radial-menu-item:focus-visible { outline: var(--border-rail) solid var(--focus); outline-offset: var(--space-1); }
