@@ -23,6 +23,9 @@
    Multiple registrations can match the same element - items are merged in
    registration order. The menu positions itself near the cursor and stays
    within viewport bounds.
+
+   HvContextMenu.openFor(element, items) opens the same menu anchored to an
+   element instead of the cursor.
 */
 (function initContextMenu() {
   if (window.HvContextMenu) return; // idempotent
@@ -55,32 +58,41 @@
     }
   }
 
-  function positionMenu(x, y) {
-    if (!menu) return;
-    // Place at cursor, then adjust to stay in viewport
-    menu.style.left = x + 'px';
-    menu.style.top = y + 'px';
-    menu.classList.remove('flip-up');
-    menu.classList.add('visible');
-    menu.setAttribute('aria-hidden', 'false');
+  var EDGE = 4;
+  var GAP = 4;
 
-    // Adjust after render so dimensions are known
-    requestAnimationFrame(function () {
-      // offset sizes ignore the reveal transform, which shrinks getBoundingClientRect while it unfurls.
-      var width = menu.offsetWidth;
-      var height = menu.offsetHeight;
-      var vw = window.innerWidth;
-      var vh = window.innerHeight;
-      if (x + width > vw - 4) menu.style.left = Math.max(4, x - width) + 'px';
-      if (y + height > vh - 4) {
-        if (y - height >= 4) {
-          menu.style.top = (y - height) + 'px';
-          menu.classList.add('flip-up');
-        } else {
-          menu.style.top = '4px';
-        }
-      }
-    });
+  // Measures the menu while it is still hidden, picks a spot, then reveals it - so it never visibly jumps.
+  // A point opens at the cursor; an anchor rect opens beside an element, below it when there is room, else above.
+  function positionMenu(x, y, anchor) {
+    if (!menu) return;
+    menu.classList.remove('visible', 'flip-up', 'flip-end');
+    menu.style.left = '0px';
+    menu.style.top = '0px';
+    // offset sizes ignore the reveal transform, which shrinks getBoundingClientRect while it unfurls.
+    var width = menu.offsetWidth;
+    var height = menu.offsetHeight;
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+    var left, top, up = false, end = false;
+    if (anchor) {
+      left = anchor.left;
+      if (left + width > vw - EDGE) { left = anchor.right - width; end = true; }
+      top = anchor.bottom + GAP;
+      if (top + height > vh - EDGE && anchor.top - GAP - height >= EDGE) { top = anchor.top - GAP - height; up = true; }
+    } else {
+      left = x;
+      if (left + width > vw - EDGE) { left = x - width; end = true; }
+      top = y;
+      if (top + height > vh - EDGE && y - height >= EDGE) { top = y - height; up = true; }
+    }
+    left = Math.min(Math.max(EDGE, left), Math.max(EDGE, vw - width - EDGE));
+    top = Math.min(Math.max(EDGE, top), Math.max(EDGE, vh - height - EDGE));
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    menu.classList.toggle('flip-up', up);
+    menu.classList.toggle('flip-end', end);
+    menu.setAttribute('aria-hidden', 'false');
+    menu.classList.add('visible');
   }
 
   function renderItems(items) {
@@ -163,11 +175,18 @@
             childWrap.setAttribute('aria-hidden', expanded ? 'false' : 'true');
             // Flip the flyout to the left when it would overflow the right edge.
             childWrap.classList.remove('flip-left');
+            childWrap.style.top = '';
             if (expanded) {
               requestAnimationFrame(function () {
                 var rect = childWrap.getBoundingClientRect();
-                if (rect.right > window.innerWidth - 4) {
+                if (rect.right > window.innerWidth - EDGE) {
                   childWrap.classList.add('flip-left');
+                }
+                // Slide the flyout up when it would run off the bottom edge, keeping its top on screen.
+                var over = rect.bottom - (window.innerHeight - EDGE);
+                if (over > 0) {
+                  var shift = Math.min(over, Math.max(0, rect.top - EDGE));
+                  childWrap.style.top = 'calc(var(--space-3) * -1 - ' + shift + 'px)';
                 }
               });
             }
@@ -227,7 +246,7 @@
     e.stopPropagation();
     ensureMenu();
     renderItems(allItems);
-    positionMenu(e.clientX, e.clientY);
+    positionMenu(e.clientX, e.clientY, null);
   }
 
   // Close on click outside, escape, or scroll
@@ -237,7 +256,10 @@
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') close();
   });
-  document.addEventListener('scroll', close, true);
+  document.addEventListener('scroll', function (e) {
+    if (menu && e.target instanceof Node && menu.contains(e.target)) return;
+    close();
+  }, true);
 
   // Listen globally for contextmenu
   document.addEventListener('contextmenu', handleContextMenu);
@@ -246,6 +268,13 @@
   window.HvContextMenu = {
     register: function (selector, itemsFn) {
       registrations.push({ selector: selector, itemsFn: itemsFn });
+    },
+    // Opens a menu of items beside an element (below it, or above when short on room). Call from the element's click handler with the click's propagation stopped.
+    openFor: function (element, items) {
+      if (!element || !items || !items.length) return;
+      ensureMenu();
+      renderItems(items);
+      positionMenu(0, 0, element.getBoundingClientRect());
     },
     close: close
   };

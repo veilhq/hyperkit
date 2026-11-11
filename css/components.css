@@ -325,6 +325,13 @@
 .context-menu.flip-up {
   transform-origin: bottom left;
 }
+/* Right-aligned to its anchor: unfurl from the right edge. */
+.context-menu.flip-end {
+  transform-origin: top right;
+}
+.context-menu.flip-up.flip-end {
+  transform-origin: bottom right;
+}
 /* Submenu extras - not part of the shared .menu-item row. */
 .context-menu-group {
   position: relative;
@@ -350,6 +357,8 @@
      outside the parent panel rather than overlapping it. */
   margin-left: calc(var(--space-3) + var(--space-1));
   min-width: 160px;
+  max-height: calc(100vh - var(--space-4));
+  overflow-y: auto;
   padding: var(--space-3);
   background: var(--bg-raised);
   border: var(--border-hair) solid var(--border-strong);
