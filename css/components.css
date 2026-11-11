@@ -448,7 +448,7 @@
   display: flex; align-items: center; justify-content: center;
   width: var(--radial-hub); height: var(--radial-hub); padding: var(--space-1);
   margin: calc(var(--radial-hub) / -2) 0 0 calc(var(--radial-hub) / -2);
-  font-family: var(--font); font-size: var(--fs-mono); line-height: var(--lh-tight); letter-spacing: var(--track-tight);
+  font-family: var(--font-body); font-size: var(--fs-prose-ui); line-height: var(--lh-tight);
   text-align: center; overflow-wrap: anywhere;
   color: var(--text-bright); background: transparent; border: var(--border-hair) solid transparent; border-radius: var(--radius-pill);
   pointer-events: none; transform: scale(0.4);
