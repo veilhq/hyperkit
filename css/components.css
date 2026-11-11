@@ -425,12 +425,18 @@
   pointer-events: none;
 }
 .radial-menu.open { pointer-events: auto; }
-.radial-menu-label {
+.radial-menu-hub {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  max-width: calc(var(--radial-radius) * 1.2); text-align: center;
+  max-width: calc(var(--radial-radius) * 1.2); padding: var(--space-1) var(--space-2); text-align: center;
   font-family: var(--font); font-size: var(--fs-mono); letter-spacing: var(--track-label);
-  color: var(--text-bright); pointer-events: none;
+  color: var(--text-bright); background: var(--bg-card); border: var(--border-hair) solid var(--border); border-radius: var(--radius);
+  pointer-events: none;
 }
+.radial-menu-hub:empty { display: none; }
+/* Inside a sub-ring the middle becomes the way back. */
+.radial-menu[data-depth]:not([data-depth="0"]) .radial-menu-hub { pointer-events: auto; cursor: pointer; }
+.radial-menu[data-depth]:not([data-depth="0"]) .radial-menu-hub:hover,
+.radial-menu-hub:focus-visible { color: var(--interactive); border-color: var(--interactive); outline: none; }
 .radial-menu-item {
   position: absolute; left: 50%; top: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -448,7 +454,14 @@
   opacity: 1;
   transform: translate(calc(var(--radial-x) * var(--radial-radius)), calc(var(--radial-y) * var(--radial-radius))) scale(1);
 }
+.radial-menu-item.is-checked { color: var(--selected); border-color: var(--selected); }
 .radial-menu-item:hover, .radial-menu-item.is-active { color: var(--interactive); border-color: var(--interactive); }
+/* A dot marks a tile that opens a second ring. */
+.radial-menu-item[aria-haspopup]::after {
+  content: ""; position: absolute; right: var(--space-1); bottom: var(--space-1);
+  width: var(--space-1); height: var(--space-1); background: currentColor;
+}
+.radial-menu-text { font-family: var(--font); font-size: var(--fs-mono); letter-spacing: var(--track-tight); }
 .radial-menu-item:focus-visible { outline: var(--border-rail) solid var(--focus); outline-offset: var(--space-1); }
 .radial-menu-item:disabled { color: var(--text-dim); cursor: default; }
 .radial-menu-icon { display: inline-flex; width: var(--icon-lg); height: var(--icon-lg); }
