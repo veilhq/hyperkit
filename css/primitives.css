@@ -340,69 +340,95 @@
   border-color: var(--selected-border);
 }
 
-/* ---- Folder tab - the tab that fuses into its panel -------------------------
-   For a horizontal strip over a content surface. .tab-rail is the strip: tabs
-   sit on its hairline. A resting folder tab is a dim card-fill tab set one step
-   low, open at the bottom; the active one rises to the top, takes the surface
-   color (--folder-surface, default --bg), carries a --selected top bar, and
-   covers the rail hairline so it reads as one piece with the panel below.
+/* ---- Folder tab - a file-cabinet divider -------------------------------------
+   A trapezoid tab: a perspective-tilted ::before carries the fill, hairline and
+   big rounded shoulders, so the sides slope outward to the base while the label
+   stays flat on top. Apps set padding wide enough to clear the slope.
 
-   Compose: .nav-tab .nav-tab-folder inside a .tab-rail. Not for vertical lists
-   or filter chips - those stay on the plain .nav-tab.
+   Horizontal: .tab-rail is the strip and tabs sit on its hairline. A resting
+   tab is a dim card-fill tab set one step low; the active one rises, takes the
+   surface color (--folder-surface, default --bg), carries a --selected top
+   edge, and covers the rail hairline so it joins the panel below.
+   Vertical: .tab-stack overlaps the tabs like dividers in a drawer; the active
+   one takes a defined fill and is pulled up in front of the stack.
+
+   Compose: .nav-tab .nav-tab-folder inside a .tab-rail or .tab-stack. Filter
+   chips stay on the plain .nav-tab. Collapses to square corners with
+   --radius: 0.
 */
 .tab-rail {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-2);
+  gap: var(--space-1);
   border-bottom: var(--border-hair) solid var(--border);
 }
-.nav-tab.nav-tab-folder {
-  --tab-curve: calc(var(--radius) * 2);
-  margin-top: var(--space-1);
-  background: var(--bg-card);
-  border-color: var(--border);
-  border-bottom-color: transparent;
-  border-radius: var(--tab-curve) var(--tab-curve) 0 0;
+.tab-stack {
+  display: flex;
+  flex-direction: column;
 }
-/* Flared feet: a concave curve on each side of the active tab sweeps down into
-   the rail hairline, like a file-cabinet divider. Collapses with --radius: 0. */
-.nav-tab.nav-tab-folder.active::before,
-.nav-tab.nav-tab-folder.nav-tab-active::before,
-.nav-tab.nav-tab-folder.active::after,
-.nav-tab.nav-tab-folder.nav-tab-active::after {
+.nav-tab.nav-tab-folder,
+.nav-tab.nav-tab-folder:hover {
+  --tab-curve: calc(var(--radius) * 5);
+  --tab-tilt: 40deg;
+  --tab-fill: var(--bg-card);
+  --tab-edge: var(--border);
+  --tab-edge-bottom: transparent;
+  --tab-drop: var(--space-1);
+  isolation: isolate;
+  background: transparent;
+  border-color: transparent;
+  border-radius: 0;
+}
+.nav-tab.nav-tab-folder::before {
   content: "";
   position: absolute;
-  bottom: calc(var(--border-hair) * -1);
-  width: var(--tab-curve);
-  height: var(--tab-curve);
-  pointer-events: none;
+  inset: var(--tab-drop) 0 0 0;
+  z-index: -1;
+  background: var(--tab-fill);
+  border: var(--border-hair) solid var(--tab-edge);
+  border-bottom-color: var(--tab-edge-bottom);
+  border-radius: var(--tab-curve) var(--tab-curve) 0 0;
+  transform-origin: 50% 100%;
+  transform: perspective(10rem) rotateX(var(--tab-tilt)) scaleY(calc(1 / cos(var(--tab-tilt))));
+  transition: background var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease);
+}
+.nav-tab.nav-tab-folder:hover { --tab-fill: var(--state-hover-bg); }
+.nav-tab.nav-tab-folder.active,
+.nav-tab.nav-tab-folder.nav-tab-active {
+  --tab-fill: var(--folder-surface, var(--bg));
+  --tab-edge-bottom: var(--folder-surface, var(--bg));
+  --tab-drop: 0px;
+  z-index: 1;
+  margin-bottom: calc(var(--border-hair) * -1);
+  color: var(--selected);
 }
 .nav-tab.nav-tab-folder.active::before,
 .nav-tab.nav-tab-folder.nav-tab-active::before {
-  right: calc(100% + var(--border-hair));
-  background: radial-gradient(circle at 0 0, transparent calc(var(--tab-curve) - var(--border-hair)),
-    var(--border) calc(var(--tab-curve) - var(--border-hair)), var(--border) var(--tab-curve),
-    var(--folder-surface, var(--bg)) var(--tab-curve));
-}
-.nav-tab.nav-tab-folder.active::after,
-.nav-tab.nav-tab-folder.nav-tab-active::after {
-  left: calc(100% + var(--border-hair));
-  background: radial-gradient(circle at 100% 0, transparent calc(var(--tab-curve) - var(--border-hair)),
-    var(--border) calc(var(--tab-curve) - var(--border-hair)), var(--border) var(--tab-curve),
-    var(--folder-surface, var(--bg)) var(--tab-curve));
-}
-.nav-tab.nav-tab-folder:hover {
-  background: var(--state-hover-bg);
-}
-.nav-tab.nav-tab-folder.active,
-.nav-tab.nav-tab-folder.nav-tab-active {
-  z-index: 1;
-  margin-top: 0;
-  margin-bottom: calc(var(--border-hair) * -1);
-  color: var(--selected);
-  background: var(--folder-surface, var(--bg));
   border-top-color: var(--selected);
-  border-bottom-color: var(--folder-surface, var(--bg));
+}
+
+/* Vertical stack: overlapped dividers, active one raised. */
+.tab-stack > .nav-tab.nav-tab-folder {
+  --tab-tilt: 28deg;
+  --tab-edge-bottom: var(--border);
+  --tab-drop: 0px;
+}
+.tab-stack > .nav-tab.nav-tab-folder + .nav-tab.nav-tab-folder {
+  margin-top: calc(var(--space-2) * -1);
+}
+.tab-stack > .nav-tab.nav-tab-folder.active,
+.tab-stack > .nav-tab.nav-tab-folder.nav-tab-active {
+  --tab-fill: var(--bg-raised);
+  --tab-edge-bottom: var(--selected-border);
+  z-index: 2;
+  margin-bottom: 0;
+  transform: translateY(calc(var(--space-1) * -1));
+}
+.tab-stack > .nav-tab.nav-tab-folder.active::before,
+.tab-stack > .nav-tab.nav-tab-folder.nav-tab-active::before {
+  border-color: var(--selected-border);
+  border-top-color: var(--selected);
 }
 
 /* ---- Flex composition primitives --------------------------------------------
