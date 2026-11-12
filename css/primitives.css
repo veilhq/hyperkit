@@ -353,15 +353,43 @@
 .tab-rail {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-1);
+  gap: var(--space-2);
   border-bottom: var(--border-hair) solid var(--border);
 }
 .nav-tab.nav-tab-folder {
+  --tab-curve: calc(var(--radius) * 2);
   margin-top: var(--space-1);
   background: var(--bg-card);
   border-color: var(--border);
   border-bottom-color: transparent;
-  border-radius: var(--radius) var(--radius) 0 0;
+  border-radius: var(--tab-curve) var(--tab-curve) 0 0;
+}
+/* Flared feet: a concave curve on each side of the active tab sweeps down into
+   the rail hairline, like a file-cabinet divider. Collapses with --radius: 0. */
+.nav-tab.nav-tab-folder.active::before,
+.nav-tab.nav-tab-folder.nav-tab-active::before,
+.nav-tab.nav-tab-folder.active::after,
+.nav-tab.nav-tab-folder.nav-tab-active::after {
+  content: "";
+  position: absolute;
+  bottom: calc(var(--border-hair) * -1);
+  width: var(--tab-curve);
+  height: var(--tab-curve);
+  pointer-events: none;
+}
+.nav-tab.nav-tab-folder.active::before,
+.nav-tab.nav-tab-folder.nav-tab-active::before {
+  right: calc(100% + var(--border-hair));
+  background: radial-gradient(circle at 0 0, transparent calc(var(--tab-curve) - var(--border-hair)),
+    var(--border) calc(var(--tab-curve) - var(--border-hair)), var(--border) var(--tab-curve),
+    var(--folder-surface, var(--bg)) var(--tab-curve));
+}
+.nav-tab.nav-tab-folder.active::after,
+.nav-tab.nav-tab-folder.nav-tab-active::after {
+  left: calc(100% + var(--border-hair));
+  background: radial-gradient(circle at 100% 0, transparent calc(var(--tab-curve) - var(--border-hair)),
+    var(--border) calc(var(--tab-curve) - var(--border-hair)), var(--border) var(--tab-curve),
+    var(--folder-surface, var(--bg)) var(--tab-curve));
 }
 .nav-tab.nav-tab-folder:hover {
   background: var(--state-hover-bg);
