@@ -340,6 +340,43 @@
   border-color: var(--selected-border);
 }
 
+/* ---- Folder tab - the tab that fuses into its panel -------------------------
+   For a horizontal strip over a content surface. .tab-rail is the strip: tabs
+   sit on its hairline. A resting folder tab is a dim card-fill tab set one step
+   low, open at the bottom; the active one rises to the top, takes the surface
+   color (--folder-surface, default --bg), carries a --selected top bar, and
+   covers the rail hairline so it reads as one piece with the panel below.
+
+   Compose: .nav-tab .nav-tab-folder inside a .tab-rail. Not for vertical lists
+   or filter chips - those stay on the plain .nav-tab.
+*/
+.tab-rail {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-1);
+  border-bottom: var(--border-hair) solid var(--border);
+}
+.nav-tab.nav-tab-folder {
+  margin-top: var(--space-1);
+  background: var(--bg-card);
+  border-color: var(--border);
+  border-bottom-color: transparent;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.nav-tab.nav-tab-folder:hover {
+  background: var(--state-hover-bg);
+}
+.nav-tab.nav-tab-folder.active,
+.nav-tab.nav-tab-folder.nav-tab-active {
+  z-index: 1;
+  margin-top: 0;
+  margin-bottom: calc(var(--border-hair) * -1);
+  color: var(--selected);
+  background: var(--folder-surface, var(--bg));
+  border-top-color: var(--selected);
+  border-bottom-color: var(--folder-surface, var(--bg));
+}
+
 /* ---- Flex composition primitives --------------------------------------------
    Named shapes for the flex idioms that recur across the layer (counted:
    ~40 center+gap rows, ~36 stacks, ~18 full-center, ~8 label/control rows).
