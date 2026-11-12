@@ -341,20 +341,21 @@
 }
 
 /* ---- Folder tab - a file-cabinet divider -------------------------------------
-   A trapezoid tab: a perspective-tilted ::before carries the fill, hairline and
-   big rounded shoulders, so the sides slope outward to the base while the label
-   stays flat on top. Apps set padding wide enough to clear the slope.
+   A trapezoid tab built from two skewed halves (::before left, ::after right),
+   so the sloped sides keep one angle at any width and the top shoulders round
+   with --tab-curve. The halves sit exactly on the tab's box, so the label is
+   centered by the app's plain padding; the app pads wide enough to clear the
+   slope.
 
    Horizontal: .tab-rail is the strip and tabs sit on its hairline. A resting
-   tab is a dim card-fill tab set one step low; the active one rises, takes the
-   surface color (--folder-surface, default --bg), carries a --selected top
-   edge, and covers the rail hairline so it joins the panel below.
+   tab is a dim card-fill tab; the active one rises a step, takes the surface
+   color (--folder-surface, default --bg), carries a --selected top edge, and
+   covers the rail hairline so it joins the panel below.
    Vertical: .tab-stack overlaps the tabs like dividers in a drawer; the active
    one takes a defined fill and is pulled up in front of the stack.
 
    Compose: .nav-tab .nav-tab-folder inside a .tab-rail or .tab-stack. Filter
-   chips stay on the plain .nav-tab. Collapses to square corners with
-   --radius: 0.
+   chips stay on the plain .nav-tab. The corners collapse with --radius: 0.
 */
 .tab-rail {
   display: flex;
@@ -368,51 +369,65 @@
 }
 .nav-tab.nav-tab-folder,
 .nav-tab.nav-tab-folder:hover {
-  --tab-curve: calc(var(--radius) * 5);
-  --tab-tilt: 40deg;
+  --tab-curve: calc(var(--radius) * 4);
+  --tab-skew: 18deg;
   --tab-fill: var(--bg-card);
   --tab-edge: var(--border);
   --tab-edge-bottom: transparent;
-  --tab-drop: var(--space-1);
+  --tab-rise: 0px;
   isolation: isolate;
   background: transparent;
   border-color: transparent;
   border-radius: 0;
 }
-.nav-tab.nav-tab-folder::before {
+.nav-tab.nav-tab-folder::before,
+.nav-tab.nav-tab-folder::after {
   content: "";
   position: absolute;
-  inset: var(--tab-drop) 0 0 0;
+  top: calc(var(--tab-rise) * -1);
+  bottom: calc(var(--tab-rise) * -1 + var(--tab-trim, 0px));
+  width: 50%;
   z-index: -1;
   background: var(--tab-fill);
   border: var(--border-hair) solid var(--tab-edge);
   border-bottom-color: var(--tab-edge-bottom);
-  border-radius: var(--tab-curve) var(--tab-curve) 0 0;
-  transform-origin: 50% 100%;
-  transform: perspective(10rem) rotateX(var(--tab-tilt)) scaleY(calc(1 / cos(var(--tab-tilt))));
+  transform-origin: 0 100%;
   transition: background var(--motion-fast) var(--ease),
               border-color var(--motion-fast) var(--ease);
+}
+.nav-tab.nav-tab-folder::before {
+  left: 0;
+  border-right-width: 0;
+  border-radius: var(--tab-curve) 0 0 0;
+  transform: skewX(calc(var(--tab-skew) * -1));
+}
+.nav-tab.nav-tab-folder::after {
+  right: 0;
+  border-left-width: 0;
+  border-radius: 0 var(--tab-curve) 0 0;
+  transform: skewX(var(--tab-skew));
 }
 .nav-tab.nav-tab-folder:hover { --tab-fill: var(--state-hover-bg); }
 .nav-tab.nav-tab-folder.active,
 .nav-tab.nav-tab-folder.nav-tab-active {
   --tab-fill: var(--folder-surface, var(--bg));
   --tab-edge-bottom: var(--folder-surface, var(--bg));
-  --tab-drop: 0px;
+  --tab-rise: calc(var(--space-1) / 2);
   z-index: 1;
   margin-bottom: calc(var(--border-hair) * -1);
   color: var(--selected);
+  transform: translateY(calc(var(--tab-rise) * -1));
 }
 .nav-tab.nav-tab-folder.active::before,
-.nav-tab.nav-tab-folder.nav-tab-active::before {
+.nav-tab.nav-tab-folder.nav-tab-active::before,
+.nav-tab.nav-tab-folder.active::after,
+.nav-tab.nav-tab-folder.nav-tab-active::after {
   border-top-color: var(--selected);
 }
 
-/* Vertical stack: overlapped dividers, active one raised. */
+/* Vertical stack: overlapped dividers, active one raised in front. */
 .tab-stack > .nav-tab.nav-tab-folder {
-  --tab-tilt: 28deg;
   --tab-edge-bottom: var(--border);
-  --tab-drop: 0px;
 }
 .tab-stack > .nav-tab.nav-tab-folder + .nav-tab.nav-tab-folder {
   margin-top: calc(var(--space-2) * -1);
@@ -421,12 +436,20 @@
 .tab-stack > .nav-tab.nav-tab-folder.nav-tab-active {
   --tab-fill: var(--bg-raised);
   --tab-edge-bottom: var(--selected-border);
+  --tab-rise: 0px;
+  --tab-trim: var(--space-2);
   z-index: 2;
   margin-bottom: 0;
   transform: translateY(calc(var(--space-1) * -1));
 }
+.tab-stack > .nav-tab.nav-tab-folder.active:last-child,
+.tab-stack > .nav-tab.nav-tab-folder.nav-tab-active:last-child {
+  --tab-trim: 0px;
+}
 .tab-stack > .nav-tab.nav-tab-folder.active::before,
-.tab-stack > .nav-tab.nav-tab-folder.nav-tab-active::before {
+.tab-stack > .nav-tab.nav-tab-folder.nav-tab-active::before,
+.tab-stack > .nav-tab.nav-tab-folder.active::after,
+.tab-stack > .nav-tab.nav-tab-folder.nav-tab-active::after {
   border-color: var(--selected-border);
   border-top-color: var(--selected);
 }
