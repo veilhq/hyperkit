@@ -341,18 +341,22 @@
 }
 
 /* ---- Folder tab - a file-cabinet divider -------------------------------------
-   A trapezoid tab built from two skewed halves (::before left, ::after right),
-   so the sloped sides keep one angle at any width and the top shoulders round
-   with --tab-curve. The halves sit exactly on the tab's box, so the label is
-   centered by the app's plain padding; the app pads wide enough to clear the
-   slope.
+   A divider tab built from two skewed halves (::before left, ::after right):
+   flat top, small rounded shoulders (--tab-curve) and near-vertical sides
+   leaning at --tab-skew, the same angle at any width. The halves sit on the
+   padding box; a transparent side border (--tab-flare) holds the foot, where
+   each side flares out in a curve into a baseline that runs the tab's full
+   width. The app's plain padding centers the label.
 
-   Horizontal: .tab-rail is the strip and tabs sit on its hairline. A resting
-   tab is a dim card-fill tab; the active one rises a step, takes the surface
-   color (--folder-surface, default --bg), carries a --selected top edge, and
-   covers the rail hairline so it joins the panel below.
-   Vertical: .tab-stack overlaps the tabs like dividers in a drawer; the active
-   one takes a defined fill and is pulled up in front of the stack.
+   Active: a solid --selected fill with inverted ink. It never changes
+   z-index; stacking stays in document order.
+
+   Two containers own the behavior, so each can change without touching the
+   other. Horizontal (.tab-rail): tabs sit side by side on the rail hairline,
+   flares meeting in a valley, no raise, and a shared minimum width
+   (--tab-rail-min) so short labels do not make short tabs. Vertical (.tab-stack): tabs overlap
+   like dividers in a drawer and the active one is raised (--tab-up grows the
+   card upward while the label moves half as far, so it stays centered).
 
    Compose: .nav-tab .nav-tab-folder inside a .tab-rail or .tab-stack. Filter
    chips stay on the plain .nav-tab. The corners collapse with --radius: 0.
@@ -360,8 +364,7 @@
 .tab-rail {
   display: flex;
   align-items: flex-end;
-  gap: var(--space-1);
-  border-bottom: var(--border-hair) solid var(--border);
+  border-bottom: var(--border-hair) solid var(--border-strong);
 }
 .tab-stack {
   display: flex;
@@ -369,31 +372,52 @@
 }
 .nav-tab.nav-tab-folder,
 .nav-tab.nav-tab-folder:hover {
-  --tab-curve: calc(var(--radius) * 4);
-  --tab-skew: 18deg;
+  --tab-curve: calc(var(--radius) * 2);
+  --tab-skew: 12deg;
+  --tab-flare: var(--space-3);
   --tab-fill: var(--bg-card);
-  --tab-edge: var(--border);
-  --tab-edge-bottom: transparent;
-  --tab-rise: 0px;
+  --tab-edge: var(--border-strong);
+  --tab-base: transparent;
+  --tab-up: 0px;
+  --tab-trim: 0px;
+  --tab-lap: 0px;
+  --tab-shift: calc((var(--tab-up) - var(--tab-lap)) / 2);
   isolation: isolate;
-  background: transparent;
   border-color: transparent;
+  border-width: var(--border-hair) var(--tab-flare);
   border-radius: 0;
+  background-color: transparent;
+  background-image:
+    linear-gradient(var(--tab-base), var(--tab-base)),
+    linear-gradient(var(--tab-fill), var(--tab-fill)),
+    radial-gradient(circle at left top, transparent calc(var(--tab-flare) - var(--border-hair) - 0.5px), var(--tab-edge) calc(var(--tab-flare) - var(--border-hair)), var(--tab-edge) var(--tab-flare), var(--tab-fill) calc(var(--tab-flare) + 0.5px)),
+    radial-gradient(circle at right top, transparent calc(var(--tab-flare) - var(--border-hair) - 0.5px), var(--tab-edge) calc(var(--tab-flare) - var(--border-hair)), var(--tab-edge) var(--tab-flare), var(--tab-fill) calc(var(--tab-flare) + 0.5px));
+  background-position:
+    left calc(var(--tab-flare) * -1) bottom calc(var(--tab-trim) - var(--tab-lap) - var(--tab-shift)),
+    left 0 bottom calc(var(--tab-trim) - var(--tab-lap) - var(--tab-shift)),
+    left calc(var(--tab-flare) * -1 + var(--border-hair)) bottom calc(var(--tab-trim) - var(--tab-lap) - var(--tab-shift)),
+    right calc(var(--tab-flare) * -1 + var(--border-hair)) bottom calc(var(--tab-trim) - var(--tab-lap) - var(--tab-shift));
+  background-size: calc(100% + var(--tab-flare) * 2) var(--border-hair), 100% var(--tab-flare), var(--tab-flare) var(--tab-flare), var(--tab-flare) var(--tab-flare);
+  background-repeat: no-repeat;
+  transition: color var(--motion-fast) var(--ease),
+              transform var(--motion-base) var(--ease);
 }
 .nav-tab.nav-tab-folder::before,
 .nav-tab.nav-tab-folder::after {
   content: "";
   position: absolute;
-  top: calc(var(--tab-rise) * -1);
-  bottom: calc(var(--tab-rise) * -1 + var(--tab-trim, 0px));
+  top: calc((var(--tab-up) - var(--tab-shift)) * -1);
+  bottom: calc(var(--tab-trim) - var(--tab-lap) - var(--tab-shift) + var(--tab-flare) - var(--border-hair));
   width: 50%;
   z-index: -1;
   background: var(--tab-fill);
   border: var(--border-hair) solid var(--tab-edge);
-  border-bottom-color: var(--tab-edge-bottom);
+  border-bottom-width: 0;
   transform-origin: 0 100%;
   transition: background var(--motion-fast) var(--ease),
-              border-color var(--motion-fast) var(--ease);
+              border-color var(--motion-fast) var(--ease),
+              top var(--motion-base) var(--ease),
+              bottom var(--motion-base) var(--ease);
 }
 .nav-tab.nav-tab-folder::before {
   left: 0;
@@ -410,48 +434,45 @@
 .nav-tab.nav-tab-folder:hover { --tab-fill: var(--state-hover-bg); }
 .nav-tab.nav-tab-folder.active,
 .nav-tab.nav-tab-folder.nav-tab-active {
-  --tab-fill: var(--folder-surface, var(--bg));
-  --tab-edge-bottom: var(--folder-surface, var(--bg));
-  --tab-rise: calc(var(--space-1) / 2);
-  z-index: 1;
-  margin-bottom: calc(var(--border-hair) * -1);
-  color: var(--selected);
-  transform: translateY(calc(var(--tab-rise) * -1));
-}
-.nav-tab.nav-tab-folder.active::before,
-.nav-tab.nav-tab-folder.nav-tab-active::before,
-.nav-tab.nav-tab-folder.active::after,
-.nav-tab.nav-tab-folder.nav-tab-active::after {
-  border-top-color: var(--selected);
+  --tab-fill: var(--selected);
+  --tab-edge: var(--selected);
+  --tab-base: var(--selected);
+  color: var(--bg);
+  transform: translateY(calc(var(--tab-shift) * -1));
 }
 
-/* Vertical stack: overlapped dividers, active one raised in front. */
-.tab-stack > .nav-tab.nav-tab-folder {
-  --tab-edge-bottom: var(--border);
+/* ---- Horizontal primitive (.tab-rail) ----
+   Tabs abut and lie over the rail hairline. No raise: --tab-up stays 0. */
+.tab-rail .nav-tab.nav-tab-folder {
+  margin-bottom: calc(var(--border-hair) * -1);
+  border-bottom-width: 0;
+  min-width: var(--tab-rail-min, calc(var(--space-6) * 5));
+  justify-content: center;
+  text-align: center;
+}
+
+/* ---- Vertical primitive (.tab-stack) ----
+   Overlapped dividers with a visible baseline. The active one is raised and
+   trims its overlap allowance so it ends just under the next tab, which
+   still overlaps it by --tab-lap. */
+.tab-stack > .nav-tab.nav-tab-folder,
+.tab-stack > .nav-tab.nav-tab-folder:hover {
+  --tab-base: var(--border-strong);
 }
 .tab-stack > .nav-tab.nav-tab-folder + .nav-tab.nav-tab-folder {
-  margin-top: calc(var(--space-2) * -1);
+  margin-top: calc(var(--space-3) * -1);
 }
 .tab-stack > .nav-tab.nav-tab-folder.active,
 .tab-stack > .nav-tab.nav-tab-folder.nav-tab-active {
-  --tab-fill: var(--bg-raised);
-  --tab-edge-bottom: var(--selected-border);
-  --tab-rise: 0px;
-  --tab-trim: var(--space-2);
-  z-index: 2;
-  margin-bottom: 0;
-  transform: translateY(calc(var(--space-1) * -1));
+  --tab-base: var(--selected);
+  --tab-up: var(--space-1);
+  --tab-trim: var(--space-3);
+  --tab-lap: var(--space-1);
 }
 .tab-stack > .nav-tab.nav-tab-folder.active:last-child,
 .tab-stack > .nav-tab.nav-tab-folder.nav-tab-active:last-child {
   --tab-trim: 0px;
-}
-.tab-stack > .nav-tab.nav-tab-folder.active::before,
-.tab-stack > .nav-tab.nav-tab-folder.nav-tab-active::before,
-.tab-stack > .nav-tab.nav-tab-folder.active::after,
-.tab-stack > .nav-tab.nav-tab-folder.nav-tab-active::after {
-  border-color: var(--selected-border);
-  border-top-color: var(--selected);
+  --tab-lap: 0px;
 }
 
 /* ---- Flex composition primitives --------------------------------------------
