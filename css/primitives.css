@@ -442,13 +442,18 @@
 }
 
 /* ---- Horizontal primitive (.tab-rail) ----
-   Tabs abut and lie over the rail hairline. No raise: --tab-up stays 0. */
+   Tabs lie over the rail hairline and overlap their neighbor by --tab-rail-lap,
+   so the flared feet tuck under the next tab in document order. No raise:
+   --tab-up stays 0. */
 .tab-rail .nav-tab.nav-tab-folder {
   margin-bottom: calc(var(--border-hair) * -1);
   border-bottom-width: 0;
   min-width: var(--tab-rail-min, calc(var(--space-6) * 5));
   justify-content: center;
   text-align: center;
+}
+.tab-rail .nav-tab.nav-tab-folder + .nav-tab.nav-tab-folder {
+  margin-left: calc(var(--tab-rail-lap, var(--space-2)) * -1);
 }
 
 /* ---- Vertical primitive (.tab-stack) ----
