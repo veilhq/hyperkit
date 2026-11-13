@@ -889,6 +889,61 @@ kbd,
 }
 .form-textarea:focus-visible { outline: none; }
 
+/* ---- Segmented control - one choice among a few, in a joined track -----------
+   A hairline --radius track of equal-width options. One thumb (the --selected
+   wash and hairline) slides to the pressed option: the owner sets
+   --segment-count and --segment-index on the track and marks the option with
+   aria-pressed="true". Options paint over the thumb by DOM order.
+
+   Compose: .segmented > .segmented-option (buttons).
+*/
+.segmented {
+  --segment-count: 2;
+  --segment-index: 0;
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: repeat(var(--segment-count), 1fr);
+  box-sizing: border-box;
+  border: var(--border-hair) solid var(--border);
+  border-radius: var(--radius);
+}
+.segmented::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  box-sizing: border-box;
+  width: calc(100% / var(--segment-count));
+  background: var(--selected-wash);
+  border: var(--border-hair) solid var(--selected-border);
+  border-radius: var(--radius);
+  transform: translateX(calc(var(--segment-index) * 100%));
+  transition: transform var(--motion-base) var(--ease);
+}
+.segmented-option {
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  font: inherit;
+  font-size: var(--fs-mono);
+  letter-spacing: var(--track-label);
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  transition: color var(--motion-fast) var(--ease);
+}
+.segmented-option:hover { color: var(--text); }
+.segmented-option[aria-pressed="true"] { color: var(--selected); }
+.segmented-option:focus { outline: none; }
+.segmented-option:focus-visible { outline: var(--border-hair) solid var(--focus); outline-offset: calc(var(--border-hair) * -1); }
+@media (prefers-reduced-motion: reduce) {
+  .segmented::before, .segmented-option { transition: none; }
+}
+html.a11y-reduce-motion .segmented::before,
+html.a11y-reduce-motion .segmented-option { transition: none; }
+
 /* ---- Pill toggle - wordless cycle button ------------------------------------
    A minimal fully-rounded --comp pill with no label. A pure cycle control: each
    click advances the surface it drives to the next view; the control itself
