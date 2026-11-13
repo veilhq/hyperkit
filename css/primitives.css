@@ -453,7 +453,7 @@
   text-align: center;
 }
 .tab-rail .nav-tab.nav-tab-folder + .nav-tab.nav-tab-folder {
-  margin-left: calc(var(--tab-rail-lap, var(--space-2)) * -1);
+  margin-left: calc(var(--tab-rail-lap, var(--space-5)) * -1);
 }
 
 /* ---- Vertical primitive (.tab-stack) ----
