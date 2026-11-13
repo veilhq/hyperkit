@@ -2207,3 +2207,223 @@ html.a11y-reduce-motion .utility-page { animation: none !important; }
 .utility-surface .preview-card:hover {
   background: var(--selected-wash);
 }
+
+/* ============================================================================
+   Poster card - a collection shown as its cover image with the title on it.
+   Children stack by DOM order (image, count, open, body, meta, tools); text
+   layers ignore the pointer so the open button owns the click. Dither veil and bottom scrim keep the title legible; hover thins the veil,
+   scales the cover, and reveals the description. The -add variant is the
+   empty "new" tile. Palette bar and dot meter carry color and size as data.
+   ============================================================================ */
+.poster-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 18rem;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: var(--border-hair) solid transparent;
+  border-radius: var(--radius-dir-surface);
+  transition: border-color var(--motion-base) var(--ease);
+}
+.poster-card:hover,
+.poster-card:focus-within { border-color: var(--border-strong); }
+.poster-card-image { position: absolute; inset: 0; isolation: isolate; }
+.poster-card-image > img,
+.poster-card-image > .poster-card-fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--motion-reveal) var(--ease);
+}
+.poster-card:hover .poster-card-image > img,
+.poster-card:hover .poster-card-image > .poster-card-fill,
+.poster-card:focus-within .poster-card-image > img,
+.poster-card:focus-within .poster-card-image > .poster-card-fill { transform: scale(1.05); }
+.poster-card-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0.35;
+  background-image: radial-gradient(var(--bg) 35%, transparent 36%);
+  background-size: var(--space-2) var(--space-2);
+  transition: opacity var(--motion-enter) var(--ease);
+}
+.poster-card-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to top, var(--scrim) 0%, transparent 70%);
+}
+.poster-card:hover .poster-card-image::before,
+.poster-card:focus-within .poster-card-image::before { opacity: 0.15; }
+.poster-card-image.is-empty { background: var(--bg-card); }
+.poster-card-image.is-empty::after { display: none; }
+.poster-card-image.is-empty::before { opacity: 0.12; }
+.poster-card-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text-dim);
+}
+.poster-card-count {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  color: var(--text-bright);
+}
+.poster-card-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4) var(--space-3) var(--space-3);
+  pointer-events: none;
+}
+.poster-card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-xl);
+  font-weight: var(--fw-extrabold);
+  letter-spacing: var(--track-display);
+  line-height: var(--lh-tight);
+  color: var(--text-bright);
+}
+.poster-card-desc {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-sm);
+  line-height: var(--lh-ui);
+  color: var(--text-muted);
+  transition: grid-template-rows var(--motion-enter) var(--ease), opacity var(--motion-enter) var(--ease);
+}
+.poster-card-desc > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 0;
+  transition: padding-top var(--motion-enter) var(--ease);
+}
+.poster-card:hover .poster-card-desc,
+.poster-card:focus-within .poster-card-desc { grid-template-rows: 1fr; opacity: 1; }
+.poster-card:hover .poster-card-desc > span,
+.poster-card:focus-within .poster-card-desc > span { padding-top: var(--space-2); }
+.poster-card-palette { display: flex; gap: var(--space-1); height: var(--space-2); margin-top: var(--space-3); }
+.poster-card-palette > i { flex: 1; border-radius: var(--radius); }
+.poster-card-meta {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.poster-card-meta span { white-space: nowrap; }
+.poster-card-meter { display: inline-flex; gap: var(--space-1); }
+.poster-card-meter > i { width: var(--space-2); height: var(--space-2); background: var(--border-strong); }
+.poster-card-meter > i.on { background: var(--magnitude); }
+.poster-card-fresh { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--live); }
+.poster-card-fresh::before { content: ""; width: var(--space-2); height: var(--space-2); background: var(--live); }
+.poster-card-tools {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: flex;
+  gap: var(--space-1);
+  opacity: 0;
+  transition: opacity var(--motion-base) var(--ease);
+}
+.poster-card:hover .poster-card-tools,
+.poster-card:focus-within .poster-card-tools,
+.poster-card-tools.keep { opacity: 1; }
+.poster-card-open { position: absolute; inset: 0; padding: 0; border: 0; background: none; cursor: pointer; }
+.poster-card-open:focus-visible { outline: var(--border-rail) solid var(--focus); outline-offset: calc(var(--space-1) * -1); }
+.poster-card-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--scrim);
+}
+.poster-card-form .form-input { width: 100%; box-sizing: border-box; }
+
+/* New-set tile: a quiet poster that wakes on hover. */
+.poster-card-add {
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+.poster-card-add .poster-card-empty { transition: color var(--motion-base) var(--ease); }
+.poster-card-add .poster-card-empty svg {
+  width: var(--icon-xl);
+  height: var(--icon-xl);
+  transition: transform var(--motion-enter) var(--ease);
+}
+.poster-card-add .poster-card-title { color: var(--text-muted); transition: color var(--motion-base) var(--ease); }
+.poster-card-add:hover .poster-card-empty,
+.poster-card-add:focus-visible .poster-card-empty { color: var(--interactive); }
+.poster-card-add:hover .poster-card-empty svg,
+.poster-card-add:focus-visible .poster-card-empty svg { transform: rotate(90deg); }
+.poster-card-add:hover .poster-card-image::before,
+.poster-card-add:focus-visible .poster-card-image::before { opacity: 0.3; }
+.poster-card-add:hover .poster-card-title,
+.poster-card-add:focus-visible .poster-card-title { color: var(--text-bright); }
+.poster-card-add:hover .poster-card-desc,
+.poster-card-add:focus-visible .poster-card-desc { grid-template-rows: 1fr; opacity: 1; }
+.poster-card-add:hover .poster-card-desc > span,
+.poster-card-add:focus-visible .poster-card-desc > span { padding-top: var(--space-2); }
+.poster-card-add:focus-visible { outline: var(--border-hair) solid var(--focus); outline-offset: var(--border-hair); }
+
+@media (prefers-reduced-motion: reduce) {
+  .poster-card,
+  .poster-card-image > img,
+  .poster-card-image > .poster-card-fill,
+  .poster-card-image::before,
+  .poster-card-desc,
+  .poster-card-desc > span,
+  .poster-card-tools,
+  .poster-card-add .poster-card-empty,
+  .poster-card-add .poster-card-empty svg,
+  .poster-card-add .poster-card-title { transition: none; }
+  .poster-card:hover .poster-card-image > img,
+  .poster-card:hover .poster-card-image > .poster-card-fill,
+  .poster-card:focus-within .poster-card-image > img,
+  .poster-card:focus-within .poster-card-image > .poster-card-fill,
+  .poster-card-add:hover .poster-card-empty svg,
+  .poster-card-add:focus-visible .poster-card-empty svg { transform: none; }
+}
+html.a11y-reduce-motion .poster-card,
+html.a11y-reduce-motion .poster-card-image > img,
+html.a11y-reduce-motion .poster-card-image > .poster-card-fill,
+html.a11y-reduce-motion .poster-card-image::before,
+html.a11y-reduce-motion .poster-card-desc,
+html.a11y-reduce-motion .poster-card-desc > span,
+html.a11y-reduce-motion .poster-card-tools,
+html.a11y-reduce-motion .poster-card-add .poster-card-empty,
+html.a11y-reduce-motion .poster-card-add .poster-card-empty svg,
+html.a11y-reduce-motion .poster-card-add .poster-card-title { transition: none; }
+html.a11y-reduce-motion .poster-card:hover .poster-card-image > img,
+html.a11y-reduce-motion .poster-card:hover .poster-card-image > .poster-card-fill,
+html.a11y-reduce-motion .poster-card:focus-within .poster-card-image > img,
+html.a11y-reduce-motion .poster-card:focus-within .poster-card-image > .poster-card-fill,
+html.a11y-reduce-motion .poster-card-add:hover .poster-card-empty svg,
+html.a11y-reduce-motion .poster-card-add:focus-visible .poster-card-empty svg { transform: none; }
