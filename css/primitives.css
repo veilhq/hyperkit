@@ -400,7 +400,8 @@
   background-size: calc(100% + var(--tab-flare) * 2) var(--border-hair), 100% var(--tab-flare), var(--tab-flare) var(--tab-flare), var(--tab-flare) var(--tab-flare);
   background-repeat: no-repeat;
   transition: color var(--motion-fast) var(--ease),
-              transform var(--motion-base) var(--ease);
+              transform var(--motion-base) var(--ease),
+              background-position var(--motion-base) var(--ease);
 }
 .nav-tab.nav-tab-folder::before,
 .nav-tab.nav-tab-folder::after {
@@ -440,6 +441,13 @@
   color: var(--bg);
   transform: translateY(calc(var(--tab-shift) * -1));
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-tab.nav-tab-folder, .nav-tab.nav-tab-folder::before, .nav-tab.nav-tab-folder::after { transition: none; }
+}
+html.a11y-reduce-motion .nav-tab.nav-tab-folder,
+html.a11y-reduce-motion .nav-tab.nav-tab-folder::before,
+html.a11y-reduce-motion .nav-tab.nav-tab-folder::after { transition: none; }
 
 /* ---- Horizontal primitive (.tab-rail) ----
    Tabs lie over the rail hairline and overlap their neighbor by --tab-rail-lap,
