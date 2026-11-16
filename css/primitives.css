@@ -348,13 +348,16 @@
    each side flares out in a curve into a baseline that runs the tab's full
    width. The app's plain padding centers the label.
 
-   Active: a solid --selected fill with inverted ink. It never changes
-   z-index; stacking stays in document order.
+   Active (base and .tab-stack): a solid --selected fill with inverted ink,
+   stacking in document order.
 
    Two containers own the behavior, so each can change without touching the
    other. Horizontal (.tab-rail): tabs sit side by side on the rail hairline,
    flares meeting in a valley, no raise, and a shared minimum width
-   (--tab-rail-min) so short labels do not make short tabs. Vertical (.tab-stack): tabs overlap
+   (--tab-rail-min) so short labels do not make short tabs. The active rail tab
+   comes in front of its neighbors, takes the panel color (--tab-panel) with a
+   --selected top edge, and covers the rail so it opens into the panel below.
+   Vertical (.tab-stack): tabs overlap
    like dividers in a drawer and the active one is raised (--tab-up grows the
    card upward while the label moves half as far, so it stays centered).
 
@@ -413,6 +416,7 @@
   z-index: -1;
   background: var(--tab-fill);
   border: var(--border-hair) solid var(--tab-edge);
+  border-top: var(--tab-top-width, var(--border-hair)) solid var(--tab-top, var(--tab-edge));
   border-bottom-width: 0;
   transform-origin: 0 100%;
   transition: background var(--motion-fast) var(--ease),
@@ -451,8 +455,8 @@ html.a11y-reduce-motion .nav-tab.nav-tab-folder::after { transition: none; }
 
 /* ---- Horizontal primitive (.tab-rail) ----
    Tabs lie over the rail hairline and overlap their neighbor by --tab-rail-lap,
-   so the flared feet tuck under the next tab in document order. No raise:
-   --tab-up stays 0. */
+   so the flared feet tuck under the next tab in document order; the active tab
+   sits in front of both neighbors. No raise: --tab-up stays 0. */
 .tab-rail .nav-tab.nav-tab-folder {
   margin-bottom: calc(var(--border-hair) * -1);
   border-bottom-width: 0;
@@ -462,6 +466,18 @@ html.a11y-reduce-motion .nav-tab.nav-tab-folder::after { transition: none; }
 }
 .tab-rail .nav-tab.nav-tab-folder + .nav-tab.nav-tab-folder {
   margin-left: calc(var(--tab-rail-lap, var(--space-5)) * -1);
+}
+/* Active: panel-colored body and baseline over the rail, --selected top edge,
+   in front of its neighbors. Set --tab-panel on the rail to the panel's color. */
+.tab-rail .nav-tab.nav-tab-folder.active,
+.tab-rail .nav-tab.nav-tab-folder.nav-tab-active {
+  --tab-fill: var(--tab-panel, var(--bg));
+  --tab-edge: var(--border-strong);
+  --tab-base: var(--tab-fill);
+  --tab-top: var(--selected);
+  --tab-top-width: var(--border-rail);
+  z-index: 1;
+  color: var(--selected);
 }
 
 /* ---- Vertical primitive (.tab-stack) ----
