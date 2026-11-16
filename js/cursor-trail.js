@@ -425,7 +425,7 @@
     }
 
     if (fadeMs && fadeMs > 0 && _canvas) {
-      _canvas.style.transition = 'opacity ' + fadeMs + 'ms linear';
+      _canvas.style.transition = 'opacity ' + fadeMs + 'ms var(--ease)';
       _canvas.style.opacity = '0';
       setTimeout(teardown, fadeMs);
     } else {

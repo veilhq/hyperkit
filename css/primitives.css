@@ -1741,7 +1741,7 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
   .notification-toast-error,
   .notification-toast-progress { animation: none; }
   .notification-toast-body,
-  .notification-toast-close { transition: opacity var(--motion-tick) linear; }
+  .notification-toast-close { transition: opacity var(--motion-tick) var(--ease); }
   .notification-toast-exit { transform: none; }
 }
 .a11y-reduce-motion .notification-toast,
@@ -1749,7 +1749,7 @@ html.a11y-reduce-motion .cursor-box.blink { animation: none !important; }
 .a11y-reduce-motion .notification-toast-error,
 .a11y-reduce-motion .notification-toast-progress { animation: none; }
 .a11y-reduce-motion .notification-toast-body,
-.a11y-reduce-motion .notification-toast-close { transition: opacity var(--motion-tick) linear; }
+.a11y-reduce-motion .notification-toast-close { transition: opacity var(--motion-tick) var(--ease); }
 .a11y-reduce-motion .notification-toast-exit { transform: none; }
 
 /* ---- Skeleton loading primitives --------------------------------------------
