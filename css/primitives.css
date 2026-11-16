@@ -1008,44 +1008,55 @@ html.a11y-reduce-motion .segmented-option { transition: none; }
 }
 
 /* ---- Switch - on/off setting control ----------------------------------------
-   A pill track with a dot that slides right when on. The markup is a
-   <button role="switch" aria-checked> so the state lives in one attribute;
-   on takes --selected, off rests in the grey ink scale.
+   A pill track holding two dots in a metaball layer: the lead dot springs to
+   the new side and the trailing dot follows a beat later, so they stretch
+   apart and merge back like liquid. Markup is <button role="switch"
+   aria-checked> wrapping <span class="switch-goo">; switch.js adds the filter.
+   Off rests in the grey ink scale; on takes --selected.
 */
 .switch {
   appearance: none;
   -webkit-appearance: none;
   position: relative;
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
   flex-shrink: 0;
   box-sizing: border-box;
   width: var(--space-6);
   height: var(--space-4);
-  padding: 0 var(--space-1);
+  padding: 0;
   margin: 0;
   background: var(--bg-surface);
   border: var(--border-hair) solid var(--border-strong);
   border-radius: var(--radius-pill);
   cursor: pointer;
-  transition: border-color var(--motion-tick) var(--ease);
+  transition: border-color var(--motion-base) var(--ease);
 }
-.switch::before {
+.switch-goo { position: absolute; inset: 0; pointer-events: none; filter: url(#hk-switch-goo); }
+.switch-goo::before,
+.switch-goo::after {
   content: "";
+  position: absolute;
+  top: 50%;
+  left: var(--space-1);
   width: var(--space-2);
   height: var(--space-2);
+  margin-top: calc(var(--space-2) / -2);
   border-radius: var(--radius-pill);
   background: var(--text-dim);
-  transition: translate var(--motion-tick) var(--ease), background-color var(--motion-tick) var(--ease);
 }
+.switch-goo::before { transition: translate var(--motion-medium) var(--ease-bounce), background-color var(--motion-base) var(--ease); }
+.switch-goo::after { transition: translate var(--motion-slow) var(--ease) var(--motion-stagger), background-color var(--motion-base) var(--ease); }
 .switch:hover { border-color: var(--interactive); }
 .switch:focus-visible { outline: var(--border-rail) solid var(--focus); outline-offset: var(--border-rail); }
 .switch[aria-checked="true"] { border-color: var(--selected); }
-.switch[aria-checked="true"]::before { background: var(--selected); translate: calc(var(--space-4) - var(--border-hair) * 2) 0; }
+.switch[aria-checked="true"] .switch-goo::before,
+.switch[aria-checked="true"] .switch-goo::after { background: var(--selected); translate: calc(var(--space-4) - var(--border-hair) * 2) 0; }
 .switch:disabled { opacity: 0.4; cursor: not-allowed; }
-@media (prefers-reduced-motion: reduce) { .switch, .switch::before { transition: none; } }
+.switch-filter { position: absolute; width: 0; height: 0; overflow: hidden; }
+@media (prefers-reduced-motion: reduce) { .switch, .switch-goo::before, .switch-goo::after { transition: none; } }
 html.a11y-reduce-motion .switch,
-html.a11y-reduce-motion .switch::before { transition: none; }
+html.a11y-reduce-motion .switch-goo::before,
+html.a11y-reduce-motion .switch-goo::after { transition: none; }
 
 /* ---- Button base + variants --------------------------------------------------
    Ghost by default: bordered, transparent bg, muted text, hovers to accent.
