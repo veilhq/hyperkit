@@ -61,6 +61,7 @@ python build.py
 |       +-- chips.py           render_chip() for semantic chip HTML
 |       +-- hyper_logging.py   setup_logger() for all ecosystem apps
 |       +-- launch_build.py    rebuild-on-launch helpers
+|       +-- window_chrome.py   apply_window_chrome() - dark title bar + DPI-sized window icon
 +-- .hypervisor/, .hyperagent/, ...   consume Hyperkit at build time
 ```
 
