@@ -1442,6 +1442,98 @@ html.a11y-reduce-motion .link-button { transition: none !important; }
 }
 html.a11y-reduce-motion .menu-item { transition: none !important; }
 
+/* ============================================================================
+   Path fork - choosing where to go next
+   Branches hang off one trunk on hairline elbows, like a tree listing. Each
+   .path-fork-branch holds a .path-fork-take button (key, icon, label, kind,
+   count) and optional trailing action icons. The elbow is the state readout:
+   solid = known, dashed = not checked yet ([data-state="unknown"]), dim =
+   resting ([data-state="resting"]); the taken branch (aria-pressed) draws in
+   the selected color. Hover follows .menu-item, the taken state .nav-tab.
+   ============================================================================ */
+.path-fork {
+  --fork-indent: var(--space-5);
+  --fork-elbow: var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.path-fork-branch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-left: var(--fork-indent);
+  --fork-line: var(--border-hair) solid var(--fork-elbow);
+}
+/* Trunk segment and elbow; the last branch stops the trunk at its elbow. */
+.path-fork-branch::before,
+.path-fork-branch::after {
+  content: "";
+  position: absolute;
+  left: var(--space-2);
+  pointer-events: none;
+  transition: border-color var(--motion-fast) var(--ease);
+}
+.path-fork-branch::before { top: 0; bottom: 0; border-left: var(--border-hair) solid var(--border); }
+.path-fork-branch:last-child::before { bottom: 50%; }
+.path-fork-branch::after {
+  top: 50%;
+  width: calc(var(--fork-indent) - var(--space-2) - var(--space-1));
+  border-top: var(--fork-line);
+}
+.path-fork-branch[data-state="unknown"] { --fork-line: var(--border-hair) dashed var(--fork-elbow); }
+.path-fork-take {
+  display: grid;
+  grid-template-columns: auto var(--icon-md) minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font);
+  font-size: var(--fs-mono);
+  line-height: var(--lh-tight);
+  color: var(--text);
+  text-align: left;
+  background: transparent;
+  border: var(--border-hair) solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--ease),
+              color var(--motion-fast) var(--ease),
+              border-color var(--motion-fast) var(--ease);
+}
+.path-fork-take > svg { width: var(--icon-md); height: var(--icon-md); color: var(--text-dim); }
+.path-fork-key, .path-fork-count { color: var(--text-dim); letter-spacing: var(--track-body); font-variant-numeric: tabular-nums; }
+.path-fork-kind { color: var(--text-dim); letter-spacing: var(--track-label); text-transform: uppercase; }
+.path-fork-label {
+  overflow: hidden;
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-ui);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.path-fork-take:focus { outline: none; }
+.path-fork-take:focus-visible { outline: var(--border-hair) solid var(--focus); outline-offset: var(--border-hair); }
+.path-fork-branch:hover { --fork-elbow: var(--interactive); }
+.path-fork-take:hover { background: var(--bg-card); border-color: var(--border); color: var(--interactive); }
+.path-fork-take:hover > svg { color: var(--interactive); }
+.path-fork-branch:has(.path-fork-take[aria-pressed="true"]) { --fork-elbow: var(--selected); }
+.path-fork-take[aria-pressed="true"] { background: var(--selected-wash); border-color: var(--selected-border); color: var(--selected); }
+.path-fork-take[aria-pressed="true"] > svg,
+.path-fork-take[aria-pressed="true"] .path-fork-count { color: var(--selected); }
+.path-fork-branch[data-state="resting"] .path-fork-take { color: var(--text-muted); }
+.path-fork-branch[data-state="resting"] .path-fork-take:hover { color: var(--interactive); }
+@media (prefers-reduced-motion: reduce) {
+  .path-fork-take, .path-fork-branch::before, .path-fork-branch::after { transition: none !important; }
+}
+html.a11y-reduce-motion .path-fork-take,
+html.a11y-reduce-motion .path-fork-branch::before,
+html.a11y-reduce-motion .path-fork-branch::after { transition: none !important; }
+
 /* ---- Cursor companion box - bordered box that follows the pointer ----------
    Lights up solid on hover over clickable elements, blinks briefly on click.
    Mounted by window.HvCursorBox.start() (see hyperkit/js/cursor-box.js).
