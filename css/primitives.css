@@ -1450,6 +1450,8 @@ html.a11y-reduce-motion .menu-item { transition: none !important; }
    solid = known, dashed = not checked yet ([data-state="unknown"]), dim =
    resting ([data-state="resting"]); the taken branch (aria-pressed) draws in
    the selected color. Hover follows .menu-item, the taken state .nav-tab.
+   .path-fork-columns flows the branches top-to-bottom into up to three
+   columns, each its own trunk, so a long fork stays short.
    ============================================================================ */
 .path-fork {
   --fork-indent: var(--space-5);
@@ -1457,6 +1459,12 @@ html.a11y-reduce-motion .menu-item { transition: none !important; }
   display: flex;
   flex-direction: column;
 }
+.path-fork-columns {
+  display: block;
+  columns: 3 18rem;
+  column-gap: var(--space-5);
+}
+.path-fork-columns .path-fork-branch { break-inside: avoid; }
 .path-fork-branch {
   position: relative;
   display: flex;
