@@ -1012,6 +1012,62 @@ html.a11y-reduce-motion .segmented-option { transition: none; }
 }
 .pill-card:hover { border-color: var(--border); }
 
+/* ---- Canvas selection - ring, resize grip, marquee, count -------------------
+   Marks for freely placed items on a pan/zoom canvas. Set --canvas-inv to
+   1 / zoom on the scaled layer so the chrome keeps its screen size.
+*/
+.select-ring {
+  position: relative;
+  outline: calc(var(--border-hair) * var(--canvas-inv, 1)) solid transparent;
+  outline-offset: calc(var(--border-rail) * var(--canvas-inv, 1));
+  transition: outline-color var(--motion-fast) var(--ease);
+}
+.select-ring:hover { outline-color: var(--interactive-border); }
+.select-ring.is-selected { outline-color: var(--selected); }
+
+/* Icon-only resize button (Lucide move-diagonal-2) off the bottom-right corner. */
+.resize-grip {
+  position: absolute;
+  right: calc((var(--border-rail) + var(--space-4)) * var(--canvas-inv, 1) * -1);
+  bottom: calc((var(--border-rail) + var(--space-4)) * var(--canvas-inv, 1) * -1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: calc(var(--space-4) * var(--canvas-inv, 1));
+  height: calc(var(--space-4) * var(--canvas-inv, 1));
+  padding: 0;
+  color: var(--selected);
+  background: var(--bg);
+  border: calc(var(--border-hair) * var(--canvas-inv, 1)) solid var(--selected-border);
+  border-radius: calc(var(--radius) * var(--canvas-inv, 1));
+  cursor: nwse-resize;
+}
+.resize-grip svg {
+  width: calc(var(--icon-sm) * var(--canvas-inv, 1));
+  height: calc(var(--icon-sm) * var(--canvas-inv, 1));
+  pointer-events: none;
+}
+.resize-grip:hover { border-color: var(--selected); }
+.resize-grip:focus-visible { outline: var(--focus-ring-width) solid var(--focus-ring-color); outline-offset: var(--focus-ring-offset); }
+
+/* Drag-to-select rectangle: a dashed rule, no fill. */
+.marquee {
+  position: absolute;
+  box-sizing: border-box;
+  border: calc(var(--border-hair) * var(--canvas-inv, 1)) dashed var(--selected);
+  pointer-events: none;
+}
+
+/* Zero-padded count of selected items, shown in the selection's context bar. */
+.select-count {
+  font-family: var(--font);
+  font-size: var(--fs-mono);
+  color: var(--selected);
+  letter-spacing: var(--track-label);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- Checkbox / radio - accent-tinted native control ------------------------
    The per-app pattern was a bare `accent-color: var(--accent)` on native
    checkboxes/radios, repeated at many settings sites. This consolidates that

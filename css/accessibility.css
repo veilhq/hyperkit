@@ -199,11 +199,10 @@ html.a11y-bw-theme .notification-toast-info    { --variant-color: #2563eb; }
 html.a11y-bw-theme .notification-toast-warn    { --variant-color: #ea8a00; }
 html.a11y-bw-theme .notification-toast-error   { --variant-color: #e11d1d; }
 
-/* ---- Filled sticky notes in BW theme ----
-   This theme collapses --accent/--warm/--cool/--comp to a single blue, so a
-   filled note card and its --note-marker moved-flag end up blue-on-blue and the
-   flag becomes illegible. Since hue carries no information here, distinguish the
-   flag by ink color plus an underline instead. */
+/* ---- Sticky-note hue strip in BW theme ----
+   This theme collapses --accent/--warm/--cool/--comp to a single blue, so the
+   --note-marker moved-flag on the hue strip ends up blue-on-blue. Distinguish
+   it by ink color plus an underline instead. */
 html.a11y-bw-theme .scratch-card-moved,
 html.a11y-bw-theme .scratch-card-delete:hover {
   color: var(--note-ink);

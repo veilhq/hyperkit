@@ -1980,22 +1980,19 @@ ul.todo-list li.todo-hidden { display: none; }
   min-width: 0;
 }
 
+/* Cap note: a neutral card with a solid hue head strip, the toast-cap fill
+   pattern. The hue is the user's tag color; JS squares short notes up to a
+   minimum height equal to their width. */
 .scratch-card {
   position: relative;
-  padding: var(--note-padding);
-  /* Height is content-driven: a short note is squared up to a minimum by JS
-     (min-height set to the rendered width), a long note simply grows taller. */
-  /* Fully filled: the surface is the full-strength cycle color, so it reads as
-     colored paper. All inner content uses --note-ink for contrast. */
-  border: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
-  background: var(--note-card-color, var(--note-color-1));
-  color: var(--note-ink);
+  background: var(--bg-card);
+  color: var(--text);
   cursor: grab;
-  transition: background var(--motion-fast) var(--ease);
-}
-.scratch-card:hover {
-  filter: brightness(var(--state-hover-brightness));
 }
 
 /* --- Card motion ---------------------------------------------------------
@@ -2024,45 +2021,19 @@ ul.todo-list li.todo-hidden { display: none; }
   pointer-events: none;
 }
 
-/* Drop pulse: a brief ring so the eye can follow a just-moved note (we
-   intentionally skip full reorder settle animation with masonry). The ring is
-   ink-colored - a cycle-color ring would be invisible against a filled card of
-   that same color. */
+/* Drop pulse: a brief ring in the note's own hue so the eye can follow a
+   just-moved note against the neutral board. */
 @keyframes scratchCardPulse {
-  0%   { box-shadow: 0 0 0 0 var(--note-ink); }
-  60%  { box-shadow: 0 0 0 var(--border-rail) var(--note-ink); }
-  100% { box-shadow: 0 0 0 0 var(--note-ink); }
+  0%   { box-shadow: 0 0 0 0 var(--note-card-color, var(--selected)); }
+  60%  { box-shadow: 0 0 0 var(--border-rail) var(--note-card-color, var(--selected)); }
+  100% { box-shadow: 0 0 0 0 var(--note-card-color, var(--selected)); }
 }
 .scratch-card-pulse {
   animation: scratchCardPulse var(--motion-slow) var(--ease);
 }
 
-/* Simulated peeled corner - a triangle in the top-right. The visible wedge is
-   painted with the card's cycle color; the inner cut reads as the panel
-   background so it looks like the paper has lifted. Grows slightly on hover to
-   reinforce the paper-lift metaphor. */
-.scratch-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 var(--note-fold-size) var(--note-fold-size) 0;
-  border-color: transparent var(--note-ink) transparent transparent;
-  opacity: 0.9;
-  transition: border-width var(--motion-fast) var(--ease),
-              opacity var(--motion-fast) var(--ease);
-}
-.scratch-card:hover::after {
-  border-width: 0 calc(var(--note-fold-size) + 5px) calc(var(--note-fold-size) + 5px) 0;
-  opacity: 1;
-}
-
-/* Palette cycle - accent, warm, cool (comp deliberately excluded).
-   Each card exposes its assigned hue via --note-card-color, which is now the
-   card's fill; inner content keys off --note-ink for contrast. */
+/* Tag hues - accent, warm, cool. The user picks one per note; new notes
+   default to the next hue after the newest note. */
 .scratch-card-c1 { --note-card-color: var(--note-color-1); }
 .scratch-card-c2 { --note-card-color: var(--note-color-2); }
 .scratch-card-c3 { --note-card-color: var(--note-color-3); }
@@ -2088,27 +2059,32 @@ ul.todo-list li.todo-hidden { display: none; }
 .scratch-card-head {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-1);
-  /* Leave room for the corner fold so actions/time don't sit under it. */
-  padding-right: var(--note-fold-size);
+  gap: var(--space-1);
+  min-height: var(--space-5);
+  padding: var(--space-1) var(--space-1) var(--space-1) var(--space-2);
+  font-family: var(--font);
+  white-space: nowrap;
+  background: var(--note-card-color, var(--note-color-1));
+  color: var(--note-ink);
 }
 .scratch-card-handle {
+  display: inline-flex;
   color: var(--note-ink-soft);
-  font-size: var(--fs-mono);
   cursor: grab;
-  line-height: var(--lh-tight);
   flex-shrink: 0;
+}
+.scratch-card-handle svg,
+.scratch-card-btn svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
 }
 .scratch-card-time {
   font-size: var(--fs-mono);
   color: var(--note-ink);
   letter-spacing: var(--track-tight);
 }
-/* Moved-out-of-order marker - alert color, so it reads as a deviation from
-   chronological order rather than part of the timestamp. Deepened toward the
-   background (--note-marker) because full --comp on a bright filled card is
-   low-contrast and clashes with the cycle colors. */
+/* Moved-out-of-order marker - alert color deepened toward the background so
+   it stays legible on the hue strip. */
 .scratch-card-moved {
   font-size: var(--fs-mono);
   color: var(--note-marker);
@@ -2118,7 +2094,7 @@ ul.todo-list li.todo-hidden { display: none; }
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  flex-shrink: 0;
   opacity: 0;
   transition: opacity var(--motion-fast) var(--ease);
 }
@@ -2127,43 +2103,51 @@ ul.todo-list li.todo-hidden { display: none; }
   opacity: 1;
 }
 .scratch-card-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-4);
+  height: var(--space-4);
+  padding: 0;
   background: none;
   border: none;
+  border-radius: var(--radius);
   color: var(--note-ink-soft);
-  font-family: inherit;
-  font-size: var(--fs-mono);
-  text-transform: uppercase;
-  letter-spacing: var(--track-label);
   cursor: pointer;
-  padding: var(--space-1) var(--space-1);
   transition: var(--transition-color);
 }
-/* On a filled card both actions darken to full ink; delete additionally shifts
-   toward alert red. Hover states must stay legible against a bright fill. */
-.scratch-card-edit:hover { color: var(--note-ink); }
+.scratch-card-btn:hover { color: var(--note-ink); }
 .scratch-card-delete:hover { color: var(--note-marker); }
+.scratch-card-btn:focus-visible {
+  outline: var(--border-hair) solid var(--note-ink);
+  outline-offset: calc(var(--border-hair) * -1);
+}
 
+/* Read text is prose; the head strip stays mono instrument chrome. */
 .scratch-card-body {
-  font-size: var(--fs-mono);
-  color: var(--note-ink);
+  flex: 1;
+  padding: var(--note-padding);
+  color: var(--text-bright);
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-ui);
+  font-weight: var(--fw-medium);
   line-height: var(--lh-body);
   white-space: pre-wrap;
   word-break: break-word;
-  padding: var(--note-body-pad);
 }
 
-/* Inline edit textarea - a dark inset panel on the filled card. Inverting to
-   the app background (rather than tinting the fill) gives an unambiguous
-   "edit mode" affordance and keeps the caret and selection legible. */
+/* Inline edit textarea - a recessed panel inside the body, keyed to the
+   note's hue for the caret. */
 .scratch-card-editor {
-  width: 100%;
+  width: calc(100% - var(--note-padding) * 2);
+  margin: var(--note-body-pad) var(--note-padding) var(--note-padding);
   background: var(--bg);
-  border: none;
+  border: var(--border-hair) solid var(--border);
   border-radius: var(--radius);
   color: var(--text-bright);
   caret-color: var(--note-card-color, var(--focus));
-  font-family: inherit;
-  font-size: var(--fs-mono);
+  font-family: var(--font-body);
+  font-size: var(--fs-prose-ui);
   line-height: var(--lh-body);
   padding: var(--space-1) var(--space-2);
   resize: none;
