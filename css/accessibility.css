@@ -141,9 +141,9 @@ html.a11y-bw-theme {
   --accent-dim:    #0000cc;
   --accent-glow:   rgba(0, 0, 255, 0.15);
   --accent-border: #0000ff;
-  --warm:          #0000ff;
+  --warm:          #ffd500;
   --cool:          #0000ff;
-  --comp:          #0000ff;
+  --comp:          #ff0000;
   --success:       #007a00;
   --warning:       #b35900;
   --error:         #cc0000;
@@ -173,7 +173,7 @@ html.a11y-bw-theme {
   /* Light scrims: a translucent grey veil instead of black. */
   --scrim:        rgba(200, 200, 200, 0.75);
   --scrim-soft:   rgba(200, 200, 200, 0.5);
-  /* The theme collapses --comp to blue; --bg ink on blue lacks contrast. */
+  /* The theme sets --comp to primary red; --bg ink on red lacks contrast. */
   --flag-ink:     #ffffff;
 }
 html.a11y-bw-theme body {
@@ -200,9 +200,9 @@ html.a11y-bw-theme .notification-toast-warn    { --variant-color: #ea8a00; }
 html.a11y-bw-theme .notification-toast-error   { --variant-color: #e11d1d; }
 
 /* ---- Sticky-note hue strip in BW theme ----
-   This theme collapses --accent/--warm/--cool/--comp to a single blue, so the
-   --note-marker moved-flag on the hue strip ends up blue-on-blue. Distinguish
-   it by ink color plus an underline instead. */
+   This theme limits the hues to primary red, yellow and blue, so the
+   --note-marker moved-flag can match its hue strip. Distinguish it by ink
+   color plus an underline instead. */
 html.a11y-bw-theme .scratch-card-moved,
 html.a11y-bw-theme .scratch-card-delete:hover {
   color: var(--note-ink);
